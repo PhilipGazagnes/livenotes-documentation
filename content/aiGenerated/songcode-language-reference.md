@@ -43,7 +43,7 @@ Every SongCode file follows this three-part structure:
 ```
 
 ### Rules:
-- **Empty lines** separate blocks but are ignored within blocks
+- **Empty lines** separate blocks
 - **Metadata** must come first (if present)
 - **Pattern definitions** must come before sections (if present)
 - **Sections** make up the rest of the file
@@ -84,6 +84,7 @@ Each metadata line starts with `@` followed by a key and value:
 - **Type**: Integer (1-20)
 - **Description**: Capo position
 - **Example**: `@guitarCapo 3`
+- **Note**: When the guitar capo is written, it is considered that the chords writen in the patterns are relative from the capo position. For example, with @guitarCapo 3, an Am chord in the file would in reality be a Cm.
 
 #### `@bpm`
 - **Type**: Integer (0-400)
@@ -116,8 +117,8 @@ Each metadata line starts with `@` followed by a key and value:
 @bpm 120
 @timeSignature 4/4
 @originalFirstChordRoot A
-@warning Faire gaffe
-@end Fin studio
+@warning Rythmic pattern on break
+@end Like studio version
 ```
 
 ### Rules:
@@ -492,10 +493,28 @@ Multiple modifiers can be used together:
 Chorus
 $3
 _repeat 2
-_cutEnd -2
+_cutEnd 1
 _after G;A
 --
 Modified chorus _20
+```
+
+If the pattern is repeated, the _cutEnd, _cutStart, _after and _before, apply to the beginning of the first repetition and the end of the last. Example :
+
+```songcode
+Chorus
+Em;G;A;C
+_repeat 3
+_cutStart 2
+_before E7;%;F7;%
+_cutEnd 1
+_after G;A
+```
+
+Result :
+
+```songcode
+E7;%;F7;%;A;C;Em;G;A;C;Em;G;A;G;A
 ```
 
 ---
@@ -579,7 +598,7 @@ In the generated JSON, these get `style: "musicianInfo"`.
 These markers are typically used for:
 - Instrumental sections: `***Solo***`, `***Intro***`
 - Performance cues: `:::Cut:::`, `:::Watch for cue:::`
-- Structural information: `***Bridge***`, `:::Repeat to top:::`
+- Structural information: `***Bridge***`, `:::Instrumental:::`
 
 ---
 
@@ -663,9 +682,9 @@ D;E;F;G
 _before Am;Am
 _after Am;Am
 --
-:::Speed up::: _2
+:::Tempo switch::: _2
 Bridge lyrics _4
-:::Back to normal::: _2
+:::Act crazy on bridge end::: _2
 ```
 
 ### Using Silence and Removers
@@ -676,12 +695,15 @@ Bridge lyrics _4
 Verse
 A _ G _;D _ E _
 --
-Rhythmic pattern _1
+***Rhythmic pattern*** _2
 
 Break
-[A]4;[=]4
+[A]4;[_]2;[_]2;[Em;G;A;G]2
 --
-:::Hits on A, then silence::: _2
+:::Hits::: _4
+:::Silence::: _2
+:::Vocal build up::: _2
+***Solo*** _8
 
 Shortened
 Em G;Em =;G
@@ -801,6 +823,8 @@ Chorus
 Bridge
 ...
 ```
+
+But, in the end, write what makes the most sense for you !
 
 ---
 

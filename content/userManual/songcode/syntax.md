@@ -275,7 +275,7 @@ Get your act together we could be just fine
 
 #### Information in lyrics
 
-Some sections may not need lyrics but information instead, like "solo" if the section is a guitar solo section. To do this, you can write between three stars : `***Solo***`. This will appear as an information in the visualisers. Yopu can also write `:::Break:::` : this is a "silent" information, that will appear only in visualisations for musicians (if you show lyrics to the audience, it will be hidden).
+Some sections may not need lyrics but information instead, like "solo" if the section is a guitar solo section. To do this, you can write between three stars : `***Solo***`. This will appear as an information in the visualisers. You can also write `:::Break:::` : this is a "silent" information, that will appear only in visualisations for musicians (if you show lyrics to the audience, it will be hidden).
 
 #### Male / female coloration for duos
 

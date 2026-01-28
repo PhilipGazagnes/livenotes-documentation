@@ -142,9 +142,9 @@ Go straight to the relevant section:
 | What I need | Where to find it |
 |-------------|------------------|
 | `;` meaning | Language Ref > Pattern Syntax > Measures |
-| `%` meaning | Language Ref > Pattern Syntax > Chord Repeat |
+| `%` meaning | Language Ref > Pattern Syntax > Chord or Measure Repeat |
 | `_` meaning | Language Ref > Pattern Syntax > Silence |
-| `=` meaning | Language Ref > Pattern Syntax > Measure Remover |
+| `=` meaning | Language Ref > Pattern Syntax > Chord Remover |
 | `[...]n` syntax | Language Ref > Pattern Syntax > Loops |
 | `:` meaning | Language Ref > Pattern Syntax > Line Breaks |
 | `_n` in lyrics | Language Ref > Lyrics > Measure Count |
@@ -167,7 +167,7 @@ Go straight to the relevant section:
 | How timing works | Language Ref > Lyrics > Measure Count |
 | How chords are written | Language Ref > Chord Notation |
 | How to repeat patterns | Language Ref > Modifiers > _repeat |
-| How to shorten sections | Language Ref > Modifiers > _cutEnd |
+| How to shorten sections | Language Ref > Modifiers > _cutEnd and _cutStart |
 | Valid metadata keys | Language Ref > Metadata |
 | Error messages | Language Ref > Common Errors |
 
@@ -261,9 +261,9 @@ _repeat 2
 @bpm 120
 
 $1
-[A;G;D]3
+[A;G;D G]3
 :
-E;F
+E;[F E F G]
 
 Bridge
 @bpm 140

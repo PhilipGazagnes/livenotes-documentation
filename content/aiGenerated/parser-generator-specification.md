@@ -136,7 +136,7 @@ Output:
 ### Step 1.3: Parse Pattern Definitions
 
 **Location**: After metadata, before sections  
-**Start marker**: Lines starting with `$`  
+**Start marker**: Lines starting with `$`
 **End marker**: First section (line not starting with `$` after patterns)
 
 #### Algorithm
@@ -182,7 +182,7 @@ $1;D;E
 ```
 SectionName[!Comment]
 [Section Metadata (optional)]
-[Pattern Description or $n]
+[Pattern Description or $n (optional)]
 [Pattern Modifiers (optional)]
 --
 Lyric Line 1
@@ -238,6 +238,8 @@ Lyric Line 2
 2. If yes, replace with the stored pattern definition
 3. Store the expanded description temporarily as `section.pattern.sc`
 
+**Note**: a pattern can be empty
+
 #### Pattern Modifier Parsing
 
 **`_repeat n`**:
@@ -281,11 +283,13 @@ As sections are parsed, assign pattern IDs alphabetically ("A", "B", "C", ...):
 **Pattern Matching Rules**:
 - Match on base pattern description only (ignore modifiers)
 - After pattern variable substitution
-- Whitespace should be preserved (not normalized)
+- Whitespace should be normalized
+- `Am D;Am` and `Am D ; Am   ` are equal
+- **Normalization process**: Delete useless whitespaces in each measure (before the first chord, after the last chord, more than 1 space between chords)
 
 #### Error Conditions
 
-- Missing `--` separator → **ERROR**: "Section must have '--' separator before lyrics"
+- Missing `--` separator before lyrics → **ERROR**: "Section must have '--' separator before lyrics" (if no lyrics, `--` separator is not mandatory)
 - Invalid modifier value → **ERROR**: "Invalid value for _repeat: must be ≥ 2"
 - Invalid measures-and-beats notation → **ERROR**: "Invalid cutEnd value: 1-a-2"
 
@@ -421,19 +425,6 @@ Pattern:
 ```
 
 Calculation:
-- `[["A", ""]]` → count = 1
-- `[["G", ""]]` → count = 2
-- `"loopEnd:3"` → loop has 2 measures, repeat 3 times total = 2 × 3 = 6 measures
-- `[["D", ""]]` → count = 7
-- **Total**: 7 measures
-
-Wait, let me recalculate:
-- Loop body: 2 measures
-- Loop repeats 3 times total: 2 × 3 = 6 measures
-- After loop: 1 measure
-- **Total**: 7 measures
-
-Actually, the algorithm should be:
 1. Count measures in loop body: 2
 2. Multiply by repetitions: 2 × 3 = 6
 3. Add measures after loop: 6 + 1 = 7
@@ -452,51 +443,45 @@ For each measure in every pattern, validate that chords fit the time signature.
 
 1. Get time signature (section-level or global)
 2. For each measure:
+   - Get amount of beats by substracting the number of `=` from the time signature numerator
+   - If number of beats is 0, measure is considered unexistent 
    - Count chord positions (chords, `%`, `_`, but not `=`)
-   - Calculate beats per position: `numerator / position_count`
-   - Validate beats per position is a valid division
-   - If `=` is present:
-     - Calculate removed beats
-     - Validate measure is shortened correctly
+   - Calculate beats per position: `amount_of_beats / position_count`
+   - Validate beats per position is an integer number
 
 #### Beat Division Validation
 
 In 4/4 time (4 beats per measure):
 - 1 position: 4 beats/position ✓
 - 2 positions: 2 beats/position ✓
-- 3 positions: 1.33 beats/position ✓
+- 3 positions: 1.33 beats/position ✗ (invalid)
 - 4 positions: 1 beat/position ✓
 - 5 positions: 0.8 beats/position ✗ (invalid)
 
 In 3/4 time (3 beats per measure):
 - 1 position: 3 beats/position ✓
-- 2 positions: 1.5 beats/position ✓
+- 2 positions: 1.5 beats/position ✗ (invalid)
 - 3 positions: 1 beat/position ✓
 - 4 positions: 0.75 beats/position ✗ (invalid)
 
-**Rule**: Beats per position must result in a valid rhythmic division (implementation-dependent, but typically must be a division that can be notated).
+**Rule**: Beats per position must be an integer
 
 #### Remover Validation
 
 **Example** (4/4 time):
 ```songcode
-A G =    ← 3 positions
+A G % =    ← 4 positions
 ```
 
-- Positions without removers: 2 (A, G)
-- Each gets: 4 / 3 ≈ 1.33 beats
-- One remover: removes 1.33 beats
-- Actual measure: 4 - 1.33 = 2.67 beats
+- Positions without removers: 3 (A, G, %)
+- Each gets: 3 / 3 = 1 beats
 
-Wait, this doesn't seem right. Let me reconsider:
+**Example**:
+- `A =` means 2 equal divisions of 2 beats
+- `=` removes its beats
+- The remaining chord gets: 2 beats
 
-**Correct interpretation**:
-- `A G =` means 3 equal divisions of 4 beats
-- Each division: 4 / 3 beats
-- `=` removes its division
-- Result: 2 positions of 4/3 beats each = 8/3 beats total
-
-Actually, reviewing the examples provided:
+**Example**:
 - `Em G` in 4/4 → 2 beats each
 - `Em =` in 4/4 → 2 beats total (Em gets 2, = removes 2)
 
@@ -504,10 +489,10 @@ Actually, reviewing the examples provided:
 - All positions (including `=`) get equal beat division
 - `=` removes its beats from the measure
 
-So: `A G =` in 4/4:
-- 3 positions: 4/3 beats each
-- A: 4/3 beats, G: 4/3 beats, =: 4/3 beats removed
-- Total: 8/3 beats
+So: `A G =` in 3/4:
+- 3 positions: 1 beat each
+- A: 1 beat, G: 1 beat, =: 1 beat removed
+- Total: 2 beats
 
 #### Error Conditions
 
@@ -526,29 +511,142 @@ For each section, calculate total measures considering:
 
 #### Algorithm
 
-```
-section_measures = 0
 
+
+```
+// 1
+section_measures = patterns[pattern.id].measures * pattern.repeat
+
+// 2
+if (pattern.cutStart):
+    // 2.1
+    section_measures -= pattern.cutStart[0]
+    // 2.2
+    if(<nb_of_beats_in_first_measure_after_cut_start> <= pattern.cutStart[1]) {
+        section_measures -= 1
+    }
+
+// 3
+if (pattern.cutEnd):
+    // 3.1
+    section_measures -= pattern.cutEnd[0]
+    // 3.2
+    if(<nb_of_beats_in_last_measure_after_cut_end> <= pattern.cutEnd[1]) {
+        section_measures -= 1
+    }
+
+// 4
 if (pattern.before):
     section_measures += calculate_measures(pattern.before.json)
 
-if (pattern.cutStart):
-    base_measures = patterns[pattern.id].measures
-    cut_start_beats = cutStart[0] * beats_per_measure + cutStart[1]
-    base_measures -= (cut_start_beats / beats_per_measure)
-
-if (pattern.cutEnd):
-    base_measures = patterns[pattern.id].measures
-    cut_end_beats = cutEnd[0] * beats_per_measure + cutEnd[1]
-    base_measures -= (cut_end_beats / beats_per_measure)
-
-section_measures += base_measures * pattern.repeat
-
+// 5
 if (pattern.after):
     section_measures += calculate_measures(pattern.after.json)
 
+// 6
 section.pattern.measures = section_measures
 ```
+
+**Example** :
+
+The "A" json pattern :
+
+```json
+{
+    "A": {
+        "sc": "[A;G =;G;A]2\n:\nA;G;%;E G D =;%",
+        "json": [
+            "loopStart",
+            [["A", ""]],
+            [["G", ""], "="],
+            [["G", ""]],
+            [["A", ""]],
+            "loopEnd:2",
+            "newLine",
+            [["A", ""]],
+            [["G", ""]],
+            [["E", "G", "D", "="]],
+            ["%"],
+            ["%"]
+        ],
+        "measures": 13
+    }
+}
+```
+
+The section pattern modifiers
+
+```json
+{
+    "name": "Verse",
+    "comment": "Tricky pattern",
+    "pattern": {
+        "id": null,
+        "repeat": 3,
+        "bpm": null,
+        "timeSignature": null,
+        "cutStart": [1, 3],
+        "cutEnd": [0, 2],
+        "before": [["F#", "7"]],
+        "after": [["G#", "7M"], ["%"]]
+    }
+}
+```
+
+Result :
+1. Section measures: 13 x 3 = 39
+2. 1. Remove nb of measures of cutStart: 39 - 1 = 38
+2. 2. Nb of beats in cutStart is 3. The first measure of the pattern after the action of the cutStart is `[["G", ""], "="]`, that has 2 beats. 3 >= 2, so that measure has no beats left, it is considered unexisting, so remove it from section measures. Section measures = 38 - 1 = 37.
+3. 1. Remove nb of measures of cutEnd: 37 - 0 = 37
+3. 2. Nb of beats in cutEnd is 2. The last measure of the pattern after the action of the cutEnd is `["%"]` (repeat of `[["E", "G", "D", "="]]`), that has 3 beats. After cutting the beats, the measure has 1 beat left (the `["E"]`). That is a non-empty measure, that still counts as a measure, so we DO NOT remove 1 from the section measures.
+4. Before pattern has 1 measure. 37 + 1 = 38
+5. After pattern has 2 measures. 38 + 2 = 40
+6. Section measures = 40
+
+**Note** : The cutStart, cutEnd, before and after modifiers only applied to the edges of the pattern. The pattern, that is played 3 times, in the end has :
+- The first occurence modified by cutStart and before
+- The second occurence unchanged
+- The third occurencemodified by cutEnd and after
+
+**Note** : The edge modifiers only apply to the first and last occurences. If an edge modifier is set to remove more than the length of the edge occurence, the max it can remove is the length of the edge occurence. So part of that edge modifier would be useless.
+
+**Example** :
+
+The "A" json pattern :
+
+```json
+{
+    "B": {
+        "sc": "A;G",
+        "json": [
+            [["A", ""]],
+            [["G", ""]]
+        ],
+        "measures": 2
+    }
+}
+```
+
+The section pattern modifiers
+
+```json
+{
+    "name": "Verse",
+    "comment": "Tricky pattern",
+    "pattern": {
+        "id": null,
+        "repeat": 4,
+        "bpm": null,
+        "timeSignature": null,
+        "cutStart": [3, 0],
+        "cutEnd": null,
+        "before": [["Em"]],
+        "after": null
+    }
+}
+```
+
+The result : Em;A;G;A;G;A;G. Even though cutStart wanted to remove 3 measure, the pattern only has 2. So it removed just 2. Section measures = 7
 
 ### Step 3.3: Validate Lyric Timing
 
@@ -595,9 +693,13 @@ For each section:
 
 2. **Expand pattern**:
    - Start with `pattern.before` (if present)
-   - Add main pattern
-   - Apply `_cutStart` and `_cutEnd`
-   - Repeat pattern `pattern.repeat` times
+   - Process main pattern :
+        - Repeat pattern `pattern.repeat` times
+        - Apply `_cutStart` and `_cutEnd`
+            - if `_cutStart` has beats, it removes the FIRST BEATS of the measure
+            - if `_cutEnd` has beats, it removes the LAST BEATS of the measure
+            - if measures become empty after beat removal, remove them
+        - Add it
    - Add `pattern.after` (if present)
    - Result: Complete measure stack for the section
 
@@ -613,72 +715,6 @@ For each section:
      - Keep one sub-pattern
      - Set `repeats: N`
 
-### Pattern Expansion Algorithm
-
-#### Step 1: Flatten Loops
-
-```
-function expandPattern(patternJson):
-    result = []
-    loopStack = []
-    
-    for element in patternJson:
-        if element == "loopStart":
-            loopStack.push([])
-        else if element == "loopEnd:n":
-            loopBody = loopStack.pop()
-            for i from 1 to n:
-                result.append(loopBody)
-        else if element == "newLine":
-            continue
-        else if loopStack.isEmpty():
-            result.append(element)
-        else:
-            loopStack.top().append(element)
-    
-    return result
-```
-
-#### Step 2: Apply Modifiers
-
-```
-function applyModifiers(measures, section):
-    if section.pattern.cutStart:
-        measures = cutFromStart(measures, section.pattern.cutStart)
-    
-    if section.pattern.cutEnd:
-        measures = cutFromEnd(measures, section.pattern.cutEnd)
-    
-    if section.pattern.repeat > 1:
-        measures = repeatMeasures(measures, section.pattern.repeat)
-    
-    return measures
-```
-
-### Optimization Algorithm
-
-For each chord pattern in a prompter item:
-
-```
-function optimizePattern(measures):
-    repeats = 1
-    
-    while measures.length % 2 == 0:
-        half = measures.length / 2
-        firstHalf = measures[0:half]
-        secondHalf = measures[half:end]
-        
-        if firstHalf == secondHalf:
-            measures = firstHalf
-            repeats *= 2
-        else:
-            break
-    
-    return {
-        pattern: measures,
-        repeats: repeats
-    }
-```
 
 ### Determining Style
 
@@ -783,8 +819,9 @@ function patternsMatch(pattern1, pattern2):
     return normalized1 == normalized2
 
 function normalizeWhitespace(pattern):
-    // Implementation depends on requirements
-    // Current spec: preserve whitespace
+    // remove white spaces before measure first chord
+    // remove white spaces bofore measure last chord
+    // keep only 1 space between chords
     return pattern
 ```
 
@@ -798,8 +835,8 @@ function normalizeWhitespace(pattern):
 = = = =
 ```
 
-**Handling**: Accept as valid (edge case)  
-**Result**: Measure with 0 beats
+**Handling**: Accept as valid (edge case)
+**Result**: Measure is considered unexistent
 
 ### 2. Pattern with Only Loops
 
@@ -818,14 +855,13 @@ $1
 ```
 
 **Handling**: Currently not supported  
-**Result**: ERROR or implement nested loop handling
+**Result**: ERROR
 
 ### 4. Section with No Lyrics
 
 ```songcode
 Intro
 $1
---
 ```
 
 **Handling**: Valid (empty lyrics array)
@@ -851,13 +887,13 @@ Café au lait ☕ _2
 
 ### 7. Very Long Songs
 
-**Handling**: Consider memory limits for large prompter arrays
+**Handling**: No limit
 
 ### 8. Floating Point Beat Divisions
 
 In 4/4 with 3 chords: each gets 1.333... beats
 
-**Handling**: Use fractional representation or validate only "musically sensible" divisions
+**Handling**: ERROR : beats value must be integers 
 
 ---
 

@@ -30,7 +30,7 @@ Create a new file called `my-first-song.sc`
 
 ```songcode
 Verse
-G
+G;%;%;%
 --
 This is my first lyric line _4
 ```
@@ -157,9 +157,9 @@ Sing it loud _2
 
 ---
 
-## Lesson 6: Repeating Chords
+## Lesson 6: Repeating Measures
 
-Use `%` to repeat the previous chord.
+Use `%` to repeat the previous measure.
 
 ```songcode
 Verse

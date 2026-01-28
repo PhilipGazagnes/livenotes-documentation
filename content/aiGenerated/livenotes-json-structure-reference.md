@@ -70,8 +70,8 @@ Contains song-level information and settings.
         "originalFirstChordRoot": "A",
         "guitarCapo": null,
         "pitch": null,
-        "warning": "Faire gaffe",
-        "end": "Fin studio"
+        "warning": "Rythmic pattern on break",
+        "end": "Like studio version"
     }
 }
 ```
@@ -200,24 +200,26 @@ Each pattern is keyed by a letter (A, B, C, ...) and contains:
 
 #### Measure Array
 ```json
-[["A", ""], ["D", "7"], ["%"], ["_"], ["="]]
+[["A", ""], ["D", "7"], "%", "_", "="]
 ```
 
 Each measure is an array containing:
 
 **Chord**: `[baseChord, extension]`
 ```json
-[["Am", "7"]]        // Am7 chord
-[["G", "sus4"]]      // Gsus4 chord
-[["D", ""]]          // D major (no extension)
+["Am", "7"]        // Am7 chord
+["G", "sus4"]      // Gsus4 chord
+["D", ""]          // D major (no extension)
 ```
 
 **Special Symbols**: String values
 ```json
-["%"]    // Repeat previous chord
-["_"]    // Silence
-["="]    // Remove beats
+"%"    // Repeat previous chord
+"_"    // Silence
+"="    // Remove beats
 ```
+
+Each pattern is an array containing measures, Loop markers and Line breaks
 
 #### Loop Markers
 ```json
@@ -381,7 +383,7 @@ Contains the structural sections of the song (verses, choruses, etc.).
     "name": "Chorus",
     "comment": null,
     "pattern": {
-        "id": "C",
+        "id": "C", // <- sc: F;Em;C#7M
         "repeat": 2,
         "bpm": null,
         "timeSignature": null,
