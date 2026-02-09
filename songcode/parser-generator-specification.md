@@ -499,14 +499,30 @@ Validate the parsed and transformed data.
 
 ### Step 3.1: Validate Measure Contents
 
-For each measure in every pattern, validate that chords fit the time signature.
+For each measure in every pattern (including `_before` and `_after` patterns), validate that chords fit the time signature.
 
-#### Algorithm
+#### Time Signature Resolution
 
-1. Get time signature (section-level or global)
-2. For each measure:
-   - Get amount of beats by substracting the number of `=` from the time signature numerator
-   - If number of beats is 0, measure is considered unexistent 
+1. **For main patterns** (in `livenotes.patterns`):
+   - Use global time signature from `meta.time` (default: 4/4)
+
+2. **For section patterns and modifiers**:
+   - Get effective time signature:
+     - If `section.pattern.time` is set → use section time signature
+     - Otherwise → use global time signature from `meta.time`
+   - Apply to:
+     - Main pattern validation
+     - `_before` pattern validation (if present)
+     - `_after` pattern validation (if present)
+
+**Important**: `_before` and `_after` patterns inherit the section's effective time signature. They cannot have different time signatures.
+
+#### Validation Algorithm
+
+1. Get effective time signature (section-level or global)
+2. For each measure in pattern JSON:
+   - Get amount of beats by subtracting the number of `=` from the time signature numerator
+   - If number of beats is 0, measure is considered nonexistent 
    - Count chord positions (chords, `%`, `_`, but not `=`)
    - Calculate beats per position: `amount_of_beats / position_count`
    - Validate beats per position is an integer number
@@ -559,7 +575,30 @@ So: `A G =` in 3/4:
 #### Error Conditions
 
 - Invalid beat division → **ERROR**: "5 chords don't fit in 4/4 time"
+- Invalid beat division in `_before` → **ERROR**: "2 chords don't fit in 3/4 time in _before pattern"
+- Invalid beat division in `_after` → **ERROR**: "2 chords don't fit in 3/4 time in _after pattern"
 - Remover not at end → **ERROR**: "Remover must be at end of measure"
+
+#### Example: Section with Time Signature Override
+
+```songcode
+@time 4/4       ← Global
+
+Verse
+@time 3/4       ← Section override
+$1
+_before A D     ← ERROR: 2 chords in 3/4 = 1.5 beats each (invalid)
+```
+
+**Correct version**:
+```songcode
+@time 4/4       
+
+Verse
+@time 3/4
+$1
+_before A D E   ← Valid: 3 chords in 3/4 = 1 beat each
+```
 
 ### Step 3.2: Calculate Section Measure Counts
 
@@ -571,43 +610,53 @@ For each section, calculate total measures considering:
 - `_before` pattern
 - `_after` pattern
 
-#### Algorithm
+#### Order of Operations
 
-
+The effective pattern for a section is constructed as:
 
 ```
-// 1
+[_before pattern] + [main pattern with cuts applied] + [_after pattern]
+```
+
+**Important**: `_cutStart` and `_cutEnd` only affect the main pattern, not `_before` or `_after`.
+
+#### Algorithm
+
+```javascript
+// 1. Start with base pattern measures (considering repeat)
 section_measures = patterns[pattern.id].measures * pattern.repeat
 
-// 2
+// 2. Apply cutStart to main pattern
 if (pattern.cutStart):
-    // 2.1
+    // 2.1 Remove full measures
     section_measures -= pattern.cutStart[0]
-    // 2.2
+    // 2.2 Check if partial beat cut removes another measure
     if(<nb_of_beats_in_first_measure_after_cut_start> <= pattern.cutStart[1]) {
         section_measures -= 1
     }
 
-// 3
+// 3. Apply cutEnd to main pattern
 if (pattern.cutEnd):
-    // 3.1
+    // 3.1 Remove full measures
     section_measures -= pattern.cutEnd[0]
-    // 3.2
+    // 3.2 Check if partial beat cut removes another measure
     if(<nb_of_beats_in_last_measure_after_cut_end> <= pattern.cutEnd[1]) {
         section_measures -= 1
     }
 
-// 4
+// 4. Add _before pattern measures (not affected by cuts)
 if (pattern.before):
     section_measures += calculate_measures(pattern.before.json)
 
-// 5
+// 5. Add _after pattern measures (not affected by cuts)
 if (pattern.after):
     section_measures += calculate_measures(pattern.after.json)
 
-// 6
+// 6. Store final count
 section.pattern.measures = section_measures
 ```
+
+**Note**: `calculate_measures(json)` uses the same algorithm as Step 2.3 (handles loops correctly).
 
 **Example** :
 

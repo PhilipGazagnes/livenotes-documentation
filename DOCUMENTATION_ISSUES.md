@@ -84,100 +84,97 @@ The `_before` and `_after` modifiers are documented but lack critical implementa
 
 ---
 
-### 3.3 Measure Counting with `_before`/`_after`
+### 3.3 Measure Counting with `_before`/`_after` ✅ RESOLVED
 
 **Current Documentation**:
 - Phase 3.2 shows: `section_measures += calculate_measures(pattern.before.json)`
 - But the algorithm for `calculate_measures()` on `_before`/`_after` is not detailed
 
-**Questions Needing Answers**:
+**ANSWERS**:
 
 5. **Do `_before`/`_after` patterns support loops?**
    
-   Example: `_before [A;G]3`
-   
-   - If valid, does measure counting follow the same loop calculation as regular patterns?
-   - Is `calculate_measures(pattern.before.json)` the same algorithm from Step 2.3?
-   - Should reference existing algorithm or duplicate explanation?
+   - ✅ **YES** - Loops are supported (confirmed in 3.1/3.2)
+   - ✅ Measure counting follows the same algorithm from Step 2.3
+   - ✅ `calculate_measures(pattern.before.json)` uses the loop calculation algorithm
 
 6. **What happens with `cutStart`/`cutEnd` and `_before`/`_after`?**
    
-   Example scenario:
+   ✅ **ANSWER: Interpretation B - Cut main pattern only**
+   
+   **Order of operations**:
+   1. Start with base pattern measures
+   2. Apply `_repeat` modifier
+   3. Apply `_cutStart` to the main pattern
+   4. Apply `_cutEnd` to the main pattern
+   5. Add `_before` measures
+   6. Add `_after` measures
+   
+   **Effective pattern**: `[before] + [pattern with cuts applied] + [after]`
+   
+   Example:
    ```
    _before A;G     ← 2 measures
    Pattern: D;E;F   ← 3 measures
+   _cutStart 1      ← Cuts 1 measure from main pattern = 2 measures left
    _after X;Y      ← 2 measures
-   _cutStart 1      ← Cuts what?
+   
+   Total: 2 + 2 + 2 = 6 measures
    ```
-   
-   Critical questions:
-   - Does `_cutStart 1` cut from the `_before` pattern or the main pattern?
-   - **Order of operations**: Is it `(_before + pattern + _after)` THEN apply cuts?
-   - Or: apply cuts to pattern first, then add `_before`/`_after`?
-   
-   Possible interpretations:
-   - **Interpretation A**: Cut from combined pattern
-     - Effective pattern: `[before][pattern][after]`
-     - Then apply `cutStart`/`cutEnd` to the whole thing
-   - **Interpretation B**: Cut main pattern only
-     - Effective pattern: `[before][pattern with cuts applied][after]`
-   - **Interpretation C**: Not allowed
-     - Error if `_cutStart` or `_cutEnd` used with `_before` or `_after`
 
-**Documentation Gaps**:
-- [ ] Clarify loop support in `_before`/`_after`
-- [ ] Document measure counting algorithm explicitly
-- [ ] **CRITICAL**: Define order of operations for modifiers
-- [ ] Add worked examples showing measure calculations
-- [ ] Add error conditions if certain combinations are invalid
+**Documentation Updates Needed**:
+- [ ] Update Phase 3.2 algorithm to clarify order of operations
+- [ ] Add worked example with all modifiers combined
+- [ ] Reference Step 2.3 algorithm for loop calculation in _before/_after
 
 ---
 
-### 3.4 Time Signature Validation
+### 3.4 Time Signature Validation ✅ RESOLVED
 
 **Current Documentation**:
 - Phase 3.1 validates measures fit time signature
 - But doesn't explicitly mention validating `_before`/`_after` patterns
 
-**Questions Needing Answers**:
+**ANSWERS**:
 
 7. **Are `_before`/`_after` patterns validated against time signature?**
    
-   Example scenario:
-   ```songcode
-   @time 4/4
+   ✅ **YES - Absolutely**
    
-   Verse
-   @time 3/4
-   $1
-   _before A D   ← 2 chords in 3/4 = invalid (1.5 beats each)
-   ```
+   - `_before` and `_after` patterns are validated against the effective time signature
+   - Same validation rules as main patterns (beats per position must be integer)
    
-   - If the section has `@time 3/4`, must the `_before` pattern fit 3/4?
-   - Or is it validated against the global time signature from metadata?
-   - Or no validation at all?
-
 8. **Can `_before`/`_after` have different time signatures than the main pattern?**
    
-   Example scenario:
+   ✅ **NO - They inherit the section's time signature**
+   
+   **Time signature inheritance rules**:
+   - Time signature can only be overridden at the section level
+   - `_before` and `_after` inherit the section's effective time signature
+   - Effective time signature = section override OR global time signature
+   
+   Example:
    ```songcode
    @time 4/4       ← Global
    
    Verse
    @time 3/4       ← Section override
-   $1              ← Main pattern validated in 3/4
-   _before A D E   ← What time signature?
+   $1              ← Validated in 3/4
+   _before A D E   ← Validated in 3/4 (inherits from section)
+   _after F G C    ← Validated in 3/4 (inherits from section)
    ```
-   
-   - Does `_before` inherit the section's time signature?
-   - Or does it inherit the global time signature?
-   - Can you explicitly set different time signatures for `_before`/`_after`?
 
-**Documentation Gaps**:
-- [ ] Document time signature validation rules for `_before`/`_after`
-- [ ] Specify time signature inheritance behavior
-- [ ] Add validation algorithm for modifier patterns
-- [ ] Add examples of valid/invalid time signature combinations
+**Documentation Updates Needed**:
+- [ ] Add explicit validation step for `_before`/`_after` patterns in Phase 3.1
+- [ ] Document time signature inheritance rules
+- [ ] Add examples showing validation with section overrides
+- [ ] Add error messages for invalid time signatures in `_before`/`_after`
+
+---
+
+## ✅ Issue 3 Complete
+
+All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
 
 ---
 

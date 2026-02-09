@@ -506,6 +506,26 @@ _after $2                   ← ERROR: No pattern variables
 _after A:G                 ← ERROR: No line breaks
 ```
 
+**Time Signature Note**: 
+- `_before` and `_after` patterns inherit the section's time signature
+- If the section has `@time`, both modifiers use that time signature
+- Otherwise, they use the global time signature
+- They must be valid in that time signature (beats per position must be integer)
+
+Example:
+```songcode
+@time 4/4       ← Global
+
+Verse
+@time 3/4       ← Section override
+$1
+_before A D E   ← Valid: 3 chords in 3/4 = 1 beat each
+_after F G C    ← Valid: 3 chords in 3/4 = 1 beat each
+
+# This would be INVALID:
+# _before A D   ← ERROR: 2 chords in 3/4 = 1.5 beats each
+```
+
 ### Section-Level Metadata
 
 You can override global metadata for a specific section:
