@@ -112,7 +112,7 @@ Create the base Livenotes JSON structure:
 | `original` | base chord | valid base chord | null |
 | `capo` | integer | 1-20 | null |
 | `bpm` | integer | 0-400 | null |
-| `time` | time sig | `n/d` where d is power of 2 | 4/4 |
+| `time` | time sig | `n/4` (V1: denominator must be 4) | 4/4 |
 | `warning` | string | max 100 chars | null |
 | `end` | string | max 100 chars | null |
 
@@ -127,11 +127,21 @@ Output:
 }
 ```
 
+**V1 Restriction**: Only denominator `4` is allowed. The denominator represents quarter notes (full beats).
+
+Examples:
+- `4/4` ✓ Valid
+- `3/4` ✓ Valid
+- `6/4` ✓ Valid
+- `3/8` ✗ Invalid (denominator must be 4)
+- `6/8` ✗ Invalid (denominator must be 4)
+
 #### Error Conditions
 
 - Non-consecutive metadata lines → **ERROR**: "Metadata must be consecutive at the beginning of the file"
 - Invalid key → **ERROR**: "Unknown metadata key: @invalidKey"
-- Invalid value → **ERROR**: "Invalid value for @bpm: must be 0-400"
+- Invalid value for @bpm → **ERROR**: "Invalid value for @bpm: must be 0-400"
+- Invalid denominator → **ERROR**: "Invalid time signature: denominator must be 4 (V1 restriction)"
 
 ### Step 1.3: Parse Pattern Definitions
 
@@ -521,11 +531,12 @@ For each measure in every pattern (including `_before` and `_after` patterns), v
 
 1. Get effective time signature (section-level or global)
 2. For each measure in pattern JSON:
-   - Get amount of beats by subtracting the number of `=` from the time signature numerator
-   - If number of beats is 0, measure is considered nonexistent 
-   - Count chord positions (chords, `%`, `_`, but not `=`)
-   - Calculate beats per position: `amount_of_beats / position_count`
-   - Validate beats per position is an integer number
+   - Count chord positions (chords, `%`, `_`, including `=`)
+   - Calculate beats per position: `time_signature_numerator / position_count`
+   - **Validate beats per position is an integer** (this check happens BEFORE `=` processing)
+   - If not an integer → **ERROR**: "Invalid number of positions in measure: beats per position must be a whole number"
+   - Calculate actual beats in measure: `time_signature_numerator - (count_of_"=" × beats_per_position)`
+   - If number of beats is 0 or negative, measure is considered nonexistent
 
 #### Beat Division Validation
 
@@ -544,33 +555,43 @@ In 3/4 time (3 beats per measure):
 
 **Rule**: Beats per position must be an integer
 
-#### Remover Validation
+#### Remover (`=`) Symbol Behavior
 
-**Example** (4/4 time):
-```songcode
-A G % =    ← 4 positions
+**Formula for beats in a measure**:
+```
+beats_per_position = time_signature_numerator / position_count
+measure_beats = time_signature_numerator - (count_of_"=" × beats_per_position)
 ```
 
-- Positions without removers: 3 (A, G, %)
-- Each gets: 3 / 3 = 1 beats
+Each `=` symbol removes exactly `beats_per_position` beats from the measure.
 
-**Example**:
-- `A =` means 2 equal divisions of 2 beats
-- `=` removes its beats
-- The remaining chord gets: 2 beats
+**Examples in 4/4 time**:
 
-**Example**:
-- `Em G` in 4/4 → 2 beats each
-- `Em =` in 4/4 → 2 beats total (Em gets 2, = removes 2)
+1. `A G % =` (4 positions)
+   - Beats per position: 4 ÷ 4 = 1 beat
+   - One `=` removes 1 beat
+   - Result: 3 beats (A:1, G:1, %:1)
 
-**Simplified rule**:
-- All positions (including `=`) get equal beat division
-- `=` removes its beats from the measure
+2. `A =` (2 positions)
+   - Beats per position: 4 ÷ 2 = 2 beats
+   - One `=` removes 2 beats
+   - Result: 2 beats (A gets 2 beats)
 
-So: `A G =` in 3/4:
-- 3 positions: 1 beat each
-- A: 1 beat, G: 1 beat, =: 1 beat removed
-- Total: 2 beats
+3. `Em G` (2 positions, no `=`)
+   - Beats per position: 4 ÷ 2 = 2 beats
+   - Result: 4 beats (Em:2, G:2)
+
+4. `A B = =` (4 positions)
+   - Beats per position: 4 ÷ 4 = 1 beat
+   - Two `=` symbols remove 2 beats
+   - Result: 2 beats (A:1, B:1)
+
+**Examples in 3/4 time**:
+
+1. `A G =` (3 positions)
+   - Beats per position: 3 ÷ 3 = 1 beat
+   - One `=` removes 1 beat
+   - Result: 2 beats (A:1, G:1)
 
 #### Error Conditions
 
@@ -626,23 +647,37 @@ The effective pattern for a section is constructed as:
 // 1. Start with base pattern measures (considering repeat)
 section_measures = patterns[pattern.id].measures * pattern.repeat
 
-// 2. Apply cutStart to main pattern
+// 2. Apply cutStart to main pattern (measure-by-measure removal)
 if (pattern.cutStart):
     // 2.1 Remove full measures
     section_measures -= pattern.cutStart[0]
-    // 2.2 Check if partial beat cut removes another measure
-    if(<nb_of_beats_in_first_measure_after_cut_start> <= pattern.cutStart[1]) {
-        section_measures -= 1
-    }
+    
+    // 2.2 Remove additional beats from next measure
+    beats_to_cut = pattern.cutStart[1]
+    if (beats_to_cut > 0):
+        // Get beats in the first remaining measure (AFTER "=" processing)
+        first_measure_beats = calculate_measure_beats(first_remaining_measure)
+        
+        if (beats_to_cut >= first_measure_beats):
+            // Remove entire measure (excess beats are "lost")
+            section_measures -= 1
+        // else: measure stays with reduced beats (partial cut)
 
-// 3. Apply cutEnd to main pattern
+// 3. Apply cutEnd to main pattern (works same as cutStart but from end)
 if (pattern.cutEnd):
-    // 3.1 Remove full measures
+    // 3.1 Remove full measures from end
     section_measures -= pattern.cutEnd[0]
-    // 3.2 Check if partial beat cut removes another measure
-    if(<nb_of_beats_in_last_measure_after_cut_end> <= pattern.cutEnd[1]) {
-        section_measures -= 1
-    }
+    
+    // 3.2 Remove additional beats from previous measure
+    beats_to_cut = pattern.cutEnd[1]
+    if (beats_to_cut > 0):
+        // Get beats in the last remaining measure (AFTER "=" processing)
+        last_measure_beats = calculate_measure_beats(last_remaining_measure)
+        
+        if (beats_to_cut >= last_measure_beats):
+            // Remove entire measure (excess beats are "lost")
+            section_measures -= 1
+        // else: measure stays with reduced beats (partial cut)
 
 // 4. Add _before pattern measures (not affected by cuts)
 if (pattern.before):
@@ -656,7 +691,20 @@ if (pattern.after):
 section.pattern.measures = section_measures
 ```
 
+**Key Concept: "Lost Beats"**
+
+When cutting beats from a measure:
+- If `beats_to_cut >= measure_beats`: Remove entire measure
+- Excess beats are "lost" and don't carry to the next/previous measure
+- No beat carry-over between measures
+
 **Note**: `calculate_measures(json)` uses the same algorithm as Step 2.3 (handles loops correctly).
+
+**Note**: `calculate_measure_beats(measure)` calculates beats AFTER processing `=` symbols using the formula:
+```
+beats_per_position = time_signature_numerator / position_count
+measure_beats = time_signature_numerator - (count_of_"=" × beats_per_position)
+```
 
 **Example** :
 
@@ -705,14 +753,28 @@ The section pattern modifiers
 ```
 
 Result :
-1. Section measures: 13 x 3 = 39
-2. 1. Remove nb of measures of cutStart: 39 - 1 = 38
-2. 2. Nb of beats in cutStart is 3. The first measure of the pattern after the action of the cutStart is `[["G", ""], "="]`, that has 2 beats. 3 >= 2, so that measure has no beats left, it is considered unexisting, so remove it from section measures. Section measures = 38 - 1 = 37.
-3. 1. Remove nb of measures of cutEnd: 37 - 0 = 37
-3. 2. Nb of beats in cutEnd is 2. The last measure of the pattern after the action of the cutEnd is `["%"]` (repeat of `[["E", "G", "D", "="]]`), that has 3 beats. After cutting the beats, the measure has 1 beat left (the `["E"]`). That is a non-empty measure, that still counts as a measure, so we DO NOT remove 1 from the section measures.
-4. Before pattern has 1 measure. 37 + 1 = 38
-5. After pattern has 2 measures. 38 + 2 = 40
-6. Section measures = 40
+1. Section measures: 13 × 3 = 39
+2. Apply cutStart [1, 3]:
+   - 2.1: Remove 1 full measure: 39 - 1 = 38
+   - 2.2: Cut 3 additional beats
+     - First remaining measure is `[["G", ""], "="]`
+     - Beats per position: 4 ÷ 2 = 2
+     - Measure beats: 4 - (1 × 2) = 2 beats
+     - Since 3 beats to cut >= 2 measure beats → Remove entire measure
+     - Section measures: 38 - 1 = 37
+     - Note: 1 beat is "lost" (excess doesn't carry forward)
+3. Apply cutEnd [0, 2]:
+   - 3.1: Remove 0 full measures: 37 - 0 = 37
+   - 3.2: Cut 2 additional beats from end
+     - Last remaining measure is `["%"]` (repeat of `[["E", "G", "D", "="]]`)
+     - Beats per position: 4 ÷ 4 = 1
+     - Measure beats: 4 - (1 × 1) = 3 beats
+     - Since 2 beats to cut < 3 measure beats → Measure stays (partial cut)
+     - Measure has 1 beat remaining (just the "E" chord)
+     - Section measures: 37 (no change)
+4. Add before pattern: 1 measure → 37 + 1 = 38
+5. Add after pattern: 2 measures → 38 + 2 = 40
+6. Final section measures = 40
 
 **Note** : The cutStart, cutEnd, before and after modifiers only applied to the edges of the pattern. The pattern, that is played 3 times, in the end has :
 - The first occurence modified by cutStart and before
@@ -757,7 +819,18 @@ The section pattern modifiers
 }
 ```
 
-The result : Em;A;G;A;G;A;G. Even though cutStart wanted to remove 3 measure, the pattern only has 2. So it removed just 2. Section measures = 7
+The result : Em;A;G;A;G;A;G. 
+
+**Calculation**:
+1. Base pattern: 2 measures × 4 repeats = 8 measures
+2. Apply cutStart [3, 0]:
+   - Remove 3 full measures: 8 - 3 = 5 measures
+   - No additional beats to cut
+3. Add before pattern: 1 measure → 5 + 1 = 6 measures
+4. No after pattern
+5. Final section measures = 6 measures (Em, A, G, A, G, A, G = 7 chords but only 6 measures due to spacing)
+
+**Note**: Even though cutStart wanted to remove 3 measures, and the single pattern instance only has 2 measures, the pattern is repeated 4 times (8 total measures), so cutStart can remove 3 complete measures. The "lost beats" concept only applies to partial beat cuts within a single measure, not to full measure removals.
 
 ### Step 3.3: Validate Lyric Timing
 

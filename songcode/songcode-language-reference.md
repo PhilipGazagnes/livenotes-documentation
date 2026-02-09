@@ -93,11 +93,13 @@ Each metadata line starts with `@` followed by a key and value:
 
 #### `@time`
 - **Type**: Time signature notation
-- **Format**: `numerator/denominator` where denominator must be a power of 2
+- **Format**: `numerator/4` (V1: denominator must be 4)
 - **Default**: `4/4`
+- **V1 Restriction**: Only denominator `4` is supported (quarter note as beat unit)
 - **Examples**: 
-  - `@time 3/4`
-  - `@time 6/8`
+  - `@time 3/4` ✓ Valid
+  - `@time 6/4` ✓ Valid
+  - `@time 6/8` ✗ Invalid in V1 (denominator must be 4)
 
 #### `@warning`
 - **Type**: String (max 100 characters)
@@ -338,15 +340,32 @@ A;_        ← Measure 1: A (4 beats), Measure 2: silence (4 beats)
 ```
 
 #### Measure Remover: `=`
-Removes beats from the end of a measure:
+Removes beats from the end of a measure.
 
+**How it works:**
+1. Each position in a measure gets an equal share of beats
+2. The `=` symbol removes its share of beats from the measure
+3. Formula: `beats_per_position = time_signature_numerator / position_count`
+4. Each `=` removes exactly `beats_per_position` beats
+
+**Examples in 4/4 time:**
 ```songcode
-Em =       ← In 4/4: 2 beats of Em (measure shortened to 2/4)
-Em G Am =  ← In 4/4: 3 beats total (1 each, measure becomes 3/4)
+Em =       ← 2 positions: 4÷2 = 2 beats each
+           ← Em gets 2 beats, = removes 2 beats
+           ← Result: 2 beats total
+
+Em G Am =  ← 4 positions: 4÷4 = 1 beat each
+           ← Em, G, Am each get 1 beat, = removes 1 beat
+           ← Result: 3 beats total
+
+A = = =    ← 4 positions: 4÷4 = 1 beat each
+           ← A gets 1 beat, three = symbols remove 3 beats
+           ← Result: 1 beat total
 ```
 
 **Rules:**
 - `=` must **always be at the end** of a measure
+- Multiple `=` symbols are allowed: `A = =` (removes 2 beats in 4/4)
 - `A _ = G` is **invalid** (remover not at end) → causes error
 - `A G _ =` is **valid** (remover at end)
 
@@ -981,12 +1000,28 @@ Line two _2    ← Total: 4 measures → OK
 
 ### 6. Chords Don't Fit Time Signature
 
+**Error** (beats per position not an integer):
+```songcode
+@time 4/4
+
+Verse
+A D E      ← 3 chords in 4/4: 4÷3 = 1.33 beats each → ERROR
+```
+
+**Fix**:
+```songcode
+@time 4/4
+
+Verse
+A D E F    ← 4 chords in 4/4: 4÷4 = 1 beat each → OK
+```
+
 **Error** (in 3/4):
 ```songcode
 @time 3/4
 
 Verse
-A D E F    ← 4 beats in 3/4 → ERROR
+A D        ← 2 chords in 3/4: 3÷2 = 1.5 beats each → ERROR
 ```
 
 **Fix**:
@@ -994,8 +1029,10 @@ A D E F    ← 4 beats in 3/4 → ERROR
 @time 3/4
 
 Verse
-A D E      ← 3 beats in 3/4 → OK
+A D E      ← 3 chords in 3/4: 3÷3 = 1 beat each → OK
 ```
+
+**Rule**: The number of positions in a measure must divide evenly into the time signature numerator.
 
 ### 7. Undefined Pattern Reference
 

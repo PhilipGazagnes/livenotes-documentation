@@ -104,6 +104,7 @@ Contains song-level information and settings.
   ```
 - **Description**: Time signature for the song
 - **Default**: `{"numerator": 4, "denominator": 4}`
+- **V1 Restriction**: `denominator` must always be `4` (quarter note as beat unit)
 
 #### `original`
 - **Type**: String (base chord) or null
@@ -592,6 +593,8 @@ The algorithm detects that the pattern can be split in half with both halves ide
     "denominator": 4
 }
 ```
+
+**V1 Restriction**: The `denominator` must always be `4` (quarter note as beat unit). Other denominators like `8` or `16` are not supported in V1.
 
 ### Measures and Beats Array
 

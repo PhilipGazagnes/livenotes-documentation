@@ -14,6 +14,14 @@
 ### ~~Issue 2: Chord Notation in JSON - Multiple Formats~~
 **Status**: FIXED ✓
 
+### ~~Issue 4: Pattern `measures` Count Algorithm Incomplete~~
+**Status**: RESOLVED ✓  
+Complete algorithm documented for:
+- Beat counting with special symbols (`%`, `_`, `=`)
+- cutStart/cutEnd measure removal with "lost beats" concept
+- Validation rule: integer beats per position
+- V1 restriction: only time signature denominator "4" allowed
+
 ---
 
 ## 🔴 Issue 3: Ambiguous `_before`/`_after` Structure
@@ -178,56 +186,132 @@ All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
 
 ---
 
-## 🟡 Issue 4: Pattern `measures` Count Algorithm Incomplete
+## ✅ Issue 4: Pattern `measures` Count Algorithm Incomplete
+
+**Status**: RESOLVED ✓
 
 **Location**: Parser spec Phase 3.2 (lines 500-580)
 
-**Current Documentation**:
-The algorithm shows pseudocode but uses placeholder expressions:
-```javascript
-if(<nb_of_beats_in_first_measure_after_cut_start> <= pattern.cutStart[1]) {
-    section_measures -= 1
-}
-```
+---
 
-**Questions Needing Answers**:
+### Beat Counting Algorithm with Special Symbols
+
+**ANSWERS**:
 
 9. **How to identify which measure comes "after" cutStart?**
    
-   Example with pattern:
+   ✅ **Algorithm: Measure-by-measure removal with "lost beats" concept**
+   
+   Example with pattern in 4/4 time:
    ```json
    [
-       [["A", ""]],        // Measure 1
-       [["G", ""], "="],   // Measure 2 (has 2 beats in 4/4)
-       [["D", ""]],        // Measure 3
-       [["E", ""]]         // Measure 4
+       [["A", ""]],        // Measure 1: 4 beats
+       [["G", ""], "="],   // Measure 2: 2 beats (after "=")
+       [["D", ""]],        // Measure 3: 4 beats
+       [["E", ""]]         // Measure 4: 4 beats
    ]
    ```
    
-   With `_cutStart [1, 3]` (cut 1 measure + 3 beats):
-   - Measure 1 is completely cut (4 beats)
-   - 3 more beats need to be cut
-   - Measure 2 has 2 beats
-   - Is Measure 2 considered "first measure after cutStart"?
-   - Since 3 beats to cut >= 2 beats in measure 2, remove it entirely?
+   With `_cutStart [1, 3]`:
+   1. Cut 1 complete measure → Remove Measure 1 entirely (4 beats cut)
+   2. 3 beats remain to cut
+   3. Look at next measure (original Measure 2): has 2 beats
+   4. Cut 2 beats (entire measure) → Remove Measure 2 entirely
+   5. **1 beat remains to cut but is "lost"** (doesn't carry to next measure)
+   6. Final result: Measures 3 and 4 remain intact
+   
+   **Key principle**: Beats to remove can only affect the current measure. Excess beats are lost, not carried forward.
 
 10. **How to count beats in a measure with special symbols?**
     
-    Examples (in 4/4 time):
-    - `[["A", ""], "%", "_"]` = 3 positions = ? beats each
-    - `[["A", ""], "="]` = 2 positions = ? beats each (considering `=` removes beats)
-    - `[["A", ""], "%", "_", "="]` = 4 positions = ?
+    ✅ **Algorithm**:
     
-    Algorithm needed:
-    - Count non-remover positions
-    - Calculate beats per position
-    - What if `=` is present? How does it affect the count?
+    **Step 1: Get time signature**
+    - Denominator = 4: numerator represents **full beats** (quarter notes)
+    - **V1 RESTRICTION**: Only denominator "4" is allowed
+    - Other denominators (8, 16, etc.) should produce validation error
+    
+    **Step 2: Calculate beats per position**
+    - Formula: `beats_per_position = time_signature_numerator / number_of_positions`
+    - Example in 4/4 with 2 positions: 4 ÷ 2 = 2 beats per position
+    
+    **Step 3: Validate integer beats per position (BEFORE processing "=")**
+    - If `beats_per_position` is not an integer → **ERROR**
+    - Example: 4/4 with 3 positions → 4 ÷ 3 = 1.33... → ERROR
+    - Error message: "Invalid number of positions in measure: beats per position must be a whole number"
+    - This validation happens as early as possible in the parsing process
+    
+    **Step 4: Process "=" symbols**
+    - Each "=" symbol removes exactly `beats_per_position` beats from the measure
+    - Formula: `measure_beats = time_signature_numerator - (count_of_"=" × beats_per_position)`
+    
+    **Examples in 4/4 time**:
+    
+    1. `[["A", ""], "="]` (2 positions)
+       - Beats per position: 4 ÷ 2 = 2
+       - One "=" removes 2 beats
+       - Result: 2 beats in measure ✓
+    
+    2. `[["A", ""], ["B", ""], "=", "="]` (4 positions)
+       - Beats per position: 4 ÷ 4 = 1
+       - Two "=" symbols remove 2 beats
+       - Result: 2 beats in measure ✓
+    
+    3. `[["A", ""], "=", "=", "="]` (4 positions)
+       - Beats per position: 4 ÷ 4 = 1
+       - Three "=" symbols remove 3 beats
+       - Result: 1 beat in measure ✓ (valid, no minimum)
+    
+    4. `[["A", ""], ["B", ""], ["C", ""]]` (3 positions)
+       - Beats per position: 4 ÷ 3 = 1.33... ❌ ERROR
 
-**Documentation Gaps**:
-- [ ] Provide complete algorithm for finding "first/last measure after cut"
-- [ ] Document beat counting with `%`, `_`, `=` symbols
-- [ ] Add step-by-step worked examples
-- [ ] Clarify edge cases (what if cut exceeds pattern length?)
+---
+
+### cutStart and cutEnd Algorithm
+
+**ANSWERS**:
+
+**cutStart Process** (measure-by-measure from the beginning):
+1. Remove `cutStart[0]` complete measures
+2. Calculate beats remaining to cut: `beats_to_cut = cutStart[1]`
+3. Look at the next measure (first remaining)
+4. Calculate measure beats (AFTER "=" processing)
+5. If `beats_to_cut >= measure_beats`: remove entire measure
+6. Excess beats are "lost" (don't carry to next measure)
+7. If `beats_to_cut < measure_beats`: measure stays with reduced beats
+
+**cutEnd Process** (works exactly the same but from the end):
+1. Remove `cutEnd[0]` complete measures from the end
+2. Calculate beats remaining to cut: `beats_to_cut = cutEnd[1]`
+3. Look at the previous measure (last remaining)
+4. Calculate measure beats (AFTER "=" processing)
+5. If `beats_to_cut >= measure_beats`: remove entire measure
+6. Excess beats are "lost" (don't carry to previous measure)
+7. If `beats_to_cut < measure_beats`: measure stays with reduced beats
+
+**Example with `_cutEnd [1, 3]`**:
+- Pattern: 4 measures (4, 2, 4, 4 beats)
+- Remove last measure (Measure 4)
+- Cut 3 beats from new last measure (Measure 3 with 4 beats)
+- Measure 3 has 1 beat remaining → stays
+- Result: 3 measures (4, 2, 1 beats)
+
+---
+
+### Complete Algorithm Summary
+
+**For cutStart/cutEnd calculations**:
+1. Always calculate beats AFTER "=" symbols are processed
+2. Process measure-by-measure (no beat carry-over)
+3. Excess beats are lost at each measure boundary
+4. A measure can have as few as 1 beat remaining (no minimum)
+
+**Documentation Updates Needed**:
+- [x] Complete algorithm for measure removal with "lost beats" concept
+- [x] Beat counting with "=" symbols formula
+- [x] Validation rule: integer beats per position (before "=" processing)
+- [x] V1 restriction: only time signature denominator "4" allowed
+- [x] Step-by-step worked examples for cutStart/cutEnd
 
 ---
 
@@ -424,14 +508,14 @@ if(<nb_of_beats_in_first_measure_after_cut_start> <= pattern.cutStart[1]) {
 ## 📋 Priority Ranking
 
 ### Critical (Blocks Implementation)
-1. **Issue 3.3** - Order of operations for `_before`/`_after` with `_cutStart`/`_cutEnd`
-2. **Issue 4** - Pattern measures count algorithm (cutStart/cutEnd logic)
+1. ~~**Issue 3.3** - Order of operations for `_before`/`_after` with `_cutStart`/`_cutEnd`~~ ✅ RESOLVED
+2. ~~**Issue 4** - Pattern measures count algorithm (cutStart/cutEnd logic)~~ ✅ RESOLVED
 3. **Issue 7** - Prompter generation algorithm
-4. **Issue 3.2** - Parsing algorithm for `_before`/`_after`
+4. ~~**Issue 3.2** - Parsing algorithm for `_before`/`_after`~~ ✅ RESOLVED
 
 ### High (Major Ambiguity)
-5. **Issue 3.1** - Full syntax support in `_before`/`_after`
-6. **Issue 3.4** - Time signature validation for modifiers
+5. ~~**Issue 3.1** - Full syntax support in `_before`/`_after`~~ ✅ RESOLVED
+6. ~~**Issue 3.4** - Time signature validation for modifiers~~ ✅ RESOLVED
 7. **Issue 5** - Empty pattern handling
 8. **Issue 6** - Whitespace normalization algorithm
 
