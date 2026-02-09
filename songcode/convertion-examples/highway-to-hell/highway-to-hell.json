@@ -1,11 +1,11 @@
 {
    "meta": {
       "bpm": 120,
-      "timeSignature": {
+      "time": {
          "numerator": 4,
          "denominator": 4
       },
-      "originalFirstChordRoot": "A",
+      "original": "A",
       "end": "Fin studio",
       "warning": "Faire gaffe"
    },
@@ -90,7 +90,7 @@
             "id": "A",
             "repeat": 2,
             "bpm": null,
-            "timeSignature": null,
+            "time": null,
             "cutStart": null,
             "cutEnd": null,
             "before": null,
@@ -104,8 +104,14 @@
          "name":"Couplet",
          "comment": null,
          "pattern": {
-            "pattern": "B",
-            "repeat": 1
+            "id": "B",
+            "repeat": 2,
+            "bpm": null,
+            "time": null,
+            "cutStart": null,
+            "cutEnd": null,
+            "before": null,
+            "after": null
          },
          "lyrics":[
             ["Living easy, living free", 2],
@@ -125,7 +131,7 @@
             "id": "C",
             "repeat": 1,
             "bpm": null,
-            "timeSignature": null,
+            "time": null,
             "cutStart": null,
             "cutEnd": null,
             "before": null,
@@ -145,7 +151,7 @@
             "id": "B",
             "repeat": 1,
             "bpm": null,
-            "timeSignature": null,
+            "time": null,
             "cutStart": null,
             "cutEnd": null,
             "before": null,
@@ -170,7 +176,7 @@
             "repeat": 1,
             "cutEnd": [2, 0],
             "bpm": null,
-            "timeSignature": null,
+            "time": null,
             "cutStart": null,
             "before": null,
             "after": null
@@ -186,8 +192,14 @@
          "name":"Break",
          "comment": "Rythmic pattern",
          "pattern":{
-            "pattern": "D",
-            "repeat": 1
+            "id": "D",
+            "repeat": 2,
+            "bpm": null,
+            "time": null,
+            "cutStart": null,
+            "cutEnd": null,
+            "before": null,
+            "after": null
          },
          "lyrics":[
             [":::Break:::", 5]
@@ -200,7 +212,7 @@
             "id": "E",
             "repeat": 4,
             "bpm": null,
-            "timeSignature": null,
+            "time": null,
             "cutStart": null,
             "cutEnd": null,
             "before": null,
@@ -217,7 +229,7 @@
             "id": "E",
             "repeat": 4,
             "bpm": null,
-            "timeSignature": null,
+            "time": null,
             "cutStart": null,
             "cutEnd": null,
             "before": null,
@@ -239,7 +251,7 @@
             "repeat": 4,
             "cutEnd": [1, 0],
             "bpm": null,
-            "timeSignature": null,
+            "time": null,
             "cutStart": null,
             "before": null,
             "after": null
@@ -258,7 +270,7 @@
             "id": "F",
             "repeat": 1,
             "bpm": null,
-            "timeSignature": null,
+            "time": null,
             "cutStart": null,
             "cutEnd": null,
             "before": null,
@@ -274,15 +286,8 @@
         {
             "type": "tempo",
             "bpm": 120,
-            "timeSignature": "4/4"
+            "time": "4/4"
         },
-
-
-
-
-
-
-
         {
             "type": "content",
             "style": "info",
@@ -299,13 +304,6 @@
                 }
             ]
         },
-
-
-
-
-
-
-
         {
             "type": "content",
             "style": "default",
@@ -419,12 +417,6 @@
                 }
             ]
         },
-
-
-
-
-
-
         {
             "type": "content",
             "style": "default",
@@ -482,12 +474,6 @@
                 }
             ]
         },
-        
-
-
-
-
-
         {
             "type": "content",
             "style": "default",
@@ -601,12 +587,6 @@
                 }
             ]
         },
-
-
-
-
-
-
         {
             "type": "content",
             "style": "default",
@@ -662,10 +642,6 @@
                 }
             ]
         },
-
-
-
-
         {
             "type": "content",
             "style": "info",
@@ -679,10 +655,6 @@
                 }
             ]
         },
-
-
-
-
         {
             "type": "content",
             "style": "info",
@@ -697,12 +669,6 @@
                 }
             ]
         },
-
-
-
-
-
-
         {
             "type": "content",
             "style": "default",
@@ -826,9 +792,6 @@
                 }
             ]
         },
-
-
-
         {
             "type": "content",
             "style": "default",
@@ -837,7 +800,7 @@
                 {
                     "repeats": 4,
                     "pattern": [
-                        ["D", ""]
+                        [["D", ""]]
                     ]
                 }
             ]
@@ -850,7 +813,7 @@
                 {
                     "repeats": 4,
                     "pattern": [
-                        ["A", ""]
+                        [["A", ""]]
                     ]
                 }
             ]

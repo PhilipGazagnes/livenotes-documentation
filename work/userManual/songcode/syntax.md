@@ -9,21 +9,21 @@ Metadata lines start with `@` and provide information about the song. They are w
 ### Metadata Fields
 
 ```songcode
-@originalKey D
+@original D
 // The key of the original version (usually the studio version). This
 // is useful to communicate with other musicians ("we play 1 tone under
 // the original" is generally easier to understand than "we play in C").
 
-@guitarCapo 5
+@capo 5
 // When this field is written, it is considered that the chords written
 // in this file are played on guitar from the capo's position.
 // The real chords are then calculated.
 // For ex, with capo 5, an Em is a Am in reality. 
 
 @bpm 112
-@timeSignature 3/4
+@time 3/4
 // The bpm and time signature can be overriden in the song structure, if there are
-// tempo variations. By default, bpm is 120 and timeSignature is 4/4.
+// tempo variations. By default, bpm is 120 and time is 4/4.
 
 @warning Something to be careful about
 // Anything you need to remember and might forget. In Livenotes Book, a red block will appear before the first lyrics. In Livenotes Prompter, it will appear at the very beginning of the video, before the beginning of the song.

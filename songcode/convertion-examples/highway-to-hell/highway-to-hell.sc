@@ -1,5 +1,5 @@
 @bpm 120
-@originalFirstChordRoot A
+@original A
 @warning Faire gaffe
 @end Fin studio
 

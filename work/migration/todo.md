@@ -1,6 +1,6 @@
 Things to have in mind while migrating to this new version of the system :
 
-- ! and @ notations in sc files (for warning and end). Need to be adapted to the new metadata structure : @end, @warning, @guitarCapo, ...
+- ! and @ notations in sc files (for warning and end). Need to be adapted to the new metadata structure : @end, @warning, @capo, ...
 
 - Remove all the +++ from the lyrics (99% sure that's not that important)
 

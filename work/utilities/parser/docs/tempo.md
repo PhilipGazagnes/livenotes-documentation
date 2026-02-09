@@ -8,7 +8,7 @@ The value of the time signature is composed of 3 elemnts :
 - a power of 2
 
 ```songcode
-@timeSignature 3/4
+@time 3/4
 ```
 
 ## How it works

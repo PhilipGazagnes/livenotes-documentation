@@ -5,7 +5,7 @@
 I've generated comprehensive documentation for the SongCode language and Livenotes JSON format based on your specifications. All files are located in:
 
 ```
-/Users/a1234/Documents/www/livenotes-documentation/content/aiGenerated/
+/Users/a1234/Documents/www/livenotes-documentation/songcode/
 ```
 
 ---
@@ -155,7 +155,7 @@ I've generated comprehensive documentation for the SongCode language and Livenot
 ## Structure Overview
 
 ```
-aiGenerated/
+songcode/
 ├── README.md                               # Start here
 ├── INDEX.md                                # Visual guide
 ├── CREATION_SUMMARY.md                     # This file

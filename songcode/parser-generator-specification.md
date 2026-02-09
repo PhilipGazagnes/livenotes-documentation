@@ -109,10 +109,10 @@ Create the base Livenotes JSON structure:
 |-----|------|------------|---------|
 | `name` | string | max 100 chars | null |
 | `artist` | string | max 100 chars | null |
-| `originalFirstChordRoot` | base chord | valid base chord | null |
-| `guitarCapo` | integer | 1-20 | null |
+| `original` | base chord | valid base chord | null |
+| `capo` | integer | 1-20 | null |
 | `bpm` | integer | 0-400 | null |
-| `timeSignature` | time sig | `n/d` where d is power of 2 | 4/4 |
+| `time` | time sig | `n/d` where d is power of 2 | 4/4 |
 | `warning` | string | max 100 chars | null |
 | `end` | string | max 100 chars | null |
 
@@ -219,7 +219,7 @@ Lyric Line 2
         "id": null,
         "repeat": 1,
         "bpm": null,
-        "timeSignature": null,
+        "time": null,
         "cutStart": null,
         "cutEnd": null,
         "before": null,
@@ -263,7 +263,7 @@ Lyric Line 2
 
 Lines starting with `@` in the pattern area override global metadata for that section:
 - `@bpm 140` → `section.pattern.bpm = 140`
-- `@timeSignature 3/4` → `section.pattern.timeSignature = {numerator: 3, denominator: 4}`
+- `@time 3/4` → `section.pattern.time = {numerator: 3, denominator: 4}`
 
 #### Pattern ID Assignment
 
@@ -584,7 +584,7 @@ The section pattern modifiers
         "id": null,
         "repeat": 3,
         "bpm": null,
-        "timeSignature": null,
+        "time": null,
         "cutStart": [1, 3],
         "cutEnd": [0, 2],
         "before": [["F#", "7"]],
@@ -637,7 +637,7 @@ The section pattern modifiers
         "id": null,
         "repeat": 4,
         "bpm": null,
-        "timeSignature": null,
+        "time": null,
         "cutStart": [3, 0],
         "cutEnd": null,
         "before": [["Em"]],
@@ -679,7 +679,7 @@ The prompter is designed for scrolling/teleprompter display. It expands all patt
 {
     "type": "tempo",
     "bpm": 120,
-    "timeSignature": "4/4"
+    "time": "4/4"
 }
 ```
 
@@ -688,7 +688,7 @@ The prompter is designed for scrolling/teleprompter display. It expands all patt
 For each section:
 
 1. **Check for tempo changes**:
-   - If section has `pattern.bpm` or `pattern.timeSignature`
+   - If section has `pattern.bpm` or `pattern.time`
    - Add tempo item to prompter
 
 2. **Expand pattern**:
@@ -802,8 +802,8 @@ function parseMeasuresAndBeats(input):
 ### Time Signature Beats Calculation
 
 ```
-function getBeatsPerMeasure(timeSignature):
-    return timeSignature.numerator
+function getBeatsPerMeasure(time):
+    return time.numerator
 ```
 
 Note: This is simplified. Full implementation should consider that in compound time signatures (like 6/8), the beat unit is different.

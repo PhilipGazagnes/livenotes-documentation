@@ -63,12 +63,12 @@ Contains song-level information and settings.
         "name": "Highway to Hell",
         "artist": "AC/DC",
         "bpm": 120,
-        "timeSignature": {
+        "time": {
             "numerator": 4,
             "denominator": 4
         },
-        "originalFirstChordRoot": "A",
-        "guitarCapo": null,
+        "original": "A",
+        "capo": null,
         "pitch": null,
         "warning": "Rythmic pattern on break",
         "end": "Like studio version"
@@ -93,7 +93,7 @@ Contains song-level information and settings.
 - **Range**: 0-400
 - **Description**: Tempo in beats per minute
 
-#### `timeSignature`
+#### `time`
 - **Type**: Object
 - **Structure**:
   ```json
@@ -105,12 +105,12 @@ Contains song-level information and settings.
 - **Description**: Time signature for the song
 - **Default**: `{"numerator": 4, "denominator": 4}`
 
-#### `originalFirstChordRoot`
+#### `original`
 - **Type**: String (base chord) or null
 - **Description**: Root note of the first chord in the original recording
 - **Example**: `"A"`, `"Dm"`, `"Bb"`
 
-#### `guitarCapo`
+#### `capo`
 - **Type**: Integer or null
 - **Range**: 1-20
 - **Description**: Guitar capo position
@@ -118,7 +118,7 @@ Contains song-level information and settings.
 #### `pitch`
 - **Type**: Number or null
 - **Range**: -10 to 10 (multiples of 0.5)
-- **Description**: Pitch transposition calculated from `originalFirstChordRoot` vs actual first chord
+- **Description**: Pitch transposition calculated from `original` vs actual first chord
 - **Computed**: Automatically calculated, not specified in SongCode
 
 #### `warning`
@@ -284,7 +284,7 @@ Contains the structural sections of the song (verses, choruses, etc.).
                 "id": "B",
                 "repeat": 1,
                 "bpm": null,
-                "timeSignature": null,
+                "time": null,
                 "cutStart": null,
                 "cutEnd": null,
                 "before": null,
@@ -332,10 +332,10 @@ Contains the structural sections of the song (verses, choruses, etc.).
 - **Description**: Section-specific tempo override
 - **Example**: 140 (faster than global tempo)
 
-###### `timeSignature`
+###### `time`
 - **Type**: Object or null
 - **Description**: Section-specific time signature override
-- **Structure**: Same as meta.timeSignature
+- **Structure**: Same as meta.time
 
 ###### `cutStart`
 - **Type**: Array `[measures, beats]` or null
@@ -386,7 +386,7 @@ Contains the structural sections of the song (verses, choruses, etc.).
         "id": "C", // <- sc: F;Em;C#7M
         "repeat": 2,
         "bpm": null,
-        "timeSignature": null,
+        "time": null,
         "cutStart": null,
         "cutEnd": [1, 0],
         "before": null,
@@ -417,7 +417,7 @@ Linear array for display/scrolling view. Expands all patterns and pairs each lyr
         {
             "type": "tempo",
             "bpm": 120,
-            "timeSignature": "4/4"
+            "time": "4/4"
         },
         {
             "type": "content",
@@ -449,14 +449,14 @@ Indicates tempo or time signature change.
 {
     "type": "tempo",
     "bpm": 120,
-    "timeSignature": "4/4"
+    "time": "4/4"
 }
 ```
 
 **Properties**:
 - `type`: Always `"tempo"`
 - `bpm`: Integer (tempo)
-- `timeSignature`: String format (e.g., `"4/4"`, `"3/4"`)
+- `time`: String format (e.g., `"4/4"`, `"3/4"`)
 
 #### Content Item
 
@@ -615,12 +615,12 @@ Here's a minimal but complete Livenotes JSON:
         "name": "Simple Song",
         "artist": "The Band",
         "bpm": 100,
-        "timeSignature": {
+        "time": {
             "numerator": 4,
             "denominator": 4
         },
-        "originalFirstChordRoot": null,
-        "guitarCapo": null,
+        "original": null,
+        "capo": null,
         "pitch": null,
         "warning": null,
         "end": null
@@ -645,7 +645,7 @@ Here's a minimal but complete Livenotes JSON:
                 "id": "A",
                 "repeat": 2,
                 "bpm": null,
-                "timeSignature": null,
+                "time": null,
                 "cutStart": null,
                 "cutEnd": null,
                 "before": null,
@@ -663,7 +663,7 @@ Here's a minimal but complete Livenotes JSON:
         {
             "type": "tempo",
             "bpm": 100,
-            "timeSignature": "4/4"
+            "time": "4/4"
         },
         {
             "type": "content",

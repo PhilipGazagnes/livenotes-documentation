@@ -74,30 +74,30 @@ Each metadata line starts with `@` followed by a key and value:
 - **Description**: Artist or band name
 - **Example**: `@artist AC/DC`
 
-#### `@originalFirstChordRoot`
+#### `@original`
 - **Type**: Base chord (see [Chord Notation](#chord-notation))
 - **Description**: The root note of the first chord in the original recording
-- **Example**: `@originalFirstChordRoot A`
+- **Example**: `@original A`
 - **Note**: Used to calculate pitch transposition
 
-#### `@guitarCapo`
+#### `@capo`
 - **Type**: Integer (1-20)
 - **Description**: Capo position
-- **Example**: `@guitarCapo 3`
-- **Note**: When the guitar capo is written, it is considered that the chords writen in the patterns are relative from the capo position. For example, with @guitarCapo 3, an Am chord in the file would in reality be a Cm.
+- **Example**: `@capo 3`
+- **Note**: When the guitar capo is written, it is considered that the chords writen in the patterns are relative from the capo position. For example, with @capo 3, an Am chord in the file would in reality be a Cm.
 
 #### `@bpm`
 - **Type**: Integer (0-400)
 - **Description**: Tempo in beats per minute
 - **Example**: `@bpm 120`
 
-#### `@timeSignature`
+#### `@time`
 - **Type**: Time signature notation
 - **Format**: `numerator/denominator` where denominator must be a power of 2
 - **Default**: `4/4`
 - **Examples**: 
-  - `@timeSignature 3/4`
-  - `@timeSignature 6/8`
+  - `@time 3/4`
+  - `@time 6/8`
 
 #### `@warning`
 - **Type**: String (max 100 characters)
@@ -115,8 +115,8 @@ Each metadata line starts with `@` followed by a key and value:
 @name Highway to Hell
 @artist AC/DC
 @bpm 120
-@timeSignature 4/4
-@originalFirstChordRoot A
+@time 4/4
+@original A
 @warning Rythmic pattern on break
 @end Like studio version
 ```
@@ -479,7 +479,7 @@ You can override global metadata for a specific section:
 ```songcode
 Bridge
 @bpm 140
-@timeSignature 3/4
+@time 3/4
 $1
 --
 Faster section in 3/4 time _12
@@ -610,7 +610,7 @@ These markers are typically used for:
 @name Simple Song
 @artist The Band
 @bpm 100
-@timeSignature 4/4
+@time 4/4
 
 $1
 G;C;D;G
@@ -635,7 +635,7 @@ This is the chorus _4
 ```songcode
 @name Complex Example
 @bpm 120
-@timeSignature 4/4
+@time 4/4
 
 $1
 A;G;%;A
@@ -690,7 +690,7 @@ Bridge lyrics _4
 ### Using Silence and Removers
 
 ```songcode
-@timeSignature 4/4
+@time 4/4
 
 Verse
 A _ G _;D _ E _
@@ -929,7 +929,7 @@ Line two _2    ← Total: 4 measures → OK
 
 **Error** (in 3/4):
 ```songcode
-@timeSignature 3/4
+@time 3/4
 
 Verse
 A D E F    ← 4 beats in 3/4 → ERROR
@@ -937,7 +937,7 @@ A D E F    ← 4 beats in 3/4 → ERROR
 
 **Fix**:
 ```songcode
-@timeSignature 3/4
+@time 3/4
 
 Verse
 A D E      ← 3 beats in 3/4 → OK

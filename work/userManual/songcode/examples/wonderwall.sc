@@ -1,8 +1,8 @@
 ```songcode
-@originalFirstChordRoot F#m
-@guitarCapo 2
+@original F#m
+@capo 2
 @bpm 88
-@timeSignature 4/4
+@time 4/4
 
 $1
 Em G;D A7

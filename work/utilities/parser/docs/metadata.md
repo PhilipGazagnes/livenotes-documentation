@@ -20,22 +20,22 @@
 @artist The Ramones
 ```
 
-### @originalFirstChordRoot
+### @original
 
 - Valid values : valid values of Base Chord (see [./chords.md])
 - Default value (if not specified) : null
 
 ```songcode
-@originalKey Dm
+@original Dm
 ```
 
-### @guitarCapo
+### @capo
 
 - Valid values : number between 1 and 20
 - Default value (if not specified) : null
 
 ```songcode
-@guitarCapo 3
+@capo 3
 ```
 
 ### @bpm
@@ -47,13 +47,13 @@
 @bpm 120
 ```
 
-### @timeSignature
+### @time
 
 - Valid values : valid values of Time Signature (see [./tempo.md])
 - Default value (if not specified) : 4/4
 
 ```songcode
-@timeSignature 3/4
+@time 3/4
 ```
 
 ### @warning
@@ -79,8 +79,8 @@
 ### pitch
 
 - Valid values : multiples of 0,5 between -10 and 10
-- Comparison between the metadata's originalFirstChordRoot and the first chord root of the song written in the file
-- If originalFirstChordRoot is not specified in the metadata, no pitch calculation
+- Comparison between the metadata's "original" and the first chord root of the song written in the file
+- If "original" is not specified in the metadata, no pitch calculation
 
 ## Data structure
 
@@ -89,11 +89,11 @@
     "meta": {
         "name": "Blitzkrieg bop",
         "artist": "The Ramones",
-        "originalKey": "Dm",
-        "guitarCapo": 3,
+        "original": "Dm",
+        "capo": 3,
         "pitch": -1.5,
         "bpm": 120,
-        "timeSignature": {
+        "time": {
             "numerator": 4,
             "denominator": 4
         },

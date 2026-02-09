@@ -115,7 +115,7 @@ Let's add song information at the top.
 @name My First Song
 @artist Your Name
 @bpm 120
-@timeSignature 4/4
+@time 4/4
 
 Verse
 G;C;D;G
@@ -128,7 +128,7 @@ Second line of the verse _2
 - `@name` - Song title
 - `@artist` - Artist name
 - `@bpm` - Tempo (beats per minute)
-- `@timeSignature` - Time signature (default is 4/4)
+- `@time` - Time signature (default is 4/4)
 
 ---
 
@@ -296,7 +296,7 @@ Let's put it all together!
 @name Campfire Song
 @artist You
 @bpm 100
-@timeSignature 4/4
+@time 4/4
 
 $1
 G;C;D;G
@@ -495,10 +495,10 @@ G;C
 
 ### Explore More Features
 
-1. **Different time signatures**: Try `@timeSignature 3/4` for waltz time
+1. **Different time signatures**: Try `@time 3/4` for waltz time
 2. **Tempo changes**: Use section-level `@bpm` to speed up or slow down
 3. **Complex loops**: Use `[pattern]n` for repeated sections
-4. **Guitar capo**: Add `@guitarCapo 3` for capo position
+4. **Guitar capo**: Add `@capo 3` for capo position
 
 ### Study Examples
 
@@ -533,7 +533,7 @@ Try writing this song on your own:
 @name Simple Song
 @artist Me
 @bpm 110
-@timeSignature 4/4
+@time 4/4
 
 $1
 C;Am;F;G

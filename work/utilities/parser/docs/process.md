@@ -62,7 +62,7 @@ Split the file in 3 sections :
     "pattern": {
         "id": null,
         "bpm": null,
-        "timeSignature": null,
+        "time": null,
         "repeat": null,
         "cutStart": null,
         "cutEnd": null,

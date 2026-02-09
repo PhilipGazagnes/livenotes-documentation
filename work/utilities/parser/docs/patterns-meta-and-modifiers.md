@@ -7,7 +7,7 @@
 - Same as in the metadata section
 - Default value (if not specified) : null
 
-#### @timeSignature
+#### @time
 
 - Same as in the metadata section
 - Default value (if not specified) : null

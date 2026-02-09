@@ -157,7 +157,7 @@ Refer to the main project for example files:
 ## Documentation Structure
 
 ```
-aiGenerated/
+songcode/
 ├── README.md (this file)
 ├── songcode-quick-start-tutorial.md
 ├── songcode-language-reference.md
