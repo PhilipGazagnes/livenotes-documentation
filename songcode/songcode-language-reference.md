@@ -448,7 +448,7 @@ Highway to hell _7
 
 Adds measures before the pattern.
 
-**Format**: `_before pattern`
+**Format**: `_before pattern` (single line)
 
 ```songcode
 Verse
@@ -458,11 +458,31 @@ _before Am D;E    ← Play Am D;E, then pattern $2
 After the intro _18
 ```
 
+**Syntax Support**:
+- ✅ All chord notation
+- ✅ Loops: `_before [A;G]3`
+- ✅ Symbols: `%`, `_`, `=`
+- ✅ Multiple chords: `_before Am D G;E`
+- ❌ **Line breaks (`:`) NOT allowed**
+- ❌ **Pattern variables (`$n`) NOT allowed**
+
+**Examples**:
+```songcode
+# Valid examples
+_before Am;D;E              ← 3 measures
+_before [A G;D]2            ← Loop: 4 measures
+_before Am %;D =;E          ← With symbols
+
+# Invalid examples
+_before $1                  ← ERROR: No pattern variables
+_before A;G:D;E            ← ERROR: No line breaks
+```
+
 ### `_after`
 
 Adds measures after the pattern.
 
-**Format**: `_after pattern`
+**Format**: `_after pattern` (single line)
 
 ```songcode
 Verse
@@ -470,6 +490,20 @@ $2
 _after D;E    ← Play pattern $2, then D;E
 --
 Ending with a twist _19
+```
+
+**Syntax Support**: Same as `_before` (see above)
+
+**Examples**:
+```songcode
+# Valid examples
+_after G;A                  ← 2 measures
+_after [D;E]3              ← Loop: 6 measures
+_after Am D;%;E =          ← With symbols
+
+# Invalid examples
+_after $2                   ← ERROR: No pattern variables
+_after A:G                 ← ERROR: No line breaks
 ```
 
 ### Section-Level Metadata

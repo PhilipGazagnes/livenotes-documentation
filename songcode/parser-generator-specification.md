@@ -255,9 +255,35 @@ Lyric Line 2
   - `-3` → `[0, 3]`
 
 **`_before` and `_after`**:
-- Parse pattern description
+- **Format**: `_before pattern` or `_after pattern` (single line only)
+- Parse pattern description from the same line (everything after the modifier keyword)
 - Store in `section.pattern.before.sc` or `section.pattern.after.sc`
 - Create object: `{ sc: "pattern_description", json: null, measures: null }`
+- The `json` and `measures` properties will be populated in Phase 2
+
+**Syntax Support in `_before`/`_after` patterns**:
+- ✅ Chords: `Am`, `D7`, `Ebm9`
+- ✅ Symbols: `;` (measure separator), `%` (repeat), `_` (silence), `=` (remover)
+- ✅ Loops: `[A;G]3`
+- ✅ Multiple chords per measure: `Am D G`
+- ❌ Line breaks: `:` is NOT allowed
+- ❌ Pattern variables: `$1`, `$2`, etc. are NOT allowed
+
+**Examples**:
+```songcode
+# Valid
+_before Am;D;E
+_before [A;G]2
+_before Am D %;E =
+
+# Invalid
+_before $1              ← Error: Pattern variables not allowed
+_before A;G:D;E        ← Error: Line breaks not allowed in _before/_after
+```
+
+**Error Conditions**:
+- Pattern variable in `_before`/`_after` → **ERROR**: "Pattern variables ($n) are not allowed in _before/_after modifiers"
+- Line break in `_before`/`_after` → **ERROR**: "Line breaks (:) are not allowed in _before/_after modifiers"
 
 #### Section-Level Metadata
 
@@ -387,11 +413,47 @@ A;G;%;E;%
 - Remover not at end → **ERROR**: "Remover (=) must be at end of measure"
 - Mismatched loop brackets → **ERROR**: "Loop started but not closed"
 
-### Step 2.2: Parse Modifier Patterns
+### Step 2.2: Transform Modifier Patterns
 
-Apply the same transformation to pattern descriptions in modifiers:
-- `section.pattern.before.sc` → `section.pattern.before.json`
-- `section.pattern.after.sc` → `section.pattern.after.json`
+Apply the same transformation algorithm (from Step 2.1) to pattern descriptions in modifiers.
+
+#### Algorithm
+
+For each section:
+1. If `section.pattern.before` exists and `before.sc` is not empty:
+   - Transform `section.pattern.before.sc` → `section.pattern.before.json`
+   - Use the same transformation algorithm as Step 2.1
+   - Calculate measures: `section.pattern.before.measures = calculate_measures(before.json)`
+
+2. If `section.pattern.after` exists and `after.sc` is not empty:
+   - Transform `section.pattern.after.sc` → `section.pattern.after.json`
+   - Use the same transformation algorithm as Step 2.1
+   - Calculate measures: `section.pattern.after.measures = calculate_measures(after.json)`
+
+#### Example
+
+**Input** (`section.pattern.before.sc`):
+```songcode
+[Am;D]2;E
+```
+
+**Output** (`section.pattern.before.json`):
+```json
+[
+    "loopStart",
+    [["Am", ""]],
+    [["D", ""]],
+    "loopEnd:2",
+    [["E", ""]]
+]
+```
+
+**Measures**: 5 (2 × 2 from loop + 1 after loop)
+
+#### Error Conditions
+
+- Invalid chord in `_before`/`_after` → **ERROR**: "Invalid chord in _before pattern: Xm"
+- Mismatched loop brackets → **ERROR**: "Loop started but not closed in _after pattern"
 
 ### Step 2.3: Calculate Pattern Measure Counts
 
