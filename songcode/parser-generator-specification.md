@@ -138,10 +138,13 @@ Examples:
 
 #### Error Conditions
 
-- Non-consecutive metadata lines → **ERROR**: "Metadata must be consecutive at the beginning of the file"
-- Invalid key → **ERROR**: "Unknown metadata key: @invalidKey"
-- Invalid value for @bpm → **ERROR**: "Invalid value for @bpm: must be 0-400"
-- Invalid denominator → **ERROR**: "Invalid time signature: denominator must be 4 (V1 restriction)"
+See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
+
+- Non-consecutive metadata lines → **E1.1.1** (SYNTAX ERROR)
+- Invalid key → **E1.1.2** (SYNTAX ERROR)
+- Invalid value for @bpm → **E1.1.3** (VALIDATION ERROR)
+- Invalid denominator → **E1.1.4** (VALIDATION ERROR)
+- Invalid time signature format → **E1.1.5** (SYNTAX ERROR)
 
 ### Step 1.3: Parse Pattern Definitions
 
@@ -177,10 +180,12 @@ $1;D;E
 
 #### Error Conditions
 
-- Non-consecutive pattern blocks → **ERROR**: "Pattern definitions must be consecutive"
-- Undefined pattern reference → **ERROR**: "Pattern $5 is not defined"
-- Circular reference → **ERROR**: "Circular reference detected: $1 → $2 → $1"
-- Redefinition → **ERROR**: "Pattern $1 is already defined"
+See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
+
+- Non-consecutive pattern blocks → **E1.2.1** (SYNTAX ERROR)
+- Undefined pattern reference → **E1.2.3** (REFERENCE ERROR)
+- Circular reference → **E1.2.4** (REFERENCE ERROR)
+- Pattern redefinition → **E1.2.2** (SYNTAX ERROR)
 
 ### Step 1.4: Parse Sections
 
@@ -320,8 +325,11 @@ _before A;G:D;E        ← Error: Line breaks not allowed in _before/_after
 ```
 
 **Error Conditions**:
-- Pattern variable in `_before`/`_after` → **ERROR**: "Pattern variables ($n) are not allowed in _before/_after modifiers"
-- Line break in `_before`/`_after` → **ERROR**: "Line breaks (:) are not allowed in _before/_after modifiers"
+
+See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
+
+- Pattern variable in `_before`/`_after` → **E1.3.4** (SYNTAX ERROR)
+- Line break in `_before`/`_after` → **E1.3.5** (SYNTAX ERROR)
 
 #### Section-Level Metadata
 
@@ -399,9 +407,12 @@ Output: "A D;G E"
 
 #### Error Conditions
 
-- Missing `--` separator before lyrics → **ERROR**: "Section must have '--' separator before lyrics" (if no lyrics, `--` separator is not mandatory)
-- Invalid modifier value → **ERROR**: "Invalid value for _repeat: must be ≥ 2"
-- Invalid measures-and-beats notation → **ERROR**: "Invalid cutEnd value: 1-a-2"
+See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
+
+- Missing `--` separator before lyrics → **E1.3.1** (SYNTAX ERROR) - only if lyrics present
+- Invalid modifier value → **E1.3.2** (VALIDATION ERROR)
+- Invalid measures-and-beats notation → **E1.3.3** (SYNTAX ERROR)
+- Invalid section-level metadata → **E1.3.6** (VALIDATION ERROR)
 
 ---
 
@@ -493,9 +504,12 @@ A;G;%;E;%
 
 #### Error Conditions
 
-- Invalid chord notation → **ERROR**: "Invalid chord: Xm (not a valid base chord)"
-- Remover not at end → **ERROR**: "Remover (=) must be at end of measure"
-- Mismatched loop brackets → **ERROR**: "Loop started but not closed"
+See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
+
+- Invalid chord notation → **E2.1.1** (SYNTAX ERROR)
+- Remover not at end → **E2.1.2** (SYNTAX ERROR)
+- Mismatched loop brackets → **E2.1.3** (SYNTAX ERROR)
+- Loop without repeat count → **E2.1.4** (SYNTAX ERROR)
 
 #### Empty Pattern Handling
 
@@ -560,8 +574,10 @@ For each section:
 
 #### Error Conditions
 
-- Invalid chord in `_before`/`_after` → **ERROR**: "Invalid chord in _before pattern: Xm"
-- Mismatched loop brackets → **ERROR**: "Loop started but not closed in _after pattern"
+See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
+
+- Invalid chord in `_before`/`_after` → **E2.2.1/E2.2.2** (SYNTAX ERROR)
+- Mismatched loop brackets → **E2.2.3/E2.2.4** (SYNTAX ERROR)
 
 ### Step 2.3: Calculate Pattern Measure Counts
 
@@ -693,10 +709,12 @@ Each `=` symbol removes exactly `beats_per_position` beats from the measure.
 
 #### Error Conditions
 
-- Invalid beat division → **ERROR**: "5 chords don't fit in 4/4 time"
-- Invalid beat division in `_before` → **ERROR**: "2 chords don't fit in 3/4 time in _before pattern"
-- Invalid beat division in `_after` → **ERROR**: "2 chords don't fit in 3/4 time in _after pattern"
-- Remover not at end → **ERROR**: "Remover must be at end of measure"
+See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
+
+- Invalid beat division → **E3.1.1** (VALIDATION ERROR)
+- Invalid beat division in `_before` → **E3.1.2** (VALIDATION ERROR)
+- Invalid beat division in `_after` → **E3.1.3** (VALIDATION ERROR)
+- Remover not at end → **E2.1.2** (SYNTAX ERROR)
 
 #### Example: Section with Time Signature Override
 
@@ -942,14 +960,18 @@ The result : Em;A;G;A;G;A;G.
 
 1. Count lyrics with measure counts
 2. Count lyrics without measure counts
-3. If both counts > 0 → **ERROR**: "All lyrics must have measure counts, or none"
+3. If both counts > 0 → **E3.3.1** (VALIDATION ERROR)
+
+See [Error Catalog](#comprehensive-error-catalog) for complete error message.
 
 #### Measure Count Validation
 
 For each section:
 1. Sum all lyric measure counts
 2. Compare with section's total measures
-3. If not equal → **ERROR**: "Lyric measures (15) don't match section measures (17)"
+3. If not equal → **E3.3.2** (VALIDATION ERROR)
+
+See [Error Catalog](#comprehensive-error-catalog) for complete error message.
 
 #### Empty Pattern Exception
 
@@ -1219,34 +1241,348 @@ Based on lyric content:
 
 ## Error Handling
 
+### Error Message Format
+
+All error messages follow this standardized format:
+
+```
+[ERROR TYPE]: [Error description]
+Line [N]: [Specific context]
+Expected: [What should have been]
+Fix: [Suggestion for correction]
+```
+
+**Components**:
+- **Error Type**: One of `SYNTAX ERROR`, `VALIDATION ERROR`, `REFERENCE ERROR`
+- **Line Number**: Location in the SongCode file where error occurred
+- **Error Description**: Clear explanation of what went wrong
+- **Expected** (optional): What the parser expected to find
+- **Fix**: Actionable suggestion for resolving the error
+
 ### Error Categories
 
-1. **Syntax Errors**: Invalid SongCode syntax
-2. **Validation Errors**: Valid syntax but invalid semantics
-3. **Reference Errors**: Undefined references
-
-### Error Response Format
-
-When an error occurs, the parser should:
-1. **Stop immediately** (fail-fast)
-2. **Provide clear feedback**:
-   - Error type
-   - Location (line number if possible)
-   - Expected vs actual
-   - Suggestion for fix
+1. **SYNTAX ERROR**: Invalid SongCode syntax (Phase 1, 2)
+2. **VALIDATION ERROR**: Valid syntax but invalid semantics (Phase 3)
+3. **REFERENCE ERROR**: Undefined or circular references (Phase 1)
 
 ### Example Error Messages
 
 **Good**:
 ```
-ERROR: Non-consecutive pattern definitions
+SYNTAX ERROR: Non-consecutive pattern definitions
 Line 15: Found pattern definition $3 after section began
-Fix: Move all pattern definitions before the first section
+Expected: All pattern definitions before first section
+Fix: Move pattern $3 to the pattern definitions block at the beginning
 ```
 
 **Bad**:
 ```
 ERROR: Invalid file
+```
+
+---
+
+## Comprehensive Error Catalog
+
+### Phase 1: First Pass Parsing
+
+#### 1.1 Metadata Errors (SYNTAX ERROR)
+
+**E1.1.1 - Non-consecutive metadata**
+```
+SYNTAX ERROR: Metadata must be consecutive at the beginning of the file
+Line [N]: Found metadata '@[key]' after content began
+Expected: All metadata at file start without gaps
+Fix: Move all @key lines to the beginning of the file
+```
+
+**E1.1.2 - Unknown metadata key**
+```
+SYNTAX ERROR: Unknown metadata key
+Line [N]: '@[key]' is not a valid metadata key
+Expected: Valid keys are @name, @bpm, @time, @original, @end, @warning
+Fix: Use a valid metadata key or remove this line
+```
+
+**E1.1.3 - Invalid BPM value**
+```
+VALIDATION ERROR: Invalid value for @bpm
+Line [N]: '@bpm [value]' is outside valid range
+Expected: Integer value between 0 and 400
+Fix: Use a BPM value between 0 and 400
+```
+
+**E1.1.4 - Invalid time signature denominator**
+```
+VALIDATION ERROR: Invalid time signature denominator
+Line [N]: '@time [num]/[denom]' has invalid denominator
+Expected: Denominator must be 4 (V1 restriction)
+Fix: Use format like 3/4 or 4/4 (denominator must be 4)
+```
+
+**E1.1.5 - Invalid time signature format**
+```
+SYNTAX ERROR: Invalid time signature format
+Line [N]: '@time [value]' is not in correct format
+Expected: Format 'n/4' where n is a positive integer
+Fix: Use format like '3/4' or '6/4'
+```
+
+#### 1.2 Pattern Definition Errors
+
+**E1.2.1 - Non-consecutive pattern blocks** (SYNTAX ERROR)
+```
+SYNTAX ERROR: Pattern definitions must be consecutive
+Line [N]: Found pattern definition $[n] after section began
+Expected: All pattern definitions before first section
+Fix: Move all $n pattern blocks together before sections
+```
+
+**E1.2.2 - Pattern redefinition** (SYNTAX ERROR)
+```
+SYNTAX ERROR: Pattern already defined
+Line [N]: Pattern $[n] is already defined
+Expected: Each pattern number used only once
+Fix: Use a different pattern number or remove duplicate definition
+```
+
+**E1.2.3 - Undefined pattern reference** (REFERENCE ERROR)
+```
+REFERENCE ERROR: Undefined pattern
+Line [N]: Pattern $[n] is not defined
+Expected: Pattern must be defined before use
+Fix: Define pattern $[n] in the pattern definitions section
+```
+
+**E1.2.4 - Circular reference** (REFERENCE ERROR)
+```
+REFERENCE ERROR: Circular reference detected
+Line [N]: Pattern references form a cycle: $[a] → $[b] → $[a]
+Expected: Pattern references must not be circular
+Fix: Remove circular dependency in pattern definitions
+```
+
+#### 1.3 Section Parsing Errors
+
+**E1.3.1 - Missing lyrics separator** (SYNTAX ERROR)
+```
+SYNTAX ERROR: Section must have '--' separator before lyrics
+Line [N]: Lyrics found without '--' separator
+Expected: '--' on its own line before lyrics
+Fix: Add '--' line before lyrics
+```
+
+**E1.3.2 - Invalid _repeat value** (VALIDATION ERROR)
+```
+VALIDATION ERROR: Invalid value for _repeat
+Line [N]: '_repeat [value]' is invalid
+Expected: Integer value ≥ 2
+Fix: Use _repeat 2 or higher (or remove modifier if only 1 repetition)
+```
+
+**E1.3.3 - Invalid measures-and-beats notation** (SYNTAX ERROR)
+```
+SYNTAX ERROR: Invalid cutStart/cutEnd value
+Line [N]: '_[modifier] [value]' format is invalid
+Expected: Format 'n' or 'n-m' where n and m are integers
+Fix: Use format like '2', '1-3', or '-2'
+```
+
+**E1.3.4 - Pattern variable in _before/_after** (SYNTAX ERROR)
+```
+SYNTAX ERROR: Pattern variables not allowed in _before/_after modifiers
+Line [N]: Found pattern variable $[n] in _[modifier]
+Expected: Inline pattern description only
+Fix: Replace $[n] with actual chords (e.g., '_before A;D' instead of '_before $1')
+```
+
+**E1.3.5 - Line break in _before/_after** (SYNTAX ERROR)
+```
+SYNTAX ERROR: Line breaks not allowed in _before/_after modifiers
+Line [N]: Found ':' (line break) in _[modifier] pattern
+Expected: Single-line pattern only
+Fix: Use semicolons (;) instead of line breaks (:) in _before/_after
+```
+
+**E1.3.6 - Invalid section-level metadata** (VALIDATION ERROR)
+```
+VALIDATION ERROR: Invalid section-level metadata
+Line [N]: Section '@[key] [value]' is invalid
+Expected: Valid values (same rules as global metadata)
+Fix: [Same fixes as corresponding global metadata error]
+```
+
+---
+
+### Phase 2: Pattern Transformation
+
+#### 2.1 Pattern Syntax Errors (SYNTAX ERROR)
+
+**E2.1.1 - Invalid chord notation**
+```
+SYNTAX ERROR: Invalid chord
+Line [N]: '[chord]' is not a valid chord
+Expected: Valid base chord (A-G with optional # or b, and optional 'm') followed by extension
+Fix: Use valid chord like Am, C#7, or Bbm9
+```
+
+**E2.1.2 - Remover not at end**
+```
+SYNTAX ERROR: Remover (=) must be at end of measure
+Line [N]: '=' symbol found before last position in measure
+Expected: '=' symbols only at end of measure
+Fix: Move '=' to the end: 'A D E =' instead of 'A = D E'
+```
+
+**E2.1.3 - Mismatched loop brackets**
+```
+SYNTAX ERROR: Loop not properly closed
+Line [N]: Loop started with '[' but missing ']n'
+Expected: Every '[' must have matching ']n'
+Fix: Close loop with ']n' where n is repeat count
+```
+
+**E2.1.4 - Loop without repeat count**
+```
+SYNTAX ERROR: Loop missing repeat count
+Line [N]: Found ']' without repeat number
+Expected: Format ']n' where n ≥ 2
+Fix: Add repeat count like ']3' (minimum 2)
+```
+
+#### 2.2 Modifier Pattern Errors (SYNTAX ERROR)
+
+**E2.2.1 - Invalid chord in _before**
+```
+SYNTAX ERROR: Invalid chord in _before pattern
+Line [N]: '[chord]' in _before is not valid
+Expected: Valid chord notation
+Fix: Use valid chord like Am, G7, or D
+```
+
+**E2.2.2 - Invalid chord in _after**
+```
+SYNTAX ERROR: Invalid chord in _after pattern
+Line [N]: '[chord]' in _after is not valid
+Expected: Valid chord notation
+Fix: Use valid chord like Am, G7, or D
+```
+
+**E2.2.3 - Mismatched loop in _before**
+```
+SYNTAX ERROR: Loop not properly closed in _before pattern
+Line [N]: _before pattern has unclosed loop
+Expected: Every '[' must have matching ']n'
+Fix: Close loop in _before pattern
+```
+
+**E2.2.4 - Mismatched loop in _after**
+```
+SYNTAX ERROR: Loop not properly closed in _after pattern
+Line [N]: _after pattern has unclosed loop
+Expected: Every '[' must have matching ']n'
+Fix: Close loop in _after pattern
+```
+
+---
+
+### Phase 3: Validation
+
+#### 3.1 Measure Content Validation (VALIDATION ERROR)
+
+**E3.1.1 - Invalid beat division**
+```
+VALIDATION ERROR: Invalid number of positions in measure
+Line [N]: [count] chords don't fit in [num]/[denom] time
+Expected: Beats per position must be a whole number
+Fix: Use [suggestions] chords for [num]/[denom] time (e.g., 1, 2, or 4 chords for 4/4)
+```
+
+**E3.1.2 - Invalid beat division in _before**
+```
+VALIDATION ERROR: Invalid measure in _before pattern
+Line [N]: [count] chords don't fit in [num]/[denom] time in _before pattern
+Expected: Beats per position must be a whole number
+Fix: Adjust _before pattern to use valid chord count for time signature
+```
+
+**E3.1.3 - Invalid beat division in _after**
+```
+VALIDATION ERROR: Invalid measure in _after pattern
+Line [N]: [count] chords don't fit in [num]/[denom] time in _after pattern
+Expected: Beats per position must be a whole number
+Fix: Adjust _after pattern to use valid chord count for time signature
+```
+
+#### 3.3 Lyrics Timing Validation (VALIDATION ERROR)
+
+**E3.3.1 - Mixed lyric measure counts**
+```
+VALIDATION ERROR: All lyrics must have measure counts, or none
+Line [N]: Section has mix of lyrics with and without measure counts
+Expected: Either all lyrics have _n counts, or none do
+Fix: Add measure counts to all lyrics, or remove all measure counts
+```
+
+**E3.3.2 - Lyric measures don't match**
+```
+VALIDATION ERROR: Lyric measures don't match section measures
+Line [N]: Lyrics total [sum] measures but section has [total] measures
+Expected: Sum of lyric measures must equal section total
+Fix: Adjust lyric measure counts or pattern to match (difference: [diff])
+```
+
+---
+
+### Additional Errors
+
+#### Empty or Invalid Content (SYNTAX ERROR)
+
+**E0.1 - Empty file**
+```
+SYNTAX ERROR: Empty file
+Expected: Valid SongCode content
+Fix: Add song content (patterns, sections, or at minimum metadata)
+```
+
+**E0.2 - Invalid character encoding**
+```
+SYNTAX ERROR: File contains invalid characters
+Line [N]: Character encoding issue detected
+Expected: Valid UTF-8 encoding
+Fix: Save file with UTF-8 encoding
+```
+
+---
+
+### Error Reporting Guidelines for Implementers
+
+**For each error**:
+1. **Stop immediately** (fail-fast approach)
+2. **Include line number** when possible
+3. **Provide context** from the actual file
+4. **Use exact error format** from catalog above
+5. **Substitute placeholders** with actual values:
+   - `[N]` → actual line number
+   - `[key]` → actual key name
+   - `[value]` → actual value
+   - `[n]` → actual pattern number
+   - `[chord]` → actual chord text
+   - `[count]` → actual chord count
+   - `[num]/[denom]` → actual time signature
+   - `[modifier]` → actual modifier name
+
+**Example implementation**:
+```python
+def report_error(error_code, line_num, **kwargs):
+    # Get template from catalog
+    template = ERROR_CATALOG[error_code]
+    
+    # Substitute values
+    message = template.format(line=line_num, **kwargs)
+    
+    # Stop parsing
+    raise ParseError(message)
 ```
 
 ---

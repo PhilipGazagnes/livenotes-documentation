@@ -727,33 +727,88 @@ function normalizePattern(pattern):
 
 ---
 
-## 🟠 Issue 8: Error Message Templates Not Standardized
+## ✅ Issue 8: Error Message Templates Not Standardized
+
+**Status**: RESOLVED ✓
 
 **Current Documentation**:
 - Error messages scattered throughout docs
 - No consistent format
-- Some are quoted, some are not
+- Now FULLY STANDARDIZED with comprehensive catalog
 
-**Examples Found**:
-- `"Metadata must be consecutive at the beginning of the file"`
-- `"Unknown metadata key: @invalidKey"`
-- `Invalid chord: Xm (not a valid base chord)`
+---
 
-**Questions Needing Answers**:
+### Standardized Error Format
 
-19. **What's the standard error message format?**
-    - Should they include line numbers?
-    - Should they include column numbers?
-    - Should they suggest fixes?
+**ANSWER to Questions 19 & 20**:
 
-20. **What are ALL the possible error messages?**
-    - Need comprehensive list for testing
+#### Question 19: Standard Error Message Format
 
-**Documentation Gaps**:
-- [ ] Create standardized error message format
-- [ ] Create comprehensive error catalog
-- [ ] Specify error codes (optional but helpful)
-- [ ] Add context information requirements
+**Format (Option 3 - With location and suggestion)**:
+
+```
+[ERROR TYPE]: [Error description]
+Line [N]: [Specific context]
+Expected: [What should have been]
+Fix: [Suggestion for correction]
+```
+
+**Components**:
+- **Error Type**: `SYNTAX ERROR`, `VALIDATION ERROR`, or `REFERENCE ERROR`
+- **Line Number**: YES - Line number in SongCode file
+- **Column Number**: NO - Not included (overkill)
+- **Expected**: What the parser expected to find
+- **Fix**: Actionable suggestion for resolving the error
+- **Categories**: YES - Error type prefix included
+
+**Example**:
+```
+SYNTAX ERROR: Non-consecutive pattern definitions
+Line 15: Found pattern definition $3 after section began
+Expected: All pattern definitions before first section
+Fix: Move pattern $3 to the pattern definitions block at the beginning
+```
+
+#### Question 20: Comprehensive Error Catalog
+
+**✅ CREATED**
+
+A complete error catalog has been added to the parser specification with:
+
+- **40+ error messages** covering all phases
+- **Organized by phase and category**:
+  - Phase 1: First Pass Parsing (Metadata, Patterns, Sections)
+  - Phase 2: Pattern Transformation
+  - Phase 3: Validation
+  - Additional edge cases
+- **Error codes** for each (E1.1.1, E2.1.3, etc.)
+- **Standardized format** for all errors
+- **Implementation guidelines** for developers
+- **Placeholder substitution** rules
+
+**Benefits for development process**:
+1. ✅ **Complete reference** for parser implementation
+2. ✅ **Systematic test coverage** - know what to test
+3. ✅ **Consistency** - all similar errors use similar messages
+4. ✅ **User experience** - clear, actionable error messages
+5. ✅ **Maintenance** - easy to add new errors following same pattern
+
+**Coverage**:
+- All syntax errors (malformed input)
+- All validation errors (invalid semantics)
+- All reference errors (undefined/circular)
+- Empty/edge cases
+- Phase-specific errors
+
+---
+
+**Documentation Updates Needed**:
+- [x] Create standardized error message format
+- [x] Create comprehensive error catalog (40+ errors)
+- [x] Specify error codes for each
+- [x] Add context information requirements
+- [x] Add implementation guidelines
+- [x] Organize by phase and category
 
 ---
 
@@ -818,7 +873,7 @@ function normalizePattern(pattern):
 8. ~~**Issue 6** - Whitespace normalization algorithm~~ ✅ RESOLVED
 
 ### Medium (Nice to Have)
-9. **Issue 8** - Error message standardization
+9. ~~**Issue 8** - Error message standardization~~ ✅ RESOLVED
 10. **Issue 9.1** - Tokenization details
 11. **Issue 9.2** - Maximum limits
 12. **Issue 9.3-9.5** - Other specification details
