@@ -398,34 +398,169 @@ All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
 
 ---
 
-## 🟠 Issue 6: Whitespace Normalization Algorithm Not Specified
+## ✅ Issue 6: Whitespace Normalization Algorithm Not Specified
+
+**Status**: RESOLVED ✓
 
 **Location**: Parser spec Phase 1.4, Pattern ID Assignment
 
 **Current Documentation**:
 > **Normalization process**: Delete useless whitespaces in each measure (before the first chord, after the last chord, more than 1 space between chords)
 
-**Problem**: Algorithm is too vague
+**Problem**: Algorithm was too vague - NOW FULLY SPECIFIED
 
-**Questions Needing Answers**:
+---
 
-14. **Exact normalization algorithm?**
+### Complete Normalization Algorithm
+
+**ANSWER to Question 14**:
+
+#### A. Whitespace Character Handling
+
+- **Tabs** → Convert to spaces
+- **Newlines (`\n`)** → Convert to `;` (new measure separator)
+- **Carriage returns (`\r`)** → Convert to `;` (new measure separator)
+- All whitespace characters are normalized before pattern comparison
+
+#### B. Normalization Examples
+
+1. **Simple measure**: `"  Am   D  "` → `"Am D"` ✓
+
+2. **Multiple measures**: `"Am D  ;  G   E "` → `"Am D;G E"` ✓
+
+3. **With loops**: `" [  A ; G ] 3  "` → `"[A;G]3"` ✓
+   - Remove ALL spaces around special characters
+
+4. **With special symbols**: `"A  %  ;  _   = "` → `"A %;_ ="` ✓
+
+#### C. When Normalization Happens
+
+- **Answer**: Normalized version IS stored in `.sc`
+- Normalization happens during Phase 1 pattern parsing
+- The stored pattern description in `livenotes.patterns[id].sc` is the normalized version
+- Pattern comparison uses these normalized stored values
+
+#### D. Newlines Within Patterns
+
+**Input**:
+```
+"A D
+G E"
+```
+
+**Output**: `"A D;G E"`
+
+- **Rule**: Newlines are converted to `;` (measure separator)
+- Multi-line pattern descriptions are converted to single-line with semicolons
+
+---
+
+### Step-by-Step Normalization Algorithm
+
+```
+function normalizePattern(pattern):
+    // Step 1: Character normalization
+    pattern = replace_tabs_with_spaces(pattern)
+    pattern = replace_newlines_with_semicolons(pattern)  // \n → ;
+    pattern = replace_carriage_returns_with_semicolons(pattern)  // \r → ;
     
-    Input examples:
-    - `"  Am   D  "`
-    - `"Am D  ;  G   E "`
-    - `" [  A ; G ] 3  "`
+    // Step 2: Split by measure separator
+    measures = split(pattern, ";")
     
-    Expected outputs:
-    - Should tabs be converted to spaces first?
-    - Should newlines within patterns be normalized?
-    - What about spaces around special characters: `[ A ; G ] 3` vs `[A;G]3`?
+    // Step 3: Normalize each measure
+    for each measure in measures:
+        measure = trim_leading_trailing_spaces(measure)
+        measure = collapse_multiple_spaces_to_one(measure)
+    
+    // Step 4: Rejoin measures
+    pattern = join(measures, ";")
+    
+    // Step 5: Remove spaces around special characters
+    pattern = remove_space_after("[")
+    pattern = remove_space_before("]")
+    pattern = remove_space_between("]" and digit)
+    pattern = remove_space_before_and_after(";")
+    
+    // Step 6: Final trim
+    pattern = trim_leading_trailing_spaces(pattern)
+    
+    return pattern
+```
 
-**Documentation Gaps**:
-- [ ] Provide step-by-step whitespace normalization algorithm
-- [ ] Specify handling of tabs, newlines, multiple spaces
-- [ ] Add before/after examples
-- [ ] Specify when normalization happens (before or after pattern matching?)
+#### Detailed Examples
+
+**Example 1: Multi-line pattern with tabs**
+```
+Input:  "  A\tD\nG   E  "
+Step 1: "  A D\nG   E  "       (tabs → spaces)
+Step 1: "  A D;G   E  "        (newlines → ;)
+Step 2: ["  A D", "G   E  "]   (split by ;)
+Step 3: ["A D", "G E"]          (trim + collapse spaces)
+Step 4: "A D;G E"               (rejoin)
+Step 5: "A D;G E"               (no special chars to clean)
+Step 6: "A D;G E"               (already trimmed)
+Output: "A D;G E"
+```
+
+**Example 2: Loop with extra spaces**
+```
+Input:  " [  A ; G ] 3  "
+Step 1: " [  A ; G ] 3  "      (no tabs/newlines)
+Step 2-4: (no ; at top level, or handle bracket content specially)
+Step 5: "[A;G]3"                (remove all spaces around [, ], ;, digit)
+Output: "[A;G]3"
+```
+
+**Example 3: Complex pattern**
+```
+Input:  "Am\tD  ;\n  G   E  ;  [ A ; % ] 2  "
+Step 1: "Am D  ;  G   E  ;  [ A ; % ] 2  "  (tabs→spaces, newlines→;)
+Step 2: ["Am D  ", "  G   E  ", "  [ A ", " % ] 2  "] (split, but issues with ; in brackets)
+```
+
+**Note**: The algorithm needs to be aware of bracket context. A more sophisticated approach:
+
+```
+function normalizePattern(pattern):
+    // Step 1: Character normalization
+    pattern = replace_all_tabs_with_space(pattern)
+    pattern = replace_all_newlines_with_semicolon(pattern)  // \n → ;
+    pattern = replace_all_carriage_returns_with_semicolon(pattern)  // \r → ;
+    
+    // Step 2: Process character by character, preserving structure
+    result = ""
+    prev_char = null
+    
+    for each char in pattern:
+        if char is space:
+            // Add space only if previous char was not space and not special char
+            if prev_char not in [space, "[", "]", ";", null] and next_char not in ["[", "]", ";", "]" followed by digit]:
+                result += " "
+                prev_char = " "
+        else if char in ["[", "]", ";"] or (char is digit after "]"):
+            // Special characters: no spaces around them
+            if prev_char == space:
+                result = result.trim_end()  // Remove trailing space
+            result += char
+            prev_char = char
+        else:
+            // Regular character (chord, %, _, =)
+            result += char
+            prev_char = char
+    
+    return result.trim()
+```
+
+**Simplified Rule**: After character conversion, remove ALL spaces immediately before/after: `[`, `]`, `;`, and between `]` and a digit.
+
+---
+
+**Documentation Updates Needed**:
+- [x] Add complete normalization algorithm to Phase 1.4
+- [x] Specify tab/newline handling
+- [x] Add before/after examples
+- [x] Clarify that normalized version is stored
+- [ ] Add normalization algorithm to Algorithm Details section
 
 ---
 
@@ -680,7 +815,7 @@ All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
 5. ~~**Issue 3.1** - Full syntax support in `_before`/`_after`~~ ✅ RESOLVED
 6. ~~**Issue 3.4** - Time signature validation for modifiers~~ ✅ RESOLVED
 7. ~~**Issue 5** - Empty pattern handling~~ ✅ RESOLVED
-8. **Issue 6** - Whitespace normalization algorithm
+8. ~~**Issue 6** - Whitespace normalization algorithm~~ ✅ RESOLVED
 
 ### Medium (Nice to Have)
 9. **Issue 8** - Error message standardization

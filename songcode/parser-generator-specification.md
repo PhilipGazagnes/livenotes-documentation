@@ -347,9 +347,55 @@ As sections are parsed, assign pattern IDs alphabetically ("A", "B", "C", ...):
 **Pattern Matching Rules**:
 - Match on base pattern description only (ignore modifiers)
 - After pattern variable substitution
-- Whitespace should be normalized
-- `Am D;Am` and `Am D ; Am   ` are equal
-- **Normalization process**: Delete useless whitespaces in each measure (before the first chord, after the last chord, more than 1 space between chords)
+- After whitespace normalization (see below)
+- `Am D;Am` and `Am D ; Am   ` are considered equal
+- `[A ; G]3` and `[ A ; G ] 3` are considered equal
+
+**Normalization Process**:
+
+The normalized version is stored in `livenotes.patterns[id].sc`. Normalization occurs during pattern parsing.
+
+**Algorithm**:
+
+1. **Character normalization**:
+   - Convert all tabs to spaces
+   - Convert all newlines (`\n`) to `;` (measure separator)
+   - Convert all carriage returns (`\r`) to `;` (measure separator)
+
+2. **Split by semicolon** to get individual measures
+
+3. **For each measure**:
+   - Trim leading and trailing whitespace
+   - Collapse multiple consecutive spaces into single space
+
+4. **Rejoin measures** with `;`
+
+5. **Remove spaces around special characters**:
+   - Remove space after `[`
+   - Remove space before `]`
+   - Remove space before and after `;`
+   - Remove space between `]` and following digit
+
+6. **Final trim** of entire pattern
+
+**Examples**:
+
+```
+Input:  "  Am   D  "
+Output: "Am D"
+
+Input:  "Am D  ;  G   E "
+Output: "Am D;G E"
+
+Input:  " [  A ; G ] 3  "
+Output: "[A;G]3"
+
+Input:  "A  %  ;  _   = "
+Output: "A %;_ ="
+
+Input:  "A\tD\nG   E"       (with tab and newline)
+Output: "A D;G E"
+```
 
 #### Error Conditions
 
@@ -1246,10 +1292,40 @@ function patternsMatch(pattern1, pattern2):
     return normalized1 == normalized2
 
 function normalizeWhitespace(pattern):
-    // remove white spaces before measure first chord
-    // remove white spaces bofore measure last chord
-    // keep only 1 space between chords
+    // Step 1: Character normalization
+    pattern = replace_all_tabs_with_space(pattern)
+    pattern = replace_all_newlines_with_semicolon(pattern)  // \n → ;
+    pattern = replace_all_carriage_returns_with_semicolon(pattern)  // \r → ;
+    
+    // Step 2: Split by semicolon (measure separator)
+    measures = split(pattern, ";")
+    
+    // Step 3: Normalize each measure
+    normalized_measures = []
+    for each measure in measures:
+        measure = trim_leading_trailing_spaces(measure)
+        measure = collapse_multiple_spaces_to_single_space(measure)
+        normalized_measures.append(measure)
+    
+    // Step 4: Rejoin measures
+    pattern = join(normalized_measures, ";")
+    
+    // Step 5: Remove spaces around special characters
+    pattern = remove_all_spaces_after("[")
+    pattern = remove_all_spaces_before("]")
+    pattern = remove_all_spaces_before_and_after(";")
+    pattern = remove_spaces_between("]", digit)
+    
+    // Step 6: Final trim
+    pattern = trim_leading_trailing_spaces(pattern)
+    
     return pattern
+
+// Examples:
+// "  Am   D  " → "Am D"
+// "Am D  ;  G   E " → "Am D;G E"
+// " [  A ; G ] 3  " → "[A;G]3"
+// "A\tD\nG E" → "A D;G E"
 ```
 
 ---
