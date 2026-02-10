@@ -6,13 +6,14 @@
 
 1. [Overview](#overview)
 2. [Input and Output](#input-and-output)
-3. [Phase 1: First Pass Parsing](#phase-1-first-pass-parsing)
-4. [Phase 2: Pattern Transformation](#phase-2-pattern-transformation)
-5. [Phase 3: Validation](#phase-3-validation)
-6. [Phase 4: Prompter Generation](#phase-4-prompter-generation)
-7. [Error Handling](#error-handling)
-8. [Algorithm Details](#algorithm-details)
-9. [Edge Cases](#edge-cases)
+3. [File Format Specifications](#file-format-specifications)
+4. [Phase 1: First Pass Parsing](#phase-1-first-pass-parsing)
+5. [Phase 2: Pattern Transformation](#phase-2-pattern-transformation)
+6. [Phase 3: Validation](#phase-3-validation)
+7. [Phase 4: Prompter Generation](#phase-4-prompter-generation)
+8. [Error Handling](#error-handling)
+9. [Algorithm Details](#algorithm-details)
+10. [Edge Cases](#edge-cases)
 
 ---
 
@@ -66,6 +67,131 @@ A JSON object with four top-level keys:
     "prompter": []
 }
 ```
+
+---
+
+## File Format Specifications
+
+### Character Encoding
+
+**Encoding**: UTF-8  
+**Validation**: Strict
+
+The parser must:
+- Accept only valid UTF-8 encoded files
+- Reject files with invalid UTF-8 sequences
+- Reject files with null bytes (`\0`)
+- Return **E0.2** error for encoding issues
+
+**Invalid UTF-8 includes**:
+- Incomplete multibyte sequences
+- Invalid byte patterns
+- Null bytes
+
+### Line Ending Normalization
+
+**Supported formats**: 
+- LF (`\n`) - Unix/Linux/macOS
+- CRLF (`\r\n`) - Windows
+
+**Processing**:
+1. Normalize all line endings to LF internally
+2. Accept mixed line endings in same file
+3. Process during initial file read (before Phase 1)
+
+**Algorithm**:
+```
+content = read_file()
+content = content.replace("\r\n", "\n")  // Normalize CRLF to LF
+content = content.replace("\r", "\n")    // Normalize standalone CR to LF
+```
+
+### Escape Sequences
+
+**SongCode does not support escape sequences.**
+
+All characters are treated literally:
+- `\n` in file content → literal backslash + 'n' (not newline)
+- `\t` in file content → literal backslash + 't' (not tab)
+- `\\` in file content → literal backslash + backslash
+
+**Special text in lyrics**:
+- `***text***` → info style (no escaping needed)
+- `:::text:::` → musicianInfo style (no escaping needed)
+- To use literal `***` in lyrics without styling, don't close the marker
+
+**Example**:
+```
+--
+This has ***bold*** style     → style: "info" (because starts and ends with ***)
+This has ***incomplete         → style: "default" (no end marker)
+```
+
+### Maximum Limits
+
+#### Pattern Limits
+
+**Maximum pattern count**: 26 (A-Z)
+- Pattern IDs are assigned alphabetically
+- First unique pattern → "A"
+- 26th unique pattern → "Z"
+- If 27th pattern needed → **ERROR** (exceeds limit)
+
+**Maximum pattern reference depth**: 1 level
+- Pattern can reference another pattern: `$1` in `$2` ✓
+- Pattern cannot reference pattern that references another: `$1` in `$2` in `$3` ✗
+
+**Pattern definition order**: 
+- Patterns must be defined before use
+- Forward references not allowed
+- Pattern `$2` can use `$1` only if `$1` defined first
+
+**Loop repeat count**: No maximum
+- `[A;G]2` ✓ (minimum)
+- `[A;G]100` ✓ (allowed)
+- `[A;G]10000` ✓ (allowed, but may be slow)
+
+**Nested loops**: Not supported (returns **E2.1.3** error)
+
+#### Section Limits
+
+**Maximum sections**: No limit
+- Song can have any number of sections
+
+**Maximum measures per pattern**: No limit
+
+**Maximum total measures**: No limit
+
+#### String Length Limits
+
+| Field | Maximum Length |
+|-------|----------------|
+| Metadata: `@name` | 200 characters |
+| Metadata: `@bpm` | N/A (numeric 0-400) |
+| Metadata: `@time` | N/A (format `n/4`) |
+| Metadata: `@original` | 50 characters |
+| Metadata: `@end` | 50 characters |
+| Metadata: `@warning` | 50 characters |
+| Section name | 50 characters |
+| Section comment | No limit |
+| Lyric line | No limit |
+| Pattern description | No limit |
+
+### Section-Level Metadata
+
+**Allowed keys**: Only `@bpm` and `@time`
+
+**Validation**:
+- `@bpm`: Same as global (integer 0-400)
+- `@time`: Same as global (denominator must be 4)
+
+**Not allowed at section level**:
+- `@name` (song-level only)
+- `@original` (song-level only)
+- `@end` (song-level only)
+- `@warning` (song-level only)
+
+Using non-allowed keys at section level → **E1.3.6** error
 
 ---
 
@@ -1362,6 +1488,15 @@ Expected: Pattern references must not be circular
 Fix: Remove circular dependency in pattern definitions
 ```
 
+**E1.2.5 - Pattern reference depth exceeded** (REFERENCE ERROR)
+```
+REFERENCE ERROR: Pattern reference depth exceeds maximum
+Line [N]: Pattern $[n] requires depth > 1 to resolve
+Expected: Maximum reference depth is 1 (direct substitution only)
+Fix: Pattern can only reference patterns that don't themselves contain references
+Example: $3 can contain $1, but $3 cannot contain $2 if $2 contains $1
+```
+
 #### 1.3 Section Parsing Errors
 
 **E1.3.1 - Missing lyrics separator** (SYNTAX ERROR)
@@ -1663,6 +1798,150 @@ function normalizeWhitespace(pattern):
 // " [  A ; G ] 3  " → "[A;G]3"
 // "A\tD\nG E" → "A D;G E"
 ```
+
+### Circular Reference Detection
+
+Detects when pattern definitions form a cycle (e.g., `$1` → `$2` → `$1`).
+
+**Algorithm**: Stack-based tracking during pattern resolution
+
+```
+resolution_stack = []  // Global tracking stack
+
+function resolvePatternVariable(pattern_id, current_line):
+    // Check if already in resolution stack (circular reference)
+    if pattern_id in resolution_stack:
+        // Build cycle path for error message
+        cycle_path = resolution_stack + [pattern_id]
+        cycle_string = " → ".join(["$" + id for id in cycle_path])
+        
+        throw E1.2.4:
+            "REFERENCE ERROR: Circular reference detected"
+            "Line [current_line]: " + cycle_string
+            "Expected: Pattern references must not be circular"
+            "Fix: Remove circular dependency in pattern definitions"
+    
+    // Add to stack
+    resolution_stack.push(pattern_id)
+    
+    // Resolve pattern content (substitute pattern variables)
+    pattern_content = patterns[pattern_id].sc
+    
+    // Process pattern content - if it contains other pattern variables,
+    // recursively resolve them (will detect deeper cycles)
+    for each "$n" in pattern_content:
+        resolvePatternVariable(n, current_line)
+    
+    // Remove from stack after successful resolution
+    resolution_stack.pop()
+    
+    return resolved_pattern_content
+```
+
+**Example detection**:
+
+```songcode
+$1
+A;$2
+
+$2
+D;$1    ← Circular reference detected here
+```
+
+**Error output**:
+```
+REFERENCE ERROR: Circular reference detected
+Line 5: Pattern references form a cycle: $2 → $1 → $2
+Expected: Pattern references must not be circular
+Fix: Remove circular dependency in pattern definitions
+```
+
+### Pattern Variable Resolution
+
+**Rule**: Patterns must be defined before use (no forward references).
+
+**Resolution depth**: Maximum 1 level
+- ✓ Allowed: `$2` contains `$1` (depth 1)
+- ✗ Not allowed: `$3` contains `$2` which contains `$1` (depth 2)
+
+**Algorithm**:
+
+```
+function resolvePattern(pattern_id):
+    pattern = patterns[pattern_id]
+    
+    if pattern.sc contains no variables:
+        return pattern.sc  // No resolution needed
+    
+    // Check depth (count how many times we need to resolve)
+    depth = 0
+    temp_content = pattern.sc
+    
+    while temp_content contains "$":
+        depth++
+        if depth > 1:
+            throw E1.2.5:
+                "REFERENCE ERROR: Pattern reference depth exceeds maximum"
+                "Line [N]: Pattern $[n] requires depth > 1 to resolve"
+        
+        // Replace all variables in this level
+        for each "$n" in temp_content:
+            if n not defined yet:
+                throw E1.2.3: "Pattern $n is not defined"
+            
+            // Check for circular reference
+            resolvePatternVariable(n, pattern_line_number)
+            
+            // Substitute
+            temp_content = temp_content.replace("$n", patterns[n].sc)
+    
+    return temp_content
+```
+
+**Valid examples**:
+
+```songcode
+# Depth 0: No variables
+$1
+A;D;G
+✓ Valid
+
+# Depth 1: One level of variables
+$1
+A;D
+
+$2
+$1;G;E
+✓ Valid (depth 1)
+
+# Depth 2: NOT ALLOWED
+$1
+A;D
+
+$2
+$1;G
+
+$3
+$2;E    ← ERROR: Would require depth 2 to fully resolve
+✗ Invalid
+```
+
+**Forward reference example (not allowed)**:
+
+```songcode
+$2
+$1;G    ← ERROR: $1 not defined yet
+
+$1
+A;D
+✗ Invalid - patterns must be defined before use
+```
+
+**Processing order**:
+1. Parse all pattern definitions (Phase 1.3)
+2. Validate no forward references
+3. Resolve pattern variables in order
+4. Detect circular references during resolution
 
 ---
 

@@ -812,49 +812,172 @@ A complete error catalog has been added to the parser specification with:
 
 ---
 
-## 🔵 Issue 9: Missing Specification Details
+## ✅ Issue 9: Missing Specification Details
 
-### 9.1 Tokenization (Phase 0)
+**Status**: RESOLVED ✓
 
-**Missing**:
-- How to split input into tokens
-- Which characters are delimiters
-- Line ending handling (CRLF vs LF)
-- Character encoding (UTF-8 assumed?)
-- Escaped characters (if any)
+All specification details have been documented.
 
-### 9.2 Maximum Limits
+---
 
-**Missing**:
-- Maximum loop depth
-- Maximum pattern count
-- Maximum section count
-- Maximum measure count per pattern
-- Maximum string lengths (beyond metadata)
-- Maximum nesting level for pattern references
+### 9.1 Tokenization (Phase 0) ✅ RESOLVED
 
-### 9.3 Circular Reference Detection
+**Character Encoding**:
+- ✅ **UTF-8** encoding required
+- ✅ **Strict validation**: Reject invalid UTF-8 sequences
+- Invalid UTF-8 includes: incomplete multibyte sequences, invalid byte patterns, null bytes
+- Returns **E0.2** error on encoding issues
 
-**Current Documentation**: Error mentioned but algorithm not specified
+**Line Ending Handling**:
+- ✅ **Normalize** all line endings to LF (`\n`)
+- ✅ Accept both CRLF (`\r\n`) and LF (`\n`)
+- ✅ Process during initial file read (before Phase 1)
+- Mixed line endings in same file are accepted and normalized
 
-**Missing**:
-- Detection algorithm
-- How to report which patterns are involved in the cycle
+**Escaped Characters**:
+- ✅ **No escape sequences** in SongCode
+- All characters treated literally
+- `\n` in file → literal backslash + 'n' (not newline)
+- Special markers (`***`, `:::`) don't need escaping
 
-### 9.4 Pattern Variable Resolution Order
+---
 
-**Missing**:
-- If `$2` references `$1`, and `$3` references `$2`
-- What's the resolution order?
-- Depth-first? Breadth-first?
-- Are forward references allowed?
+### 9.2 Maximum Limits ✅ RESOLVED
 
-### 9.5 Section-Level Metadata Validation
+**A. Loop Depth**:
+- ✅ Nested loops: **NOT supported** (returns **E2.1.3** error)
+- ✅ Loop repeat count: **No maximum**
+- `[A;G]2` ✓ minimum
+- `[A;G]100` ✓ allowed
+- `[A;G]10000` ✓ allowed (no limit)
 
-**Missing**:
-- Can section `@bpm` be outside the 0-400 range?
-- Can section `@time` use the same validation as global?
-- Are there any metadata keys that can't be overridden at section level?
+**B. Pattern Count**:
+- ✅ Maximum: **26 patterns** (A-Z)
+- Pattern IDs assigned alphabetically
+- 27th unique pattern → ERROR (exceeds limit)
+
+**C. Section Count**:
+- ✅ **No limit** on number of sections
+
+**D. Measure Count**:
+- ✅ **No limit** on measures per pattern
+- ✅ **No limit** on total measures in song
+
+**E. String Lengths**:
+- ✅ Metadata `@name`: 200 characters
+- ✅ Metadata `@original`, `@end`, `@warning`: 50 characters
+- ✅ Section name: **50 characters**
+- ✅ Lyric line: **No limit**
+- ✅ Pattern description: **No limit**
+- ✅ Section comment: **No limit**
+
+**F. Pattern Reference Depth**:
+- ✅ Maximum: **1 level** deep
+- `$2` can contain `$1` ✓ (depth 1)
+- `$3` containing `$2` containing `$1` ✗ (depth 2 - not allowed)
+
+---
+
+### 9.3 Circular Reference Detection ✅ RESOLVED
+
+**Algorithm documented**: Stack-based tracking
+
+**Implementation**:
+```
+resolution_stack = []
+
+function resolvePatternVariable(pattern_id):
+    if pattern_id in resolution_stack:
+        throw CircularReferenceError(resolution_stack + [pattern_id])
+    
+    resolution_stack.push(pattern_id)
+    resolve pattern content
+    resolution_stack.pop()
+```
+
+**Error message format**:
+```
+REFERENCE ERROR: Circular reference detected
+Line [N]: Pattern references form a cycle: $1 → $2 → $1
+Expected: Pattern references must not be circular
+Fix: Remove circular dependency in pattern definitions
+```
+
+**Benefits**:
+- Clear, simple algorithm
+- Easy to implement
+- Provides exact cycle path for debugging
+- Consistent with error catalog format
+
+---
+
+### 9.4 Pattern Variable Resolution Order ✅ RESOLVED
+
+**Rule**: Patterns must be defined before use
+
+**Forward references**: ✗ **NOT allowed**
+
+**Resolution order**: In-order (patterns resolved as encountered)
+
+**Valid**:
+```songcode
+$1
+A;D
+
+$2
+$1;G    ✓ $1 defined before use
+```
+
+**Invalid**:
+```songcode
+$2
+$1;G    ✗ ERROR: $1 not defined yet
+
+$1
+A;D
+```
+
+**Depth limit**: Maximum 1 level
+- Direct substitution only
+- Cannot reference pattern that references another pattern
+
+---
+
+### 9.5 Section-Level Metadata Validation ✅ RESOLVED
+
+**A. Section @bpm**:
+- ✅ **Same validation as global** (integer 0-400)
+
+**B. Section @time**:
+- ✅ **Same validation as global** (denominator must be 4)
+
+**C. Allowed metadata keys at section level**:
+- ✅ **Only** `@bpm` and `@time`
+- ✗ **NOT allowed**: `@name`, `@original`, `@end`, `@warning` (song-level only)
+- Using non-allowed keys → **E1.3.6** error
+
+**Example**:
+```songcode
+@name My Song        ← Global: Valid
+@bpm 120             ← Global: Valid
+
+Verse
+@bpm 140             ← Section: Valid (override)
+@time 3/4            ← Section: Valid (override)
+@name Something      ← Section: ERROR (not allowed)
+```
+
+---
+
+**Documentation Updates Completed**:
+- [x] Add File Format Specifications section
+- [x] Document character encoding (UTF-8, strict)
+- [x] Document line ending normalization
+- [x] Clarify no escape sequences
+- [x] Document all maximum limits
+- [x] Add circular reference detection algorithm
+- [x] Document pattern variable resolution rules
+- [x] Specify section-level metadata validation
 
 ---
 
@@ -874,9 +997,9 @@ A complete error catalog has been added to the parser specification with:
 
 ### Medium (Nice to Have)
 9. ~~**Issue 8** - Error message standardization~~ ✅ RESOLVED
-10. **Issue 9.1** - Tokenization details
-11. **Issue 9.2** - Maximum limits
-12. **Issue 9.3-9.5** - Other specification details
+10. ~~**Issue 9.1** - Tokenization details~~ ✅ RESOLVED
+11. ~~**Issue 9.2** - Maximum limits~~ ✅ RESOLVED
+12. ~~**Issue 9.3-9.5** - Other specification details~~ ✅ RESOLVED
 
 ---
 
