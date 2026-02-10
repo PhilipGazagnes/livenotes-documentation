@@ -248,7 +248,35 @@ Lyric Line 2
 2. If yes, replace with the stored pattern definition
 3. Store the expanded description temporarily as `section.pattern.sc`
 
-**Note**: a pattern can be empty
+**Empty Patterns**:
+
+Empty patterns are valid and useful during the writing process:
+
+```songcode
+$1
+
+
+Verse
+$1
+--
+First line
+Second line
+```
+
+**Purpose**: Allows writers to create the song skeleton/structure first and progressively add patterns and timing.
+
+**Representation**:
+- `section.pattern.sc`: `""` (empty string)
+- Later in Phase 2: `json: null`, `measures: 0`
+
+**Important**: For sections with only lyrics and no chords, prefer using silence symbols (`_`) instead of empty patterns to maintain proper timing:
+```songcode
+Verse (correct approach)
+_; _; _; _
+--
+First line _2
+Second line _2
+```
 
 #### Pattern Modifier Parsing
 
@@ -422,6 +450,30 @@ A;G;%;E;%
 - Invalid chord notation → **ERROR**: "Invalid chord: Xm (not a valid base chord)"
 - Remover not at end → **ERROR**: "Remover (=) must be at end of measure"
 - Mismatched loop brackets → **ERROR**: "Loop started but not closed"
+
+#### Empty Pattern Handling
+
+If `patterns[id].sc` is an empty string:
+
+**Processing**:
+- Skip transformation algorithm
+- Set `patterns[id].json = null`
+- Set `patterns[id].measures = 0`
+
+**Valid use case**: Song skeleton during writing process
+
+**Example**:
+```json
+{
+    "A": {
+        "sc": "",
+        "json": null,
+        "measures": 0
+    }
+}
+```
+
+**Note**: Empty patterns are placeholders. For lyrics-only sections with timing, use silence symbols (`_`) instead.
 
 ### Step 2.2: Transform Modifier Patterns
 
@@ -644,6 +696,12 @@ The effective pattern for a section is constructed as:
 #### Algorithm
 
 ```javascript
+// 0. Check if pattern is empty (json = null)
+if (patterns[pattern.id].json === null):
+    // Empty pattern: all modifiers are bypassed
+    section_measures = 0
+    // Skip to step 6
+
 // 1. Start with base pattern measures (considering repeat)
 section_measures = patterns[pattern.id].measures * pattern.repeat
 
@@ -847,6 +905,26 @@ For each section:
 2. Compare with section's total measures
 3. If not equal → **ERROR**: "Lyric measures (15) don't match section measures (17)"
 
+#### Empty Pattern Exception
+
+**If section has an empty pattern** (`json = null`, `measures = 0`):
+- Lyric measure counts are not validated
+- Lyrics can exist without measure counts (or with any measure count values)
+- This is valid during the writing process (song skeleton)
+
+**Example** (valid during composition):
+```songcode
+$1
+
+
+Verse
+$1
+--
+First line
+Second line
+Third line
+```
+
 ---
 
 ## Phase 4: Prompter Generation
@@ -870,6 +948,8 @@ The prompter is designed for scrolling/teleprompter display. It expands all patt
 ### Step 4.2: Process Each Section
 
 For each section:
+
+**Note**: If section has an empty pattern (`json = null`), skip this section entirely in prompter generation. Empty patterns don't produce prompter items.
 
 #### Substep 4.2.1: Check for Tempo Changes
 
@@ -1214,7 +1294,28 @@ $1
 **Handling**: Valid (empty lyrics array)  
 **Prompter**: Section's measures are expanded but not consumed by lyrics. If you want section to appear in prompter, add lyrics (e.g., `***Intro***`).
 
-### 5. Pattern Variable Self-Reference
+### 5. Empty Pattern
+
+```songcode
+$1
+
+
+Verse
+$1
+--
+First line
+Second line
+```
+
+**Handling**: Valid (placeholder during composition)  
+**JSON**: `"json": null`, `"measures": 0`  
+**Modifiers**: All modifiers bypassed (`_repeat`, `_cutStart`, `_cutEnd`, `_before`, `_after`)  
+**Validation**: Lyric measure counts not validated  
+**Prompter**: Section skipped entirely  
+**Use case**: Song skeleton during writing process  
+**Note**: For lyrics-only sections with timing, use silence symbols (`_`) instead
+
+### 6. Pattern Variable Self-Reference
 
 ```songcode
 $1
@@ -1224,7 +1325,7 @@ A;$1
 **Handling**: ERROR (infinite recursion)  
 **Detection**: Track resolution stack
 
-### 6. Unicode in Lyrics
+### 7. Unicode in Lyrics
 
 ```songcode
 --
@@ -1233,11 +1334,11 @@ Café au lait ☕ _2
 
 **Handling**: Accept UTF-8 characters in lyrics
 
-### 7. Very Long Songs
+### 8. Very Long Songs
 
 **Handling**: No limit
 
-### 8. Floating Point Beat Divisions
+### 9. Floating Point Beat Divisions
 
 In 4/4 with 3 chords: each gets 1.333... beats
 

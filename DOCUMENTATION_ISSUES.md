@@ -315,17 +315,25 @@ All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
 
 ---
 
-## 🟡 Issue 5: Empty Pattern Handling
+## ✅ Issue 5: Empty Pattern Handling
+
+**Status**: RESOLVED ✓
 
 **Current Documentation**:
 - Parser spec mentions: "Note: a pattern can be empty" (line 238)
-- No further details provided
+- Now fully documented
 
-**Questions Needing Answers**:
+---
+
+### Complete Specification
+
+**ANSWERS**:
 
 11. **How are empty patterns represented?**
     
-    In SongCode:
+    ✅ **ANSWER**: Empty patterns are valid, JSON stays `null`
+    
+    **In SongCode**:
     ```songcode
     $1
     
@@ -334,26 +342,59 @@ All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
     $1
     ```
     
-    In JSON:
-    - `"json": []` ?
-    - `"json": null` ?
-    - Is this even valid?
+    **In JSON**:
+    ```json
+    {
+        "sc": "",
+        "json": null,
+        "measures": 0
+    }
+    ```
+    
+    **Use case**: During the writing process, editors can write the song skeleton first and progressively add patterns, lyrics, etc. It's useful to see the song structure early.
 
 12. **How do empty patterns affect measure counting?**
-    - If `measures: 0`, how does `_repeat 3` work?
-    - Can you use `_cutStart` or `_cutEnd` on an empty pattern?
-    - What about `_before` or `_after` with an empty main pattern?
+    
+    ✅ **ANSWER**: All modifiers are bypassed when pattern is empty
+    
+    - `measures: 0` (always)
+    - `_repeat 3` → bypassed (still 0 measures)
+    - `_cutStart` / `_cutEnd` → bypassed (nothing to cut)
+    - `_before` / `_after` → bypassed (no main pattern to wrap)
+    
+    **Key principle**: Empty pattern acts as a placeholder that doesn't affect timing or prompter generation.
 
 13. **Are empty patterns valid, and if so, what's the use case?**
-    - Is it for sections with only lyrics and no chords?
-    - Or is it an error condition?
+    
+    ✅ **ANSWER**: Valid, but should be completed eventually
+    
+    **Valid use case**: 
+    - Writing the song skeleton/structure first
+    - Placeholder during composition process
+    - Allows progressive development of the song
+    
+    **NOT for sections with lyrics but no chords**:
+    - For lyrics-only sections, use silence symbols: `_` (to track duration)
+    - Example: `_; _; _; _` creates 4 measures of silence in 4/4
+    - This maintains proper timing and prompter generation
+    
+    **Example**:
+    ```songcode
+    Verse (lyrics only, with timing)
+    _; _; _; _
+    --
+    First line _2
+    Second line _2
+    ```
 
-**Documentation Gaps**:
-- [ ] Define valid empty pattern syntax
-- [ ] Document JSON representation
-- [ ] Specify measure counting behavior (0 measures?)
-- [ ] Add validation rules
-- [ ] Provide use case examples or declare as error
+---
+
+**Documentation Updates Needed**:
+- [ ] Add empty pattern handling to Phase 2 transformation
+- [ ] Document modifier bypass behavior
+- [ ] Add empty pattern examples
+- [ ] Clarify difference between empty patterns vs silence patterns
+- [ ] Add validation: empty patterns with lyrics require no measure counts
 
 ---
 
@@ -638,7 +679,7 @@ All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
 ### High (Major Ambiguity)
 5. ~~**Issue 3.1** - Full syntax support in `_before`/`_after`~~ ✅ RESOLVED
 6. ~~**Issue 3.4** - Time signature validation for modifiers~~ ✅ RESOLVED
-7. **Issue 5** - Empty pattern handling
+7. ~~**Issue 5** - Empty pattern handling~~ ✅ RESOLVED
 8. **Issue 6** - Whitespace normalization algorithm
 
 ### Medium (Nice to Have)
