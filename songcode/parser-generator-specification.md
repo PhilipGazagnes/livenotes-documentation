@@ -871,41 +871,204 @@ The prompter is designed for scrolling/teleprompter display. It expands all patt
 
 For each section:
 
-1. **Check for tempo changes**:
-   - If section has `pattern.bpm` or `pattern.time`
-   - Add tempo item to prompter
+#### Substep 4.2.1: Check for Tempo Changes
 
-2. **Expand pattern**:
-   - Start with `pattern.before` (if present)
-   - Process main pattern :
-        - Repeat pattern `pattern.repeat` times
-        - Apply `_cutStart` and `_cutEnd`
-            - if `_cutStart` has beats, it removes the FIRST BEATS of the measure
-            - if `_cutEnd` has beats, it removes the LAST BEATS of the measure
-            - if measures become empty after beat removal, remove them
-        - Add it
-   - Add `pattern.after` (if present)
-   - Result: Complete measure stack for the section
+- If section has `pattern.bpm` or `pattern.time` override
+- Add tempo item to prompter:
+  ```json
+  {
+      "type": "tempo",
+      "bpm": <value>,
+      "time": "<numerator>/<denominator>"
+  }
+  ```
 
-3. **Pair with lyrics**:
-   - For each lyric line:
-     - Take the number of measures specified by lyric's measure count
-     - Remove those measures from the measure stack
-     - Create prompter item with lyric and measures
+#### Substep 4.2.2: Expand Pattern to Measure Stack
 
-4. **Optimize chord patterns**:
-   - For each prompter item, check if chord pattern can be simplified
-   - If pattern can be split into N identical sub-patterns:
-     - Keep one sub-pattern
-     - Set `repeats: N`
+Build an ordered array of measures (the "measure stack") by:
+
+1. **Add `_before` measures** (if present):
+   - Expand loops in `pattern.before.json`
+   - Add all measures to stack
+
+2. **Add main pattern measures**:
+   - Start with `patterns[pattern.id].json`
+   - Expand all loops (see Substep 4.2.3)
+   - Repeat entire pattern `pattern.repeat` times
+   - Apply `_cutStart` (see Substep 4.2.4)
+   - Apply `_cutEnd` (see Substep 4.2.4)
+   - Add remaining measures to stack
+
+3. **Add `_after` measures** (if present):
+   - Expand loops in `pattern.after.json`
+   - Add all measures to stack
+
+**Result**: Ordered array of measures `[M1, M2, M3, ...]` ready for consumption
+
+#### Substep 4.2.3: Loop Expansion Algorithm
+
+To expand loops in a pattern:
+
+```
+for each element in pattern:
+    if element == "loopStart":
+        marker_index = current_index
+        continue
+    
+    if element starts with "loopEnd:":
+        repeat_count = extract_number(element)  // e.g., "loopEnd:3" → 3
+        loop_content = elements between marker_index and current_index
+        
+        // Repeat loop content N times
+        for i = 1 to repeat_count:
+            add loop_content to output
+        
+        // Remove loop markers
+        continue
+    
+    if element is measure:
+        add to output (will be processed in loop expansion)
+```
+
+**Example**:
+```json
+// Input
+["loopStart", [["A",""]], [["D",""]], "loopEnd:3"]
+
+// Output (markers removed, content repeated 3 times)
+[[["A",""]], [["D",""]], [["A",""]], [["D",""]], [["A",""]], [["D",""]]]
+```
+
+#### Substep 4.2.4: Beat Removal with cutStart/cutEnd
+
+Both `_cutStart` and `_cutEnd` use `[measures, beats]` notation and follow the same algorithm as Phase 3 validation:
+
+**For cutStart** (remove from beginning):
+```
+measures_to_remove = cutStart[0]
+beats_to_remove = cutStart[1]
+
+// Step 1: Remove complete measures
+remove first measures_to_remove measures from pattern
+
+// Step 2: Remove beats from next measure
+if beats_to_remove > 0:
+    next_measure = first remaining measure
+    measure_beats = count_beats(next_measure)  // After "=" processing
+    
+    if beats_to_remove >= measure_beats:
+        // Remove entire measure (beat loss occurs)
+        remove next_measure
+    else:
+        // Keep measure (implementation-specific how to mark partial removal)
+        // Note: In prompter context, typically remove entire measure
+        remove beats_to_remove beats from beginning of next_measure
+```
+
+**For cutEnd** (remove from end):
+- Same algorithm but process from the end of the pattern
+- Remove last N measures
+- Remove beats from the end of the last remaining measure
+
+**Key principle**: Beats to remove can only affect one measure. Excess beats are lost (no carry-over).
+
+**Example with cutStart [1, 2]**:
+```
+Pattern: [A(4 beats), B(2 beats), C(4 beats), D(4 beats)] in 4/4 time
+Step 1: Remove 1 complete measure → [B, C, D]
+Step 2: Remove 2 beats from B (beginning) → B has 0 beats left
+Step 3: Remove B entirely (beat loss)
+Result: [C, D]
+```
+
+#### Substep 4.2.5: Pair Lyrics with Measures
+
+**Note**: Lyric measure counts are optional. This substep only applies when lyrics have measure counts specified.
+
+For each lyric line with measure count:
+
+1. Take N measures from the beginning of the measure stack (where N = lyric's measure count)
+2. Remove those measures from the stack
+3. Create prompter content item:
+   ```json
+   {
+       "type": "content",
+       "style": <determine from lyric text>,
+       "lyrics": <lyric text>,
+       "chords": [
+           {
+               "repeats": 1,
+               "pattern": <the N measures>
+           }
+       ]
+   }
+   ```
+4. Apply pattern optimization (see Substep 4.2.6)
+5. Add to prompter array
+
+**Sections with no lyrics**: If a section has no lyric lines, or lyrics without measure counts, the measures from the measure stack are not consumed. This is valid.
+
+**Validation**: If all lyrics have measure counts, the sum must equal the section's total measures (validated in Phase 3).
+
+#### Substep 4.2.6: Pattern Optimization Algorithm
+
+For each prompter content item, optimize the chord pattern by detecting repetitions:
+
+```
+start with: repeats = 1, pattern = [full measure array]
+
+while pattern.length is even AND pattern.length > 1:
+    first_half = pattern[0 ... pattern.length/2]
+    second_half = pattern[pattern.length/2 ... end]
+    
+    if first_half equals second_half:
+        // Optimization possible
+        pattern = first_half
+        repeats = repeats * 2
+    else:
+        // No more optimization possible
+        break
+
+result: {repeats: repeats, pattern: pattern}
+```
+
+**Example**:
+```json
+// Initial pattern (8 measures)
+[["A",""], ["B",""], ["C",""], ["D",""], ["A",""], ["B",""], ["C",""], ["D",""]]
+
+// Iteration 1: Divide [A,B,C,D] == [A,B,C,D] ✓
+// Result: repeats=2, pattern=[["A",""], ["B",""], ["C",""], ["D",""]]
+
+// Iteration 2: Divide [A,B] != [C,D] ✗
+// Stop optimization
+
+// Final result:
+{
+    "repeats": 2,
+    "pattern": [["A",""], ["B",""], ["C",""], ["D",""]]
+}
+```
 
 
-### Determining Style
+### Step 4.3: Determine Lyric Style
 
 Based on lyric content:
-- If lyric starts with `***` and ends with `***`: `style: "info"`
-- If lyric starts with `:::` and ends with `:::`: `style: "musicianInfo"`
+
+- If lyric **starts with** `***` **AND ends with** `***`: `style: "info"`
+- If lyric **starts with** `:::` **AND ends with** `:::`: `style: "musicianInfo"`
 - Otherwise: `style: "default"`
+
+**Examples**:
+```
+"***Guitar Solo***"     → style: "info"
+":::Watch drummer:::"   → style: "musicianInfo"
+"Living easy"           → style: "default"
+"***Incomplete"         → style: "default" (no ending marker)
+"Complete***"           → style: "default" (no starting marker)
+```
+
+**Note**: Section names do NOT automatically appear in the prompter. If you want a section name to be visible in the prompter, add it as a lyric line (often as `***Section Name***`).
 
 ### Example Prompter Item
 
@@ -1048,7 +1211,8 @@ Intro
 $1
 ```
 
-**Handling**: Valid (empty lyrics array)
+**Handling**: Valid (empty lyrics array)  
+**Prompter**: Section's measures are expanded but not consumed by lyrics. If you want section to appear in prompter, add lyrics (e.g., `***Intro***`).
 
 ### 5. Pattern Variable Self-Reference
 

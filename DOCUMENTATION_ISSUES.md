@@ -388,44 +388,166 @@ All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
 
 ---
 
-## 🟠 Issue 7: Prompter Generation Algorithm Missing
+## ✅ Issue 7: Prompter Generation Algorithm Missing
+
+**Status**: RESOLVED ✓
 
 **Location**: Parser spec Phase 4, JSON Structure spec Prompter section
 
-**Current Documentation**:
-- JSON structure reference shows prompter examples
-- Parser spec Phase 4 section exists but is not detailed
-- No algorithm provided for prompter generation
+---
 
-**Questions Needing Answers**:
+### Complete Section-to-Prompter Flow
+
+**ANSWERS**:
 
 15. **How does prompter generation work?**
-    - How do lyrics map to chord measures?
-    - How are loops expanded in the prompter?
-    - How are `_cutStart` and `_cutEnd` applied in prompter?
 
-16. **How do special markers affect styling?**
-    - `***Solo***` → `"style": "info"`
-    - `:::Break:::` → `"style": "info"`
-    - Regular lyrics → `"style": "default"`
-    - What's the exact pattern matching rule?
+    ✅ **Complete algorithm**:
+    
+    **Step 1: Check for tempo changes**
+    - If section has `pattern.bpm` or `pattern.time` override
+    - Add tempo item to prompter
+    
+    **Step 2: Expand section pattern into measure stack**
+    - Add `_before` measures (if present)
+    - Add main pattern repeated N times (`_repeat`)
+    - Apply `_cutStart` to main pattern (remove measures + beats from beginning)
+    - Apply `_cutEnd` to main pattern (remove measures + beats from end)
+    - Add `_after` measures (if present)
+    - **Result**: Ordered array of measures `[M1, M2, M3, ...]`
+    
+    **Step 3: Process lyrics with measure stack**
+    - For each lyric line:
+      - Take N measures from the beginning of the stack (where N = lyric's measure count)
+      - Remove those measures from the stack
+      - Create prompter content item with lyric + measures
+      - Set `repeats: 1` initially
+      - Apply pattern optimization (see Q16)
+    
+    **Key concepts**:
+    - **Measure stack**: Ordered array of measures consumed sequentially
+    - **Beat removal with cutStart/cutEnd**: Same algorithm as Step 3 validation (beat loss concept)
+    - **Lyric measure counts are optional**: If not specified, no correlation between measures and lyrics
+    - **Sections can have no lyrics**: Pattern-only sections are valid (measures not consumed)
 
-17. **When are tempo changes inserted?**
-    - At the beginning always?
-    - When `@bpm` changes between sections?
-    - Example structure needed
+16. **Pattern optimization algorithm**
+    
+    ✅ **Iterative division algorithm**:
+    
+    ```
+    Start with: repeats=1, pattern=[full measure array]
+    
+    While pattern can be divided in half:
+        1. Divide pattern array in half
+        2. Compare first half == second half
+        3. If equal:
+           - Delete second half
+           - Multiply repeats by 2
+        4. If not equal:
+           - Stop optimization
+    ```
+    
+    **Example**:
+    ```
+    Initial: [A, B, C, D, A, B, C, D] (8 measures)
+    Iteration 1: [A,B,C,D] == [A,B,C,D] ✓
+      → repeats=2, pattern=[A,B,C,D]
+    
+    Iteration 2: [A,B] != [C,D] ✗
+      → Stop
+    
+    Final: repeats=2, pattern=[A,B,C,D]
+    ```
 
-18. **How are section names displayed?**
-    - The highway-to-hell example shows: `"lyrics": "Intro"` for first section
-    - But other sections don't show the section name in prompter
-    - What's the rule?
+17. **Loop expansion in prompter**
+    
+    ✅ **ANSWER**: Remove loop markers and repeat content
+    
+    - Repeat content between `loopStart` and `loopEnd:N` markers N times
+    - Remove the markers themselves
+    - Result: Flattened measure array
+    
+    **Example**:
+    ```json
+    Input: ["loopStart", [["A",""]], [["D",""]], "loopEnd:3"]
+    Output: [["A",""], ["D",""], ["A",""], ["D",""], ["A",""], ["D",""]]
+    ```
 
-**Documentation Gaps**:
-- [ ] Write complete Phase 4 algorithm
-- [ ] Document lyric-to-chord mapping rules
-- [ ] Specify special marker patterns and styling
-- [ ] Define tempo change insertion rules
-- [ ] Add complete worked example from section to prompter
+18. **cutStart/cutEnd beat removal in prompter**
+    
+    ✅ **ANSWER**: Same algorithm as Step 3 validation
+    
+    - `[measures, beats]` notation
+    - Remove `measures` complete measures first
+    - Remove `beats` from the next measure (beginning for cutStart, end for cutEnd)
+    - If beats exceed measure beats → remove entire measure (beat loss)
+    - Process measure-by-measure (no beat carry-over)
+    
+    **Example with cutStart [1, 2]**:
+    ```
+    Pattern: [A(4 beats), B(2 beats), C(4 beats), D(4 beats)]
+    Step 1: Remove 1 measure → [B, C, D]
+    Step 2: Remove 2 beats from B (beginning) → B has 0 beats left
+    Step 3: Remove B entirely
+    Result: [C, D]
+    ```
+
+---
+
+### Special Markers and Styling
+
+**ANSWERS**:
+
+19. **How do special markers affect styling?**
+    
+    ✅ **Pattern matching rules**:
+    
+    - If lyric starts with `***` AND ends with `***` → `"style": "info"`
+    - If lyric starts with `:::` AND ends with `:::` → `"style": "musicianInfo"`
+    - Otherwise → `"style": "default"`
+    
+    **Examples**:
+    ```
+    "***Guitar Solo***"     → style: "info"
+    ":::Watch drummer:::"   → style: "musicianInfo"
+    "Living easy"           → style: "default"
+    "***Incomplete"         → style: "default" (no ending marker)
+    ```
+
+20. **When are tempo changes inserted?**
+    
+    ✅ **ANSWER**:
+    
+    - Always add initial tempo item at prompter start (from global metadata)
+    - Add tempo item when section overrides `@bpm` or `@time`
+    
+    **Structure**:
+    ```json
+    {
+        "type": "tempo",
+        "bpm": 120,
+        "time": "4/4"
+    }
+    ```
+
+21. **How are section names displayed?**
+    
+    ✅ **ANSWER**: Section names do NOT automatically appear in prompter
+    
+    - Only lyric text appears in prompter content items
+    - If you want section name visible, add it as a lyric line
+    - Example: `***Intro***` becomes `lyrics: "Intro"` with `style: "info"`
+    - The section's `name` property is stored in `sections` array only
+
+---
+
+**Documentation Updates Needed**:
+- [ ] Expand Phase 4 algorithm with complete step-by-step process
+- [ ] Add loop expansion algorithm
+- [ ] Document measure stack consumption process
+- [ ] Add pattern optimization algorithm with examples
+- [ ] Clarify cutStart/cutEnd applies only to main pattern in prompter context
+- [ ] Add complete worked example showing all steps
 
 ---
 
@@ -510,7 +632,7 @@ All sub-issues (3.1, 3.2, 3.3, 3.4) have been resolved!
 ### Critical (Blocks Implementation)
 1. ~~**Issue 3.3** - Order of operations for `_before`/`_after` with `_cutStart`/`_cutEnd`~~ ✅ RESOLVED
 2. ~~**Issue 4** - Pattern measures count algorithm (cutStart/cutEnd logic)~~ ✅ RESOLVED
-3. **Issue 7** - Prompter generation algorithm
+3. ~~**Issue 7** - Prompter generation algorithm~~ ✅ RESOLVED
 4. ~~**Issue 3.2** - Parsing algorithm for `_before`/`_after`~~ ✅ RESOLVED
 
 ### High (Major Ambiguity)

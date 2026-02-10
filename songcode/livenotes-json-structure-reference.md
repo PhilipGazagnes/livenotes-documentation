@@ -525,25 +525,123 @@ Displays lyric with chord progression.
 
 ### Prompter Generation Logic
 
-1. **Start with tempo item** using global metadata
-2. **For each section**:
-   - Add tempo item if section has tempo changes
-   - Expand pattern (resolve loops, apply modifiers)
-   - For each lyric line:
-     - Take the specified number of measures
-     - Create content item with lyric + chords
-     - Optimize pattern (detect repetitions)
+The prompter is generated in Phase 4 of the parser. Here's the complete flow:
+
+#### 1. Initialize with Tempo
+
+Start by adding an initial tempo item using global metadata:
+```json
+{
+    "type": "tempo",
+    "bpm": 120,
+    "time": "4/4"
+}
+```
+
+#### 2. Process Each Section
+
+For each section in the `sections` array:
+
+**A. Check for tempo changes**
+- If section overrides `@bpm` or `@time`, add a tempo item
+
+**B. Build measure stack**
+- Expand all patterns and loops
+- Apply modifiers in order:
+  1. Add `_before` measures (if present)
+  2. Repeat main pattern `_repeat` times
+  3. Apply `_cutStart` to main pattern
+  4. Apply `_cutEnd` to main pattern
+  5. Add `_after` measures (if present)
+- Result: Ordered array of measures
+
+**C. Consume measures with lyrics** (if lyrics have measure counts)
+- For each lyric line:
+  - Take N measures from measure stack (N = lyric's measure count)
+  - Create content item with lyric + measures
+  - Initially set `repeats: 1`
+  - Apply pattern optimization
+
+**D. Pattern optimization**
+- Iteratively divide pattern in half
+- If both halves are identical:
+  - Keep one half
+  - Multiply `repeats` by 2
+- Repeat until no more optimization possible
+
+#### Loop Expansion
+
+Loops are expanded by repeating content between `loopStart` and `loopEnd:N` markers N times, then removing the markers:
+
+```json
+// Input
+["loopStart", [["A",""]], [["D",""]], "loopEnd:3"]
+
+// Output
+[[["A",""]], [["D",""]], [["A",""]], [["D",""]], [["A",""]], [["D",""]]]
+```
+
+#### Beat Removal (cutStart/cutEnd)
+
+Uses `[measures, beats]` notation:
+1. Remove `measures` complete measures
+2. Remove `beats` from the next measure (beginning for cutStart, end for cutEnd)
+3. If beats exceed measure beats → remove entire measure (beat loss)
+
+**Example**:
+```
+Pattern: [A(4 beats), B(2 beats), C(4 beats)] 
+cutStart [1, 2]:
+  - Remove 1 measure → [B, C]
+  - Remove 2 beats from B → B has 0 beats left
+  - Remove B entirely → [C]
+```
+
+#### Measure Stack Concept
+
+The "measure stack" is an ordered array of measures that gets consumed as lyrics are processed:
+- Lyrics are processed in order
+- Each lyric "consumes" N measures from the front of the stack
+- After all lyrics are processed, the stack should be empty (if validation passed)
+- Sections with no lyrics or lyrics without measure counts don't consume measures (valid)
 
 ### Style Detection
 
 Based on lyric content:
-- `***Guitar Solo***` → `style: "info"`
-- `:::Watch drummer:::` → `style: "musicianInfo"`
-- Normal lyrics → `style: "default"`
+- If lyric **starts with** `***` **AND ends with** `***` → `style: "info"`
+- If lyric **starts with** `:::` **AND ends with** `:::` → `style: "musicianInfo"`
+- Otherwise → `style: "default"`
+
+**Examples**:
+```
+"***Guitar Solo***"     → style: "info"
+":::Watch drummer:::"   → style: "musicianInfo"
+"Living easy"           → style: "default"
+"***Incomplete"         → style: "default" (missing end marker)
+```
+
+**Note**: Section names do NOT automatically appear in the prompter. If you want a section name visible, add it as an explicit lyric line (typically as `***Section Name***`).
 
 ### Pattern Optimization Example
 
-**Before optimization**:
+The optimization algorithm iteratively divides the pattern in half and checks if both halves are identical.
+
+**Algorithm**:
+```
+Start with: repeats=1, pattern=[full measure array]
+
+While pattern length is even AND length > 1:
+    Divide pattern in half
+    If first_half == second_half:
+        pattern = first_half
+        repeats = repeats * 2
+    Else:
+        Stop (no more optimization possible)
+```
+
+**Example 1: Simple optimization**
+
+Before optimization:
 ```json
 {
     "repeats": 1,
@@ -556,7 +654,7 @@ Based on lyric content:
 }
 ```
 
-**After optimization**:
+After optimization:
 ```json
 {
     "repeats": 2,
@@ -567,7 +665,25 @@ Based on lyric content:
 }
 ```
 
-The algorithm detects that the pattern can be split in half with both halves identical.
+**Example 2: Multiple iterations**
+
+```json
+// Initial: 8 measures
+[["A",""], ["B",""], ["A",""], ["B",""], ["A",""], ["B",""], ["A",""], ["B",""]]
+
+// Iteration 1: [A,B,A,B] == [A,B,A,B] ✓
+// Result: repeats=2, pattern=[["A",""], ["B",""], ["A",""], ["B",""]]
+
+// Iteration 2: [A,B] == [A,B] ✓
+// Result: repeats=4, pattern=[["A",""], ["B",""]]
+
+// Iteration 3: [A] != [B] ✗
+// Stop
+
+// Final: repeats=4, pattern=[["A",""], ["B",""]]
+```
+
+The algorithm detects repetitions automatically and minimizes the stored pattern data.
 
 ---
 
