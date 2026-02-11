@@ -304,6 +304,123 @@ $1;D;E
 2. For each definition, recursively replace `$n` references with their definitions
 3. Store the fully expanded pattern description
 
+#### Pattern Normalization
+
+Before storing or comparing pattern descriptions, they must be normalized to a canonical one-line format. This ensures that functionally identical patterns are recognized as the same.
+
+**Purpose**:
+- Enable reliable pattern comparison
+- Provide canonical representation for JSON output
+- Eliminate formatting variations that don't affect semantics
+
+**Normalization Rules**:
+
+1. **Newlines between measures** → Convert to `;` separator
+2. **Explicit `:` line breaks** → Preserve as-is
+3. **Whitespace** → Strip leading/trailing from each line
+4. **Empty lines** → Not allowed in pattern definitions (would start new block)
+
+**Algorithm**:
+
+```
+function normalize_pattern_sc(sc_string):
+    lines = sc_string.split('\n')
+    result = []
+    
+    for each line in lines:
+        line = line.strip()  // Remove leading/trailing whitespace
+        line = line.replace('\t', ' ')  // Convert tabs to spaces
+        line = collapse_spaces(line)  // Multiple spaces → single space
+        
+        if line is empty:
+            continue  // Skip empty lines (shouldn't occur in valid patterns)
+        
+        if line == ':':
+            // Explicit line break marker - keep as-is
+            result.append(':')
+        else:
+            // Regular measure line
+            if result is not empty AND result[-1] != ':':
+                // Previous was a measure, need separator
+                result.append(';')
+            result.append(line)
+    
+    return ''.join(result)
+
+function collapse_spaces(text):
+    // Replace multiple consecutive spaces with single space
+    while '  ' in text:  // double space
+        text = text.replace('  ', ' ')
+    return text
+```
+
+**Examples**:
+
+**Example 1: Multi-line with explicit line break**
+```
+Input:
+[A;G;%;A]3
+:
+A;G;%;E;%
+
+Normalized:
+[A;G;%;A]3:A;G;%;E;%
+```
+
+**Example 2: Simple multi-line**
+```
+Input:
+A;G D;D G;A
+E;C;E;%
+
+Normalized:
+A;G D;D G;A;E;C;E;%
+```
+
+**Example 3: With whitespace**
+```
+Input:
+   A;G   
+D;E  
+
+Normalized:
+A;G;D;E
+```
+
+**Example 4: Tabs and multiple spaces**
+```
+Input:
+A ; G\t\tD
+E  ;   C
+
+(where \t represents tab character)
+
+Normalized:
+A ; G D;E ; C
+```
+
+**Example 5: Multiple line breaks**
+```
+Input:
+A;G
+:
+D;E
+:
+F;G
+
+Normalized:
+A;G:D;E:F;G
+```
+
+**When to Apply**:
+- After parsing each pattern definition
+- Before comparing patterns for ID assignment (Phase 1)
+- Before storing in `patterns[id].sc` field
+- When parsing section-level `_before`/`_after` patterns
+
+**Storage**:
+The normalized form is stored in the JSON output's `sc` field, providing a canonical reference that can be reliably compared.
+
 #### Error Conditions
 
 See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
@@ -426,9 +543,15 @@ Second line _2
 **`_before` and `_after`**:
 - **Format**: `_before pattern` or `_after pattern` (single line only)
 - Parse pattern description from the same line (everything after the modifier keyword)
-- Store in `section.pattern.before.sc` or `section.pattern.after.sc`
-- Create object: `{ sc: "pattern_description", json: null, measures: null }`
+- Apply pattern normalization (see Step 1.3) to the pattern description
+- Store in `section.pattern.before.sc` or `section.pattern.after.sc` (normalized form)
+- Create object: `{ sc: "normalized_pattern", json: null, measures: null }`
 - The `json` and `measures` properties will be populated in Phase 2
+
+**Note**: Since `_before`/`_after` are single-line, normalization primarily handles:
+- Tab → space conversion
+- Multiple spaces → single space
+- Leading/trailing whitespace removal
 
 **Syntax Support in `_before`/`_after` patterns**:
 - ✅ Chords: `Am`, `D7`, `Ebm9`
@@ -481,28 +604,32 @@ As sections are parsed, assign pattern IDs alphabetically ("A", "B", "C", ...):
 **Pattern Matching Rules**:
 - Match on base pattern description only (ignore modifiers)
 - After pattern variable substitution
-- After whitespace normalization (see below)
-- `Am D;Am` and `Am D ; Am   ` are considered equal
-- `[A ; G]3` and `[ A ; G ] 3` are considered equal
+- After normalization (see Step 1.3 - Pattern Normalization)
+- Compare using normalized `sc` strings
 
-**Normalization Process**:
+**Comparison**:
+When comparing patterns to determine if they match:
+1. Both patterns have already been normalized (Step 1.3)
+2. Compare the normalized `sc` strings directly
+3. If strings are equal → patterns match, reuse pattern ID
+4. If strings differ → patterns don't match, create new pattern ID
 
-The normalized version is stored in `livenotes.patterns[id].sc`. Normalization occurs during pattern parsing.
+**Note**: The normalization (Step 1.3) handles:
+- Multi-line patterns → single-line
+- Newlines → `;` separators  
+- Explicit `:` preserved
+- Whitespace trimming
 
-**Algorithm**:
+**Example**:
+```
+Pattern in Section 1:
+A;G;D;G
 
-1. **Character normalization**:
-   - Convert all tabs to spaces
-   - Convert all newlines (`\n`) to `;` (measure separator)
-   - Convert all carriage returns (`\r`) to `;` (measure separator)
+Pattern in Section 2:
+A ; G ; D ; G    ← Same after normalization
 
-2. **Split by semicolon** to get individual measures
-
-3. **For each measure**:
-   - Trim leading and trailing whitespace
-   - Collapse multiple consecutive spaces into single space
-
-4. **Rejoin measures** with `;`
+Result: Both sections use same pattern ID
+```
 
 5. **Remove spaces around special characters**:
    - Remove space after `[`

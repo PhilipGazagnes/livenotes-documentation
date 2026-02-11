@@ -181,8 +181,47 @@ Each pattern is keyed by a letter (A, B, C, ...) and contains:
 
 #### `sc`
 - **Type**: String
-- **Description**: Original SongCode pattern description
-- **Purpose**: Reference/debugging
+- **Description**: Normalized SongCode pattern description
+- **Format**: Single-line canonical form
+- **Purpose**: Pattern comparison, reference, debugging
+
+**Normalization**:
+The `sc` field contains the pattern in normalized form, where:
+- Multi-line patterns are collapsed to single-line
+- Newlines between measures are converted to `;` separators
+- Explicit `:` line breaks are preserved
+- Leading/trailing whitespace is removed
+
+**Examples**:
+
+**Original SongCode**:
+```songcode
+$2
+[A;G;%;A]3
+:
+A;G;%;E;%
+```
+
+**Normalized `sc` value**:
+```json
+"sc": "[A;G;%;A]3:A;G;%;E;%"
+```
+
+**Original SongCode**:
+```songcode
+$1
+A;G;D;G
+```
+
+**Normalized `sc` value**:
+```json
+"sc": "A;G;D;G"
+```
+
+**Benefits**:
+- Enables reliable pattern comparison
+- Two functionally identical patterns will have the same `sc` value
+- Simplifies pattern matching during parsing
 
 #### `json`
 - **Type**: Array

@@ -163,6 +163,41 @@ $3
 A;D;%
 ```
 
+### Formatting Flexibility
+
+**Multi-line patterns**: You can write patterns across multiple lines for readability. Newlines between measures act as implicit `;` separators.
+
+```songcode
+# These are identical:
+
+# Version 1: All on one line
+$1
+A;G D;D G;A;E;C;E;%
+
+# Version 2: Split across lines
+$1
+A;G D;D G;A
+E;C;E;%
+```
+
+**Line breaks**: Use `:` to indicate a visual line break (for UI display):
+
+```songcode
+# These are identical:
+
+# One line with explicit :
+$2
+[A;G;%;A]3:A;G;%;E;%
+
+# Multiple lines (: creates line break)
+$2
+[A;G;%;A]3
+:
+A;G;%;E;%
+```
+
+**Note**: The parser normalizes patterns to a single-line canonical form internally, so formatting is purely for human readability.
+
 ### Rules:
 - Pattern identifiers can be **any number** (`$1`, `$2`, `$100`)
 - Numbers don't have to be **sequential**

@@ -78,6 +78,7 @@ _repeat 4
 ***Solo*** _8
 
 Refrain
+$4
 _repeat 4
 --
 I'm on the highway to hell _2
@@ -87,6 +88,7 @@ On the highway _1
 :::Cut::: _1
 
 Refrain
+$4
 _repeat 4
 _cutEnd 1
 --
