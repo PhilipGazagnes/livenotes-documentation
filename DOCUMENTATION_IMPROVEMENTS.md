@@ -84,27 +84,43 @@ The SongCode documentation is **functionally complete and ready for development*
 
 ---
 
-### 1.3 Add Authoritative Source Markers
+### 1.3 Add Authoritative Source Markers ✅ COMPLETED
 
-**Files**: All documentation files  
+**Files**: All documentation files ✅  
 **Effort**: 2 hours  
 **Impact**: High (prevents confusion on conflicts)
 
-Add section headers that clarify the authoritative source:
+**Markers Added**:
 
+**Parser Specification**:
+- ✅ Phase 1: First Pass Parsing
+- ✅ Phase 2: Pattern Transformation
+- ✅ Phase 3: Validation
+- ✅ Phase 4: Prompter Generation
+
+**JSON Structure Reference**:
+- ✅ Patterns Object
+- ✅ Sections Array
+- ✅ Prompter Array
+
+**Language Reference**:
+- ✅ Pattern Definitions
+- ✅ Pattern Syntax
+- ✅ Modifiers
+
+**Format Used**:
 ```markdown
-## Pattern Transformation
-**📖 For Users**: See Language Reference - Patterns (conceptual)
-**🔧 For Implementers**: This section is authoritative for algorithms
-**📊 Output Format**: See JSON Structure Reference
-
-When in doubt, this specification takes precedence over the Language Reference.
+**📖 For Users**: Reference for user perspective
+**🔧 For Implementers**: Link to authoritative algorithm/parsing section
+**📊 Output Format**: Link to JSON structure
+> **Authority/Note**: Clarification on which doc is definitive
 ```
 
-**Apply to**:
-- Parser Spec (all phases)
-- JSON Structure Reference (all sections)
-- Language Reference (cross-references)
+**Benefits**:
+- Clear hierarchy: Language Ref (user behavior), Parser Spec (algorithms), JSON Structure (output)
+- No ambiguity when details differ between documents
+- Easy navigation with cross-references
+- AI agents know which document to trust for specific information
 
 ---
 
@@ -497,7 +513,7 @@ Add version numbers and changelog to each doc:
 - [x] 1.2 Clarify `pattern.sc` field ✅ **COMPLETED**
 - [x] 1.4 Validate Highway to Hell example ✅ **COMPLETED**
 - [x] 1.1 Add Quick Reference Card ✅ **COMPLETED**
-- [ ] 1.3 Add Authoritative Source Markers
+- [x] 1.3 Add Authoritative Source Markers ✅ **COMPLETED**
 - [ ] 1.5 Create Troubleshooting Guide
 
 ### Sprint 2: High-Value Additions (2 weeks)

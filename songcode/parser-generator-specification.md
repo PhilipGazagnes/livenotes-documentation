@@ -197,6 +197,12 @@ Using non-allowed keys at section level → **E1.3.6** error
 
 ## Phase 1: First Pass Parsing
 
+**🔧 For Implementers**: This section is authoritative for parsing algorithms  
+**📖 For Users**: See [Language Reference](songcode-language-reference.md) for syntax rules  
+**📊 Output Format**: See [JSON Structure Reference](livenotes-json-structure-reference.md)
+
+> **Authority**: When implementation details conflict between documents, this specification takes precedence.
+
 This phase reads the SongCode file and populates the initial structure.
 
 ### Step 1.1: Initialize Output
@@ -1249,6 +1255,12 @@ Third line
 ---
 
 ## Phase 4: Prompter Generation
+
+**🔧 For Implementers**: This section is authoritative for prompter generation algorithms  
+**📊 Output Format**: See [JSON Structure Reference - Prompter Array](livenotes-json-structure-reference.md#prompter-array)  
+**📖 For Users**: Prompter is internal; users write SongCode, not prompter arrays
+
+> **Authority**: The algorithm here is definitive. The JSON Structure Reference describes the output format.
 
 Generate a linear, display-friendly representation of the song.
 

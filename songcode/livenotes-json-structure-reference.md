@@ -310,6 +310,12 @@ A;D;%
 
 ## Sections Array
 
+**📊 For Consumers**: This section is authoritative for section JSON structure  
+**🔧 For Implementers**: See [Parser Spec - Phase 1.4](parser-generator-specification.md#step-14-parse-sections) for parsing  
+**📖 For Users**: See [Language Reference - Sections](songcode-language-reference.md#sections)
+
+> **Authority**: This document defines the JSON format. The Parser Spec defines how to parse sections.
+
 Contains the structural sections of the song (verses, choruses, etc.).
 
 ### Structure

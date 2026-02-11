@@ -133,6 +133,12 @@ Each metadata line starts with `@` followed by a key and value:
 
 ## Pattern Definitions
 
+**📖 For Users**: This section describes how to write and use patterns  
+**🔧 For Implementers**: See [Parser Spec - Phase 1.3](parser-generator-specification.md#step-13-parse-pattern-definitions) for parsing algorithm  
+**📊 JSON Output**: See [JSON Structure - Patterns Object](livenotes-json-structure-reference.md#patterns-object)
+
+> **Note**: This section explains what patterns do and how to write them. For implementation details, see the Parser Specification.
+
 Pattern definitions allow you to write chord progressions once and reuse them throughout the song.
 
 ### Format
@@ -329,6 +335,12 @@ Dbm9#11    ← D-flat minor 9 sharp 11 (any extension works)
 
 ## Pattern Syntax
 
+**📖 For Users**: This section describes pattern syntax from the writer's perspective  
+**🔧 For Implementers**: See [Parser Spec - Phase 2](parser-generator-specification.md#phase-2-pattern-transformation) for transformation details  
+**📊 JSON Output**: See [JSON Structure - Pattern JSON Arrays](livenotes-json-structure-reference.md#json-pattern-elements)
+
+> **Note**: This explains the syntax rules. The Parser Spec explains how to transform patterns into JSON.
+
 Patterns describe the chord progression structure using a specific syntax.
 
 ### Basic Elements
@@ -441,6 +453,12 @@ This pattern:
 ---
 
 ## Modifiers
+
+**📖 For Users**: This section describes available modifiers and their effects  
+**🔧 For Implementers**: See [Parser Spec - Phase 1.4](parser-generator-specification.md#pattern-modifier-parsing) for parsing, [Phase 3](parser-generator-specification.md#phase-3-validation) for validation  
+**📊 JSON Output**: See [JSON Structure - Section Pattern Object](livenotes-json-structure-reference.md#pattern-object)
+
+> **Note**: This explains what modifiers do. The Parser Spec explains how they're applied during validation and prompter generation.
 
 Modifiers alter how a pattern is played in a specific section. They appear before the `--` separator.
 
