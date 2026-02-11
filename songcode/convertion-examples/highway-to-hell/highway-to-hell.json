@@ -105,7 +105,7 @@
          "comment": null,
          "pattern": {
             "id": "B",
-            "repeat": 2,
+            "repeat": 1,
             "bpm": null,
             "time": null,
             "cutStart": null,
@@ -193,7 +193,7 @@
          "comment": "Rythmic pattern",
          "pattern":{
             "id": "D",
-            "repeat": 2,
+            "repeat": 1,
             "bpm": null,
             "time": null,
             "cutStart": null,
@@ -700,7 +700,7 @@
         {
             "type": "content",
             "style": "default",
-            "lyrics": "Highway to hell",
+            "lyrics": "I'm on the highway to hell",
             "chords": [
                 {
                     "repeats": 1,
@@ -726,7 +726,7 @@
         },
         {
             "type": "content",
-            "style": "info",
+            "style": "musicianInfo",
             "lyrics": "Cut",
             "chords": [
                 {
@@ -740,7 +740,7 @@
         {
             "type": "content",
             "style": "default",
-            "lyrics": "I'm on the highway to hell",
+            "lyrics": "Yeah, highway to hell",
             "chords": [
                 {
                     "repeats": 1,
@@ -754,7 +754,7 @@
         {
             "type": "content",
             "style": "default",
-            "lyrics": "On the highway to hell",
+            "lyrics": "I'm on the highway to hell",
             "chords": [
                 {
                     "repeats": 1,
