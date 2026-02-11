@@ -54,7 +54,8 @@ A visual guide to navigate the SongCode documentation.
 1. ✅ Start with [Quick Start Tutorial](./songcode-quick-start-tutorial.md)
 2. ✅ Practice writing a simple song
 3. ✅ Keep [Language Reference](./songcode-language-reference.md) handy
-4. ✅ Write more complex songs as you learn
+4. ✅ Use [Quick Reference Card](./quick-reference-card.md) for fast syntax lookup
+5. ✅ Write more complex songs as you learn
 
 **Estimated time to first song**: 15 minutes
 
@@ -87,17 +88,29 @@ A visual guide to navigate the SongCode documentation.
 
 Go straight to the relevant section:
 
+**📄 [Quick Reference Card](./quick-reference-card.md)** - All symbols, syntax, and common patterns on one page
+
 | Topic | Document | Section |
 |-------|----------|---------|
-| Chord notation | Language Reference | Chord Notation |
-| Pattern syntax | Language Reference | Pattern Syntax |
-| Modifiers | Language Reference | Modifiers |
-| Metadata keys | Language Reference | Metadata |
+| All symbols | Quick Reference Card | Symbols Reference |
+| Chord notation | Language Reference OR Quick Reference Card | Chord Notation |
+| Pattern syntax | Language Reference OR Quick Reference Card | Pattern Syntax |
+| Modifiers | Language Reference OR Quick Reference Card | Modifiers |
+| Metadata keys | Language Reference OR Quick Reference Card | Metadata |
+| Common progressions | Quick Reference Card | Common Chord Progressions |
 | Parsing algorithm | Parser Specification | Phase 1-4 |
 | JSON format | JSON Structure | All sections |
-| Error messages | Language Reference | Common Errors |
+| Error messages | Language Reference OR Parser Spec | Common Errors / Error Catalog |
 
----
+---Quick Reference Card
+- **Type**: Cheat sheet
+- **Audience**: All users
+- **Length**: ~300 lines (1-2 pages)
+- **Format**: Fast lookup tables and examples
+- **Includes**: All symbols, metadata keys, modifiers, common progressions, error codes
+- **Best for**: Quick syntax lookup without reading full documentation
+
+### 
 
 ## 📖 Document Summaries
 
