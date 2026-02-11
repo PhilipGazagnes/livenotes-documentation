@@ -55,7 +55,8 @@ A visual guide to navigate the SongCode documentation.
 2. ✅ Practice writing a simple song
 3. ✅ Keep [Language Reference](./songcode-language-reference.md) handy
 4. ✅ Use [Quick Reference Card](./quick-reference-card.md) for fast syntax lookup
-5. ✅ Write more complex songs as you learn
+5. ✅ Check [Troubleshooting Guide](./troubleshooting-guide.md) when stuck
+6. ✅ Write more complex songs as you learn
 
 **Estimated time to first song**: 15 minutes
 
@@ -102,7 +103,11 @@ Go straight to the relevant section:
 | JSON format | JSON Structure | All sections |
 | Error messages | Language Reference OR Parser Spec | Common Errors / Error Catalog |
 
----Quick Reference Card
+---
+
+## 📖 Document Summaries
+
+### Quick Reference Card
 - **Type**: Cheat sheet
 - **Audience**: All users
 - **Length**: ~300 lines (1-2 pages)
@@ -110,9 +115,13 @@ Go straight to the relevant section:
 - **Includes**: All symbols, metadata keys, modifiers, common progressions, error codes
 - **Best for**: Quick syntax lookup without reading full documentation
 
-### 
-
-## 📖 Document Summaries
+### Troubleshooting Guide
+- **Type**: Practical debugging guide
+- **Audience**: All users (especially when stuck)
+- **Length**: ~600 lines
+- **Format**: Problem → Solution format
+- **Includes**: Common errors, timing issues, pattern problems, debugging workflows
+- **Best for**: Fixing errors, understanding what went wrong, debugging timing
 
 ### SongCode Quick Start Tutorial
 - **Type**: Tutorial

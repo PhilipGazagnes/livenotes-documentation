@@ -150,20 +150,33 @@ The SongCode documentation is **functionally complete and ready for development*
 
 ---
 
-### 1.5 Create Troubleshooting Guide
+### 1.5 Create Troubleshooting Guide ✅ COMPLETED
 
-**File**: `songcode/troubleshooting-guide.md`  
+**File**: `songcode/troubleshooting-guide.md` ✅  
 **Effort**: 3-4 hours  
 **Impact**: High (reduces support questions)
 
-**Content**:
-- Common mistakes and how to fix them
-- How to debug timing mismatches
-- How to read error messages
-- "My pattern isn't working" - debugging steps
-- Measure count calculation examples
-- Time signature common errors
-- Pattern variable resolution issues
+**Content Created**:
+- ✅ Common syntax errors (missing `--`, empty lines, spaces in chords, pattern order)
+- ✅ Timing and measure count issues (mismatches, all-or-nothing rule, modifier calculations)
+- ✅ Pattern problems (undefined references, circular references, depth exceeded)
+- ✅ Metadata errors (non-consecutive, invalid values, time signatures)
+- ✅ Modifier issues (`_before`/`_after` restrictions, `_repeat` validation)
+- ✅ Time signature problems (beats don't divide evenly, removers)
+- ✅ Reading error messages (format explanation, common codes)
+- ✅ Debugging workflows (4 practical workflows for common issues)
+- ✅ Quick diagnostic checklist
+
+**Integration**:
+- ✅ Added to INDEX.md in Path 1 ("I want to write songs")
+- ✅ Added to Document Summaries section
+
+**Benefits**:
+- Practical problem → solution format
+- Real examples of common mistakes
+- Step-by-step debugging workflows
+- Reduces need to read full documentation when stuck
+- Clear explanations of why errors happen
 
 ---
 
@@ -509,12 +522,12 @@ Add version numbers and changelog to each doc:
 
 ## Implementation Timeline
 
-### Sprint 1: Critical Fixes (1 week)
-- [x] 1.2 Clarify `pattern.sc` field ✅ **COMPLETED**
-- [x] 1.4 Validate Highway to Hell example ✅ **COMPLETED**
-- [x] 1.1 Add Quick Reference Card ✅ **COMPLETED**
-- [x] 1.3 Add Authoritative Source Markers ✅ **COMPLETED**
-- [ ] 1.5 Create Troubleshooting Guide
+### Sprint 1: Critical Fixes (1 week) ✅ **COMPLETED**
+- [x] 1.2 Clarify `pattern.sc` field ✅
+- [x] 1.4 Validate Highway to Hell example ✅
+- [x] 1.1 Add Quick Reference Card ✅
+- [x] 1.3 Add Authoritative Source Markers ✅
+- [x] 1.5 Create Troubleshooting Guide ✅
 
 ### Sprint 2: High-Value Additions (2 weeks)
 - [ ] 1.5 Create Troubleshooting Guide
