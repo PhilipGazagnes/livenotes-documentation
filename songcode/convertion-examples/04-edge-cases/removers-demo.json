@@ -1,0 +1,200 @@
+{
+  "meta": {
+    "bpm": 120,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "C"
+  },
+  "patterns": {
+    "A": {
+      "sc": "C;G;D =;C = = =",
+      "json": [
+        [["C", ""]],
+        [["G", ""]],
+        [["D", ""], ["="]],
+        [["C", ""], ["="], ["="], ["="]]
+      ],
+      "measures": 4
+    },
+    "B": {
+      "sc": "C;D;F =",
+      "json": [
+        [["C", ""]],
+        [["D", ""]],
+        [["F", ""], ["="]]
+      ],
+      "measures": 3
+    }
+  },
+  "sections": [
+    {
+      "name": "Verse with reovers",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "C for 4 beats",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "G for 4 beats",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "D for 2 beats",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "C for 1 beat",
+          "measures": 1,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Bridge with Removers",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 3,
+      "lyrics": [
+        {
+          "text": "C chord for 4 beats",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "D chord for 4 beats",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "F chord for 2 beats",
+          "measures": 1,
+          "style": "normal"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 120,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "C for 4 beats",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "G for 4 beats",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "D for 2 beats",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""], ["="]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "C for 1 beat",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""], ["="], ["="], ["="]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "C chord for 4 beats",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "D chord for 4 beats",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "F chord for 2 beats",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["F", ""], ["="]]
+          ]
+        }
+      ]
+    }
+  ]
+}

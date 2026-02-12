@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "bpm": 90,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "E"
+  },
+  "patterns": {
+    "A": {
+      "sc": "E;%;%;%",
+      "json": [
+        [["E", ""]],
+        [["%"]],
+        [["%"]],
+        [["%"]]
+      ],
+      "measures": 4
+    },
+    "B": {
+      "sc": "E;A;%;E",
+      "json": [
+        [["E", ""]],
+        [["A", ""]],
+        [["%"]],
+        [["E", ""]]
+      ],
+      "measures": 4
+    }
+  },
+  "sections": [
+    {
+      "name": "Verse with % Repeating Chord",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "Four measures all E chord",
+          "measures": 4,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Chorus with % Repeating Measure",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "E then A",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Then A again then E",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 90,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Four measures all E chord",
+      "chords": [
+        {
+          "repeats": 4,
+          "pattern": [
+            [["E", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "E then A",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["E", ""]],
+            [["A", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Then A again then E",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["A", ""]],
+            [["E", ""]]
+          ]
+        }
+      ]
+    }
+  ]
+}

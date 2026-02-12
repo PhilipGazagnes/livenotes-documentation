@@ -1,0 +1,21 @@
+@bpm 120
+@original A
+
+$1
+[A;D]4
+
+$2
+[A;D;G;A]2
+:
+E;E
+
+Intro with Loop
+$1
+--
+***8 measures from 2 repeated 4 times*** _8
+
+Verse with Loop and Line Break
+$2
+--
+Pattern repeats twice _8
+Then two E measures _2

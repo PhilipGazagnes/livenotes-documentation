@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "bpm": 100,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "G"
+  },
+  "patterns": {
+    "A": {
+      "sc": "G;C;D;G;G;C;D;G",
+      "json": [
+        [["G", ""]],
+        [["C", ""]],
+        [["D", ""]],
+        [["G", ""]],
+        [["G", ""]],
+        [["C", ""]],
+        [["D", ""]],
+        [["G", ""]]
+      ]
+    },
+    "B": {
+      "sc": "C;G;D;G;C;G;D;G",
+      "json": [
+        [["C", ""]],
+        [["G", ""]],
+        [["D", ""]],
+        [["G", ""]],
+        [["C", ""]],
+        [["G", ""]],
+        [["D", ""]],
+        [["G", ""]]
+      ]
+    }
+  },
+  "sections": [
+    {
+      "name": "Verse",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 8,
+      "lyrics": [
+        {
+          "text": "Walking down the road today",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Sunshine lights my way",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Feeling good and free",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "It's where I want to be",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 8,
+      "lyrics": [
+        {
+          "text": "This is my song",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Singing all day long",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Won't you sing along",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Join me in this song",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 100,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Walking down the road today",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["G", ""]],
+            [["C", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Sunshine lights my way",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Feeling good and free",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["G", ""]],
+            [["C", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "It's where I want to be",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "This is my song",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Singing all day long",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Won't you sing along",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Join me in this song",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    }
+  ]
+}

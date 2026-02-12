@@ -360,6 +360,10 @@ Contains the structural sections of the song (verses, choruses, etc.).
 - **Type**: Object
 - **Description**: Pattern usage and modifiers for this section
 
+**Purpose**: Pattern modifiers allow a single pattern definition to be reused across multiple sections with variations (different start/end points, tempo changes, added measures). This avoids duplicating similar patterns and makes maintenance easier.
+
+**Example**: An 8-measure pattern can be used in full for verses, with the first 2 measures cut for the intro (`cutStart`), and with the last 3 measures cut for the chorus (`cutEnd`), all while maintaining a single pattern definition.
+
 ##### Pattern Properties
 
 ###### `id`

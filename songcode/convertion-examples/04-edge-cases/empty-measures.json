@@ -1,0 +1,165 @@
+{
+  "meta": {
+    "bpm": 80,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "Am"
+  },
+  "patterns": {
+    "A": {
+      "sc": "Am;_;D;_",
+      "json": [
+        [["Am", ""]],
+        [["_"]],
+        [["D", ""]],
+        [["_"]]
+      ],
+      "measures": 4
+    },
+    "B": {
+      "sc": "_;_;_;_",
+      "json": [
+        [["_"]],
+        [["_"]],
+        [["_"]],
+        [["_"]]
+      ],
+      "measures": 4
+    }
+  },
+  "sections": [
+    {
+      "name": "Verse with Silent Beats",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "First measure Am",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "Skip a beat",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "Third measure D",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "One more silent beat",
+          "measures": 1,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Instrumental Break",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "Four measures of silence",
+          "measures": 4,
+          "style": "info"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 80,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "First measure Am",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["Am", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Skip a beat",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["_"]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Third measure D",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "One more silent beat",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["_"]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "info",
+      "lyrics": "Four measures of silence",
+      "chords": [
+        {
+          "repeats": 4,
+          "pattern": [
+            [["_"]]
+          ]
+        }
+      ]
+    }
+  ]
+}

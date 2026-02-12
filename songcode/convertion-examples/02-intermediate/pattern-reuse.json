@@ -1,0 +1,337 @@
+{
+  "meta": {
+    "bpm": 110,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "C"
+  },
+  "patterns": {
+    "A": {
+      "sc": "C;G;Am;F",
+      "json": [
+        [["C", ""]],
+        [["G", ""]],
+        [["Am", ""]],
+        [["F", ""]]
+      ],
+      "measures": 4
+    },
+    "B": {
+      "sc": "F;G;C;Am",
+      "json": [
+        [["F", ""]],
+        [["G", ""]],
+        [["C", ""]],
+        [["Am", ""]]
+      ],
+      "measures": 4
+    }
+  },
+  "sections": [
+    {
+      "name": "Intro",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "Intro",
+          "measures": 4,
+          "style": "info"
+        }
+      ]
+    },
+    {
+      "name": "Verse",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "Here we go again",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Same old pattern friend",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 8,
+      "lyrics": [
+        {
+          "text": "Using patterns saves time",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Makes the structure shine",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Bridge",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "One definition",
+          "measures": 4,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Verse",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "Second verse same chords",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "No need to write more words",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "Using patterns saves time",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Makes the structure shine",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 110,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "info",
+      "lyrics": "Intro",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]],
+            [["G", ""]],
+            [["Am", ""]],
+            [["F", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Here we go again",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Same old pattern friend",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["Am", ""]],
+            [["F", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Using patterns saves time",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["F", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Makes the structure shine",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]],
+            [["Am", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "One definition",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]],
+            [["G", ""]],
+            [["Am", ""]],
+            [["F", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Second verse same chords",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "No need to write more words",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["Am", ""]],
+            [["F", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Using patterns saves time",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["F", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Makes the structure shine",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["C", ""]],
+            [["Am", ""]]
+          ]
+        }
+      ]
+    }
+  ]
+}

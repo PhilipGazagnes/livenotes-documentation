@@ -1252,6 +1252,103 @@ Second line
 Third line
 ```
 
+#### Global Prompter Eligibility
+
+**Beyond per-section validation**, prompter generation in Phase 4 requires all of the following conditions:
+
+1. **ALL sections must have lyrics**: Every section must have at least one lyric line
+2. **ALL sections must have patterns**: Every section must have a non-empty pattern (`json != null`, `measures > 0`)
+3. **ALL lyrics must have measure counts**: Every lyric line in every section must have `_n` suffix
+4. **ALL measure counts must be valid**: Already validated above (sum matches section measures)
+
+**If any condition fails**:
+- The song is still **valid** (no error)
+- But it is **not eligible** for prompter generation
+- Phase 4 will produce an empty prompter array: `"prompter": []`
+
+**Valid but not prompter-eligible examples**:
+
+❌ **Section without lyrics**:
+```songcode
+Intro
+G;C;D;G
+
+Verse
+G;C;D;G
+--
+First line _2
+Second line _2
+```
+→ Valid song, but `prompter: []` (Intro has no lyrics)
+
+❌ **Section with empty pattern**:
+```songcode
+$1
+
+
+Verse
+$1
+--
+First line
+Second line
+```
+→ Valid song, but `prompter: []` (pattern is empty)
+
+❌ **Lyrics without measure counts**:
+```songcode
+Verse
+G;C;D;G
+--
+First line
+Second line
+```
+→ Valid song, but `prompter: []` (no measure counts)
+
+✅ **Prompter-eligible** (all conditions met):
+```songcode
+Verse
+G;C;D;G
+--
+First line _2
+Second line _2
+
+Chorus
+C;G;D;G
+--
+Chorus line _4
+```
+→ Valid song, generates full prompter
+
+**Handling Instrumental Sections**:
+
+For instrumental sections (solos, breaks, intros), use info markers to provide timing while keeping prompter eligibility:
+
+✅ **Instrumental with info marker**:
+```songcode
+Intro
+G;C;D;G
+--
+***Intro*** _4
+
+Verse
+G;C;D;G
+--
+First line _2
+Second line _2
+
+Solo
+A;D;E;A;A;D;E;A
+--
+***Guitar Solo*** _8
+```
+→ Valid song, generates full prompter (all sections have lyrics with counts)
+
+**Info markers** (`***text***`) and **musician markers** (`:::text:::`) are lyric lines that:
+- Provide visual cues in the prompter
+- Have measure counts like regular lyrics
+- Allow instrumental sections to participate in prompter generation
+- Are styled differently in the output (see Phase 4, Step 4.3)
+
 ---
 
 ## Phase 4: Prompter Generation
@@ -1268,7 +1365,74 @@ Generate a linear, display-friendly representation of the song.
 
 The prompter is designed for scrolling/teleprompter display. It expands all patterns, resolves all repeats, and pairs each lyric line with its chord progression.
 
-### Step 4.1: Add Initial Tempo
+### Step 4.1: Check Prompter Eligibility
+
+**Before any prompter generation**, verify the song qualifies for prompter generation.
+
+#### Algorithm
+
+```javascript
+function is_prompter_eligible(sections, patterns):
+    // Check 1: All sections must have at least one lyric
+    for each section in sections:
+        if section.lyrics.length == 0:
+            return false  // Section has no lyrics
+    
+    // Check 2: All sections must have non-empty patterns
+    for each section in sections:
+        pattern_id = section.pattern.id
+        if patterns[pattern_id].json == null:
+            return false  // Pattern is empty
+        if patterns[pattern_id].measures == 0:
+            return false  // Pattern has no measures
+    
+    // Check 3: All lyric lines must have measure counts
+    for each section in sections:
+        for each lyric in section.lyrics:
+            if lyric.measure_count is null or undefined:
+                return false  // Lyric missing measure count
+    
+    // Check 4: All measure counts already validated in Phase 3
+    // (sum matches section measures)
+    
+    return true  // All conditions met
+```
+
+#### Result
+
+- **If `is_prompter_eligible() == false`**:
+  - Set `livenotes.prompter = []`
+  - **Skip Steps 4.2 through 4.4**
+  - Song is still valid, just not prompter-eligible
+  
+- **If `is_prompter_eligible() == true`**:
+  - Continue with Steps 4.2 through 4.4
+  - Generate full prompter
+
+#### Why This Matters
+
+- Prompter is for **display during performance**
+- Requires **complete timing information** across **entire song**
+- Requires **all sections to have both patterns and lyrics**
+- Incomplete data → no prompter (but song is still valid and usable)
+
+**Common cases that prevent prompter generation**:
+- Song skeleton during composition (empty patterns)
+- Instrumental-only songs (no lyrics)
+- Songs without timing information (no `_n` counts)
+- Mixed songs with some instrumental sections and no info markers
+
+**To make instrumental sections prompter-eligible**: Use info markers with measure counts:
+```songcode
+Solo
+A;D;E;A
+--
+***Guitar Solo*** _4
+```
+
+### Step 4.2: Add Initial Tempo
+
+*[Only if prompter-eligible, otherwise skip all remaining steps]*
 
 ```json
 {
@@ -1278,13 +1442,15 @@ The prompter is designed for scrolling/teleprompter display. It expands all patt
 }
 ```
 
-### Step 4.2: Process Each Section
+### Step 4.3: Process Each Section
+
+*[Only if prompter-eligible]*
 
 For each section:
 
 **Note**: If section has an empty pattern (`json = null`), skip this section entirely in prompter generation. Empty patterns don't produce prompter items.
 
-#### Substep 4.2.1: Check for Tempo Changes
+#### Substep 4.3.1: Check for Tempo Changes
 
 - If section has `pattern.bpm` or `pattern.time` override
 - Add tempo item to prompter:
@@ -1296,29 +1462,32 @@ For each section:
   }
   ```
 
-#### Substep 4.2.2: Expand Pattern to Measure Stack
+#### Substep 4.3.2: Expand Pattern to Measure Stack
 
 Build an ordered array of measures (the "measure stack") by:
 
 1. **Add `_before` measures** (if present):
    - Expand loops in `pattern.before.json`
+   - Resolve all `%` symbols (see Substep 4.3.3a)
    - Add all measures to stack
 
 2. **Add main pattern measures**:
    - Start with `patterns[pattern.id].json`
-   - Expand all loops (see Substep 4.2.3)
+   - Expand all loops (see Substep 4.3.3)
+   - Resolve all `%` symbols (see Substep 4.3.3a)
    - Repeat entire pattern `pattern.repeat` times
-   - Apply `_cutStart` (see Substep 4.2.4)
-   - Apply `_cutEnd` (see Substep 4.2.4)
+   - Apply `_cutStart` (see Substep 4.3.4)
+   - Apply `_cutEnd` (see Substep 4.3.4)
    - Add remaining measures to stack
 
 3. **Add `_after` measures** (if present):
    - Expand loops in `pattern.after.json`
+   - Resolve all `%` symbols (see Substep 4.3.3a)
    - Add all measures to stack
 
 **Result**: Ordered array of measures `[M1, M2, M3, ...]` ready for consumption
 
-#### Substep 4.2.3: Loop Expansion Algorithm
+#### Substep 4.3.3: Loop Expansion Algorithm
 
 To expand loops in a pattern:
 
@@ -1352,7 +1521,80 @@ for each element in pattern:
 [[["A",""]], [["D",""]], [["A",""]], [["D",""]], [["A",""]], [["D",""]]]
 ```
 
-#### Substep 4.2.4: Beat Removal with cutStart/cutEnd
+#### Substep 4.3.3a: Resolve Repeat Symbols (`%`)
+
+**Purpose**: The prompter requires fully resolved chord progressions because lyrics consume measures sequentially without context of previous measures.
+
+**Problem Example**:
+```
+Pattern: E;%;%;%  (4 measures)
+Lyrics: 
+  Line 1: "First line" _2  → gets measures [E, %]
+  Line 2: "Second line" _2 → gets measures [%, %]
+```
+Without resolution, Line 2 has no way to know what chord `%` refers to.
+
+**Algorithm**: After expanding loops, resolve all `%` symbols:
+
+```
+last_chord = null
+last_measure = null
+
+for each measure in expanded_pattern:
+    if measure contains only [["%"]]:
+        // Repeat entire previous measure
+        if last_measure == null:
+            ERROR: "% symbol with no previous measure"
+        measure = copy(last_measure)
+    else:
+        // Resolve % symbols within the measure
+        for each position in measure:
+            if position == "%":
+                if last_chord == null:
+                    ERROR: "% symbol with no previous chord"
+                position = copy(last_chord)
+            else if position is a chord (not "_" or "="):
+                last_chord = position
+        
+        last_measure = copy(measure)
+```
+
+**Examples**:
+
+1. **Repeating chord within measure**:
+   ```
+   Input:  [["E", ""], "%", "%", "%"]
+   Output: [["E", ""], ["E", ""], ["E", ""], ["E", ""]]
+   ```
+
+2. **Repeating entire measure**:
+   ```
+   Input:  [["E", ""]], [["%"]]
+   Output: [["E", ""]], [["E", ""]]
+   ```
+
+3. **Complex case**:
+   ```
+   Input:  [["E", ""], ["A", ""]], [["%"]], [["D", ""], "%"]
+   Output: [["E", ""], ["A", ""]], [["E", ""], ["A", ""]], [["D", ""], ["D", ""]]
+   ```
+
+4. **With silence and removers**:
+   ```
+   Input:  [["E", ""], "_", "%", "="]
+   Output: [["E", ""], "_", ["E", ""], "="]
+   Note: "_" and "=" are passed through; only chords update last_chord
+   ```
+
+**Important Notes**:
+- `%` resolution happens AFTER loop expansion but BEFORE cutStart/cutEnd
+- Silence (`_`) and remover (`=`) symbols don't update `last_chord` tracking
+- `%` can only refer to chords, never to `_` or `=`
+- Each section's pattern expansion resets the tracking (starts with `last_chord = null`)
+- `_before` patterns are processed first (their chords can be referenced by main pattern)
+
+#### Substep 4.3.4: Beat Removal with cutStart/cutEnd
+
 
 Both `_cutStart` and `_cutEnd` use `[measures, beats]` notation and follow the same algorithm as Phase 3 validation:
 
@@ -1394,9 +1636,9 @@ Step 3: Remove B entirely (beat loss)
 Result: [C, D]
 ```
 
-#### Substep 4.2.5: Pair Lyrics with Measures
+#### Substep 4.3.5: Pair Lyrics with Measures
 
-**Note**: Lyric measure counts are optional. This substep only applies when lyrics have measure counts specified.
+**Note**: At this point in Phase 4, all sections are guaranteed to have lyrics with measure counts (verified in Step 4.1). This substep pairs each lyric with its measures.
 
 For each lyric line with measure count:
 
@@ -1416,14 +1658,12 @@ For each lyric line with measure count:
        ]
    }
    ```
-4. Apply pattern optimization (see Substep 4.2.6)
+4. Apply pattern optimization (see Substep 4.3.6)
 5. Add to prompter array
 
-**Sections with no lyrics**: If a section has no lyric lines, or lyrics without measure counts, the measures from the measure stack are not consumed. This is valid.
+**Validation**: The sum of all lyric measure counts equals the section's total measures (validated in Phase 3).
 
-**Validation**: If all lyrics have measure counts, the sum must equal the section's total measures (validated in Phase 3).
-
-#### Substep 4.2.6: Pattern Optimization Algorithm
+#### Substep 4.3.6: Pattern Optimization Algorithm
 
 For each prompter content item, optimize the chord pattern by detecting repetitions:
 
@@ -1464,7 +1704,9 @@ result: {repeats: repeats, pattern: pattern}
 ```
 
 
-### Step 4.3: Determine Lyric Style
+### Step 4.4: Determine Lyric Style
+
+*[Only if prompter-eligible]*
 
 Based on lyric content:
 

@@ -1,0 +1,238 @@
+{
+  "meta": {
+    "bpm": 100,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "D"
+  },
+  "patterns": {
+    "A": {
+      "sc": "D;A;Bm;G;D;A;Bm;G",
+      "json": [
+        [["D", ""]],
+        [["A", ""]],
+        [["Bm", ""]],
+        [["G", ""]],
+        [["D", ""]],
+        [["A", ""]],
+        [["Bm", ""]],
+        [["G", ""]]
+      ],
+      "measures": 6
+    }
+  },
+  "sections": [
+    {
+      "name": "Verse with CutStart",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": 2,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 6,
+      "lyrics": [
+        {
+          "text": "First two measures removed",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Only last 6 measures play",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Starts at Bm instead of D",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Chorus with CutEnd",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": 3,
+        "before": null,
+        "after": null
+      },
+      "measures": 5,
+      "lyrics": [
+        {
+          "text": "Last three measures removed",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Ends at D after 5 measures",
+          "measures": 3,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Bridge with Both Cuts",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": 1,
+        "cutEnd": 2,
+        "before": null,
+        "after": null
+      },
+      "measures": 5,
+      "lyrics": [
+        {
+          "text": "Removes D from start",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "And last two from end",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Total 5 measures remain",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 100,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "First two measures removed",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["Bm", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Only last 6 measures play",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["A", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Starts at Bm instead of D",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["Bm", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Last three measures removed",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["A", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Ends at D after 5 measures",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["Bm", ""]],
+            [["G", ""]],
+            [["D", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Removes D from start",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["A", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "And last two from end",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["Bm", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Total 5 measures remain",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["A", ""]]
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "bpm": 120,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "C"
+  },
+  "patterns": {
+    "A": {
+      "sc": "C;G;Am;F",
+      "json": [
+        [["C", ""]],
+        [["G", ""]],
+        [["Am", ""]],
+        [["F", ""]]
+      ],
+      "measures": 4
+    }
+  },
+  "sections": [
+    {
+      "name": "Extreme Section",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 3,
+        "bpm": 150,
+        "time": null,
+        "cutStart": 1,
+        "cutEnd": 2,
+        "before": {
+            "sc": "Em;Em",
+            "json": [
+                [["Em", ""]],
+                [["Em", ""]]
+            ]
+        },
+        "after": {
+            "sc": "D;D;D",
+            "json": [
+                [["D", ""]],
+                [["D", ""]],
+                [["D", ""]]
+            ]
+        }
+      },
+      "measures": 14,
+      "lyrics": [
+        {
+          "text": "Two Em measures before",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Pattern repeated 3 times",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "But first measure cut",
+          "measures": 3,
+          "style": "normal"
+        },
+        {
+          "text": "And last 2 measures cut",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Three D measures after",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "All at 150 BPM",
+          "measures": 4,
+          "style": "normal"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 120,
+      "time": "4/4"
+    },
+    {
+      "type": "tempo",
+      "bpm": 150,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Two Em measures before",
+      "chords": [
+        {
+          "repeats": 2,
+          "pattern": [
+            [["Em", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Pattern repeated 3 times",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["G", ""]],
+            [["Am", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "But first measure cut",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["F", ""]],
+            [["C", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "And last 2 measures cut",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["Am", ""]],
+            [["F", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Three D measures after",
+      "chords": [
+        {
+          "repeats": 3,
+          "pattern": [
+            [["C", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "All at 150 BPM",
+      "chords": [
+        {
+          "repeats": 3,
+          "pattern": [
+            [["G", ""]],
+            [["D", ""]],
+            [["D", ""]],
+            [["D", ""]]
+          ]
+        }
+      ]
+    }
+  ]
+}

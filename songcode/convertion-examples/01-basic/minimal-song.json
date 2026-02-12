@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "bpm": 120,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    }
+  },
+  "patterns": {},
+  "sections": [
+    {
+      "name": "Instrumental",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": []
+    }
+  ],
+  "prompter": []
+}

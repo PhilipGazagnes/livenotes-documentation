@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "bpm": 120,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "A"
+  },
+  "patterns": {
+    "A": {
+      "sc": "[A;D]4",
+      "json": [
+        "loopStart",
+        [["A", ""]],
+        [["D", ""]],
+        "loopEnd:4"
+      ],
+      "measures": 8
+    },
+    "B": {
+      "sc": "[A;D;G;A]2;E;E",
+      "json": [
+        "loopStart",
+        [["A", ""]],
+        [["D", ""]],
+        [["G", ""]],
+        [["A", ""]],
+        "loopEnd:2",
+        "newLine",
+        [["E", ""]],
+        [["E", ""]]
+      ],
+      "measures": 10
+    }
+  },
+  "sections": [
+    {
+      "name": "Intro with Loop",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 8,
+      "lyrics": [
+        {
+          "text": "8 measures from 2 repeated 4 times",
+          "measures": 8,
+          "style": "info"
+        }
+      ]
+    },
+    {
+      "name": "Verse with Loop and Line Break",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 10,
+      "lyrics": [
+        {
+          "text": "Pattern repeats twice",
+          "measures": 8,
+          "style": "normal"
+        },
+        {
+          "text": "Then two E measures",
+          "measures": 2,
+          "style": "normal"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 120,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "info",
+      "lyrics": "8 measures from 2 repeated 4 times",
+      "chords": [
+        {
+          "repeats": 4,
+          "pattern": [
+            [["A", ""]],
+            [["D", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Pattern repeats twice",
+      "chords": [
+        {
+          "repeats": 2,
+          "pattern": [
+            [["A", ""]],
+            [["D", ""]],
+            [["G", ""]],
+            [["A", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Then two E measures",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["E", ""]],
+            [["E", ""]]
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -141,6 +141,13 @@ Each metadata line starts with `@` followed by a key and value:
 
 Pattern definitions allow you to write chord progressions once and reuse them throughout the song.
 
+**Key Benefits**:
+- **Avoid duplication**: Define a progression once, use it multiple times
+- **Easy maintenance**: Change the pattern once, all sections update
+- **Use with modifiers**: A single pattern can be varied per section using modifiers (`_cutStart`, `_cutEnd`, `_before`, `_after`, `_repeat`)
+
+**Pattern Reuse Philosophy**: Instead of creating multiple similar patterns (like Pattern A, Pattern A-shortened, Pattern A-with-intro), create **one pattern** and use **modifiers** to adapt it per section.
+
 ### Format
 
 ```songcode
@@ -462,6 +469,51 @@ This pattern:
 
 Modifiers alter how a pattern is played in a specific section. They appear before the `--` separator.
 
+### Purpose of Modifiers
+
+Modifiers enable **pattern reuse with variation**. Instead of defining multiple similar patterns, you define **one pattern** and use modifiers to adapt it for each section.
+
+**Example Scenario**: A song has an 8-measure chord progression. The intro uses measures 3-8, the verse uses all 8 measures, and the chorus uses measures 1-5.
+
+**❌ Without modifiers** (duplicating patterns):
+```songcode
+$1
+D;A;Bm;G;D;A;Bm;G    ← Full progression
+
+$2  
+Bm;G;D;A;Bm;G        ← Intro (cut first 2)
+
+$3
+D;A;Bm;G;D           ← Chorus (cut last 3)
+```
+
+**✅ With modifiers** (reusing one pattern):
+```songcode
+$1
+D;A;Bm;G;D;A;Bm;G    ← Single definition
+
+Intro
+$1
+_cutStart 2          ← Start at measure 3
+--
+***Intro*** _6
+
+Verse
+$1                   ← Use full pattern
+--
+First verse line _8
+
+Chorus
+$1
+_cutEnd 3            ← End at measure 5
+--
+Chorus line _5
+```
+
+**Result**: One pattern definition, multiple uses with variations. Changes to the base pattern automatically apply to all sections.
+
+---
+
 ### `_repeat`
 
 Repeats the entire pattern.
@@ -497,6 +549,24 @@ _cutStart 1    ← Skip first measure of pattern
 Starting from measure 2 _16
 ```
 
+**Pattern Reuse Example**:
+```songcode
+# Example: Reusing same pattern with different starts
+$1
+D;A;Bm;G;D;A;Bm;G
+
+Intro
+$1
+_cutStart 2    ← Skip first 2, start at Bm
+--
+***Intro*** _6
+
+Verse
+$1             ← Use full pattern
+--
+Full verse _8
+```
+
 ### `_cutEnd`
 
 Cuts measures/beats from the end of the pattern.
@@ -514,6 +584,25 @@ $3
 _cutEnd 2    ← Omit last 2 measures of pattern
 --
 Highway to hell _7
+```
+
+**Pattern Reuse Example**:
+```songcode
+# Example: Same pattern with different endings
+$1
+D;A;Bm;G;D;A;Bm;G
+
+Chorus
+$1
+_cutEnd 3      ← End after 5 measures
+--
+Short chorus _5
+
+Bridge
+$1
+_cutEnd 1      ← End after 7 measures
+--
+Longer bridge _7
 ```
 
 ### `_before`

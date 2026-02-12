@@ -1,0 +1,290 @@
+{
+  "meta": {
+    "bpm": 100,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "D"
+  },
+  "patterns": {
+    "A": {
+      "sc": "D;A;Bm;G",
+      "json": [
+        [["D", ""]],
+        [["A", ""]],
+        [["Bm", ""]],
+        [["G", ""]]
+      ],
+      "measures": 4
+    },
+    "B": {
+      "sc": "G;A;D;Bm",
+      "json": [
+        [["G", ""]],
+        [["A", ""]],
+        [["D", ""]],
+        [["Bm", ""]]
+      ],
+      "measures": 4
+    }
+  },
+  "sections": [
+    {
+      "name": "Verse with Repeat",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 3,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 12,
+      "lyrics": [
+        {
+          "text": "This pattern plays three times",
+          "measures": 4,
+          "style": "normal"
+        },
+        {
+          "text": "Watch the repeat modifier",
+          "measures": 4,
+          "style": "normal"
+        },
+        {
+          "text": "Making sections longer",
+          "measures": 4,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Chorus with Before",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": {
+          "sc": "Em;Em",
+          "json": [
+            [["Em", ""]],
+            [["Em", ""]]
+          ]
+        },
+        "after": null
+      },
+      "measures": 6,
+      "lyrics": [
+        {
+          "text": "Two measures before the pattern",
+          "measures": 2,
+          "style": "normal"
+        },
+        {
+          "text": "Then the chorus starts",
+          "measures": 4,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Bridge with After",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": {
+          "sc": "A;A;A;A",
+          "json": [
+            [["A", ""]],
+            [["A", ""]],
+            [["A", ""]],
+            [["A", ""]]
+          ]
+        }
+      },
+      "measures": 8,
+      "lyrics": [
+        {
+          "text": "Bridge with normal pattern",
+          "measures": 4,
+          "style": "normal"
+        },
+        {
+          "text": "Then four extra measures after",
+          "measures": 4,
+          "style": "normal"
+        }
+      ]
+    },
+    {
+      "name": "Fast Outro",
+      "comment": null,
+      "pattern": {
+        "id": "B",
+        "repeat": 1,
+        "bpm": 140,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "Tempo changed to 140",
+          "measures": 4,
+          "style": "info"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 100,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "This pattern plays three times",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["A", ""]],
+            [["Bm", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Watch the repeat modifier",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["A", ""]],
+            [["Bm", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Making sections longer",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["A", ""]],
+            [["Bm", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Two measures before the pattern",
+      "chords": [
+        {
+          "repeats": 2,
+          "pattern": [
+            [["Em", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Then the chorus starts",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["G", ""]],
+            [["A", ""]],
+            [["D", ""]],
+            [["Bm", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Bridge with normal pattern",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""]],
+            [["A", ""]],
+            [["Bm", ""]],
+            [["G", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Then four extra measures after",
+      "chords": [
+        {
+          "repeats": 4,
+          "pattern": [
+            [["A", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "tempo",
+      "bpm": 140,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "info",
+      "lyrics": "Tempo changed to 140",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["G", ""]],
+            [["A", ""]],
+            [["D", ""]],
+            [["Bm", ""]]
+          ]
+        }
+      ]
+    }
+  ]
+}

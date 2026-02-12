@@ -1,0 +1,120 @@
+{
+  "meta": {
+    "bpm": 140,
+    "time": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "original": "G"
+  },
+  "patterns": {
+    "A": {
+      "sc": "G C;D Em;G C;D G",
+      "json": [
+        [["G", ""], ["C", ""]],
+        [["D", ""], ["Em", ""]],
+        [["G", ""], ["C", ""]],
+        [["D", ""], ["G", ""]]
+      ],
+      "measures": 4
+    }
+  },
+  "sections": [
+    {
+      "name": "Verse with Multi-Chord",
+      "comment": null,
+      "pattern": {
+        "id": "A",
+        "repeat": 1,
+        "bpm": null,
+        "time": null,
+        "cutStart": null,
+        "cutEnd": null,
+        "before": null,
+        "after": null
+      },
+      "measures": 4,
+      "lyrics": [
+        {
+          "text": "Two chords per measure",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "Creates faster changes",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "Common in jazz and folk",
+          "measures": 1,
+          "style": "normal"
+        },
+        {
+          "text": "Space separates chords",
+          "measures": 1,
+          "style": "normal"
+        }
+      ]
+    }
+  ],
+  "prompter": [
+    {
+      "type": "tempo",
+      "bpm": 140,
+      "time": "4/4"
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Two chords per measure",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["G", ""], ["C", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Creates faster changes",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""], ["Em", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Common in jazz and folk",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["G", ""], ["C", ""]]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "style": "default",
+      "lyrics": "Space separates chords",
+      "chords": [
+        {
+          "repeats": 1,
+          "pattern": [
+            [["D", ""], ["G", ""]]
+          ]
+        }
+      ]
+    }
+  ]
+}
