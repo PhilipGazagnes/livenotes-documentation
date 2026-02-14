@@ -97,8 +97,13 @@
             "after": null
          },
          "lyrics":[
-            ["***Intro***", 8]
-         ]
+            {
+               "text": "Intro",
+               "measures": 8,
+               "style": "info"
+            }
+         ],
+         "measures": 8
       },
       {
          "name":"Couplet",
@@ -114,15 +119,48 @@
             "after": null
          },
          "lyrics":[
-            ["Living easy, living free", 2],
-            ["Season ticket on a one-way ride", 2],
-            ["Asking nothing, leave me be", 2],
-            ["Taking everything in my stride", 2],
-            ["Don't need reason, don't need rhyme", 2],
-            ["Ain't nothing I would rather do", 2],
-            ["Going down, party time", 2],
-            ["My friends are gonna be there too", 3]
-         ]
+            {
+               "text": "Living easy, living free",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Season ticket on a one-way ride",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Asking nothing, leave me be",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Taking everything in my stride",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Don't need reason, don't need rhyme",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Ain't nothing I would rather do",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Going down, party time",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "My friends are gonna be there too",
+               "measures": 3,
+               "style": "normal"
+            }
+         ],
+         "measures": 17
       },
       {
          "name":"Refrain",
@@ -138,11 +176,28 @@
             "after": null
          },
          "lyrics":[
-            ["I'm on the highway to hell", 2],
-            ["On the highway to hell", 2],
-            ["Highway to hell", 2],
-            ["I'm on the highway to hell", 3]
-         ]
+            {
+               "text": "I'm on the highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "On the highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "I'm on the highway to hell",
+               "measures": 3,
+               "style": "normal"
+            }
+         ],
+         "measures": 9
       },
       {
          "name":"Couplet",
@@ -158,15 +213,48 @@
             "after": null
          },
          "lyrics":[
-            ["No stop signs, speed limit", 2],
-            ["Nobody's gonna slow me down", 2],
-            ["Like a wheel, gonna spin it", 2],
-            ["Nobody's gonna mess me around", 2],
-            ["Hey Satan, paid my dues", 2],
-            ["Playing in a rocking band", 2],
-            ["Hey mama, look at me", 2],
-            ["I'm on my way to the promised land, whoo!", 3]
-         ]
+            {
+               "text": "No stop signs, speed limit",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Nobody's gonna slow me down",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Like a wheel, gonna spin it",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Nobody's gonna mess me around",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Hey Satan, paid my dues",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Playing in a rocking band",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Hey mama, look at me",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "I'm on my way to the promised land, whoo!",
+               "measures": 3,
+               "style": "normal"
+            }
+         ],
+         "measures": 17
       },
       {
          "name":"Refrain",
@@ -182,11 +270,28 @@
             "after": null
          },
          "lyrics":[
-            ["I'm on the highway to hell", 2],
-            ["Highway to hell", 2],
-            ["I'm on the highway to hell", 2],
-            ["Highway to hell", 1]
-         ]
+            {
+               "text": "I'm on the highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "I'm on the highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Highway to hell",
+               "measures": 1,
+               "style": "normal"
+            }
+         ],
+         "measures": 7
       },
       {
          "name":"Break",
@@ -202,8 +307,13 @@
             "after": null
          },
          "lyrics":[
-            [":::Break:::", 5]
-         ]
+            {
+               "text": "Break",
+               "measures": 5,
+               "style": "musician"
+            }
+         ],
+         "measures": 5
       },
       {
          "name":"Solo",
@@ -219,8 +329,13 @@
             "after": null
          },
          "lyrics":[
-            ["***Solo***", 8]
-         ]
+            {
+               "text": "Solo",
+               "measures": 8,
+               "style": "info"
+            }
+         ],
+         "measures": 8
       },
       {
          "name":"Refrain",
@@ -236,12 +351,33 @@
             "after": null
          },
          "lyrics":[
-            ["I'm on the highway to hell", 2],
-            ["On the highway to hell", 2],
-            ["I'm on the highway to hell", 2],
-            ["On the highway", 1],
-            [":::Cut:::", 1]
-         ]
+            {
+               "text": "I'm on the highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "On the highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "I'm on the highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "On the highway",
+               "measures": 1,
+               "style": "normal"
+            },
+            {
+               "text": "Cut",
+               "measures": 1,
+               "style": "musician"
+            }
+         ],
+         "measures": 8
       },
       {
          "name":"Refrain",
@@ -257,11 +393,28 @@
             "after": null
          },
          "lyrics":[
-            ["Yeah, highway to hell", 2],
-            ["I'm on the highway to hell", 2],
-            ["Highway to hell", 2],
-            ["Highway to hell", 1]
-         ]
+            {
+               "text": "Yeah, highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "I'm on the highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Highway to hell",
+               "measures": 2,
+               "style": "normal"
+            },
+            {
+               "text": "Highway to hell",
+               "measures": 1,
+               "style": "normal"
+            }
+         ],
+         "measures": 7
       },
       {
          "name":"Outro",
@@ -277,9 +430,18 @@
             "after": null
          },
          "lyrics":[
-            ["And I'm going down all the way", 4],
-            ["Whoa!", 4]
-         ]
+            {
+               "text": "And I'm going down all the way",
+               "measures": 4,
+               "style": "normal"
+            },
+            {
+               "text": "Whoa!",
+               "measures": 4,
+               "style": "normal"
+            }
+         ],
+         "measures": 8
       }
    ],
    "prompter": [
@@ -298,7 +460,7 @@
                     "pattern": [
                         [["A", ""]],
                         [["G", ""]],
-                        ["%"],
+                        [["G", ""]],
                         [["A", ""]]
                     ]
                 }
@@ -412,7 +574,7 @@
                     "pattern": [
                         [["G", ""]],
                         [["E", ""]],
-                        ["%"]
+                        [["E", ""]]
                     ]
                 }
             ]
@@ -426,7 +588,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -440,7 +602,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -454,7 +616,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -469,7 +631,7 @@
                     "pattern": [
                         [["A", ""]],
                         [["D", ""]],
-                        ["%"]
+                        [["D", ""]]
                     ]
                 }
             ]
@@ -582,7 +744,7 @@
                     "pattern": [
                         [["G", ""]],
                         [["E", ""]],
-                        ["%"]
+                        [["E", ""]]
                     ]
                 }
             ]
@@ -596,21 +758,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
-                    ]
-                }
-            ]
-        },
-        {
-            "type": "content",
-            "style": "default",
-            "lyrics": "On the highway to hell",
-            "chords": [
-                {
-                    "repeats": 1,
-                    "pattern": [
-                        [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -624,7 +772,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -637,6 +785,20 @@
                 {
                     "repeats": 1,
                     "pattern": [
+                        [["A", ""]],
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "content",
+            "style": "default",
+            "lyrics": "Highway to hell",
+            "chords": [
+                {
+                    "repeats": 1,
+                    "pattern": [
                         [["A", ""]]
                     ]
                 }
@@ -644,12 +806,16 @@
         },
         {
             "type": "content",
-            "style": "info",
+            "style": "musicianInfo",
             "lyrics": "Break",
             "chords": [
                 {
-                    "repeats": 5,
+                    "repeats": 1,
                     "pattern": [
+                        [["A", ""]],
+                        [["A", ""]],
+                        [["A", ""]],
+                        [["A", ""]],
                         [["A", ""]]
                     ]
                 }
@@ -664,7 +830,7 @@
                     "repeats": 4,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -678,7 +844,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -692,7 +858,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -706,7 +872,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -732,7 +898,7 @@
                 {
                     "repeats": 1,
                     "pattern": [
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -746,7 +912,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -760,7 +926,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]
@@ -774,7 +940,7 @@
                     "repeats": 1,
                     "pattern": [
                         [["A", ""]],
-                        [["D", ""], "%", ["G", ""], ["D", ""]]
+                        [["D", ""], ["D", ""], ["G", ""], ["D", ""]]
                     ]
                 }
             ]

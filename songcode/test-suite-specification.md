@@ -1,7 +1,8 @@
 # SongCode Converter - Test Suite Specification
 
-**Version**: 1.0  
+**Version**: 1.1  
 **Created**: February 13, 2026  
+**Updated**: February 13, 2026  
 **Purpose**: Framework-agnostic test specifications for SongCode converter implementation
 
 ---
@@ -15,9 +16,13 @@ This document provides comprehensive test cases for implementing the SongCode to
 Tests are organized by the 4 parsing phases and their component bricks:
 
 - **Phase 1**: First Pass Parsing (4 bricks)
+- **Phase 1.5**: Pattern Organization (1 brick)
 - **Phase 2**: Pattern Transformation (3 bricks)
 - **Phase 3**: Validation (3 bricks)
+- **Phase 3.5**: Lyric Transformation (1 brick)
 - **Phase 4**: Prompter Generation (4 bricks)
+
+**Total: 16 bricks**
 
 ### Test Case Format
 
@@ -345,6 +350,81 @@ Each test case specifies:
 - **Input**: `Intro\n$1`
 - **Expected**: Reject (must have `--` separator)
 - **Error**: E1.4.1 - Missing lyric separator
+
+---
+
+## Phase 1.5: Pattern Organization
+
+### 1.5 PatternIdAssigner
+
+**Purpose**: Assigns alphabetical IDs (A, B, C...) to unique patterns and builds the patterns object for the final output.
+
+**Input**: 
+- Pattern definitions from PatternParser (`PatternMap` with numeric keys)
+- Sections from SectionParser with pattern strings (inline or `$n` references)
+
+**Output**:
+- `PatternsObject` with alphabetical keys (A, B, C...) containing `{sc, json: null, measures: 0}`
+- Updated sections with `pattern.id` field set to assigned letter
+
+**Algorithm**:
+1. Iterate through sections in order
+2. For each section's pattern (after resolving `$n` references):
+   - Normalize the pattern string
+   - Check if this normalized pattern already exists
+   - If yes: reuse existing pattern ID
+   - If no: assign next alphabetical letter (A, B, C...)
+3. Build patterns object with assigned IDs
+
+#### Test 1.5.1: Single Pattern Assignment
+- **Input**: Section with inline pattern `"A;G;D;G"`
+- **Expected**: Pattern assigned ID "A", stored in patterns object as `{"A": {sc: "A;G;D;G", json: null, measures: 0}}`
+- **Error**: None
+
+#### Test 1.5.2: Multiple Unique Patterns
+- **Input**: 3 sections with patterns `"A;G"`, `"D;E"`, `"C;F"`
+- **Expected**: Patterns assigned IDs "A", "B", "C" in order of first appearance
+- **Error**: None
+
+#### Test 1.5.3: Reuse Same Pattern
+- **Input**: Section 1 with `"A;G;D;G"`, Section 2 with `"A;G;D;G"` (exact match)
+- **Expected**: Both sections reference pattern ID "A", only one entry in patterns object
+- **Error**: None
+
+#### Test 1.5.4: Pattern Reference Resolution
+- **Input**: Pattern definition `$1 → "A;G"`, Section with `$1`
+- **Expected**: Pattern "A;G" assigned ID "A", section references "A"
+- **Error**: None
+
+#### Test 1.5.5: Pattern Normalization Match
+- **Input**: Section 1 with `"A ; G"`, Section 2 with `"A;G"` (different spacing)
+- **Expected**: Both sections reference same pattern ID "A" (normalized to same string)
+- **Error**: None
+
+#### Test 1.5.6: Multi-line Pattern Normalization
+- **Input**: Section 1 with `"A;G\nD;E"`, Section 2 with `"A;G;D;E"`
+- **Expected**: Both sections reference same pattern ID "A" (newline converted to `;`)
+- **Error**: None
+
+#### Test 1.5.7: Empty Pattern Handling
+- **Input**: Section with empty pattern `""`
+- **Expected**: Pattern assigned ID "A" with `{sc: "", json: null, measures: 0}`
+- **Error**: None
+
+#### Test 1.5.8: Maximum Pattern IDs (26 patterns)
+- **Input**: 26 unique patterns
+- **Expected**: Patterns assigned IDs "A" through "Z"
+- **Error**: None
+
+#### Test 1.5.9: Pattern Order Independence
+- **Input**: Section order: Verse($1), Chorus($2), Verse($1)
+- **Expected**: First Verse assigns "A" to pattern $1, Chorus assigns "B" to pattern $2, second Verse reuses "A"
+- **Error**: None
+
+#### Test 1.5.10: Inline vs Referenced Pattern Same Content
+- **Input**: Pattern $1 = "A;G", Section 1 uses $1, Section 2 uses inline "A;G"
+- **Expected**: Both sections reference pattern ID "A" (same normalized content)
+- **Error**: None
 
 ---
 
@@ -741,6 +821,79 @@ Each test case specifies:
 
 ---
 
+## Phase 3.5: Lyric Transformation
+
+### 3.5 LyricTransformer
+
+**Purpose**: Transforms raw lyric strings into structured LyricObject array with parsed measure counts and style markers for final output.
+
+**Input**: 
+- Section with lyrics as `string[]` (e.g., `["First line _2", "Second line _2"]`)
+- Total measure count for the section
+
+**Output**:
+- Section with lyrics as `LyricObject[]` with structure: `{text: string, measures: number, style: 'normal' | 'info' | 'musician'}`
+
+**Algorithm**:
+1. For each lyric line in section:
+   - Extract text and `_N` measure count marker
+   - Detect special markers: `***text***` (info) or `:::text:::` (musician)
+   - Set style: 'info', 'musician', or 'normal'
+   - Remove markers from text
+2. Validate total measures match section measure count (already done in Phase 3)
+
+#### Test 3.5.1: Transform Single Normal Lyric
+- **Input**: `"First line _4"`
+- **Expected**: `{text: "First line", measures: 4, style: "normal"}`
+- **Error**: None
+
+#### Test 3.5.2: Transform Multiple Normal Lyrics
+- **Input**: `["First line _2", "Second line _2"]`
+- **Expected**: `[{text: "First line", measures: 2, style: "normal"}, {text: "Second line", measures: 2, style: "normal"}]`
+- **Error**: None
+
+#### Test 3.5.3: Transform Info Marker Lyric
+- **Input**: `"***Guitar Solo*** _4"`
+- **Expected**: `{text: "Guitar Solo", measures: 4, style: "info"}`
+- **Error**: None
+
+#### Test 3.5.4: Transform Musician Marker Lyric
+- **Input**: `":::Watch drummer::: _2"`
+- **Expected**: `{text: "Watch drummer", measures: 2, style: "musician"}`
+- **Error**: None
+
+#### Test 3.5.5: Transform Empty Lyric Line
+- **Input**: `"_4"`
+- **Expected**: `{text: "", measures: 4, style: "normal"}`
+- **Error**: None
+
+#### Test 3.5.6: Mixed Lyric Types
+- **Input**: `["Verse text _2", "***Solo*** _2", ":::Watch tempo::: _2", "Back to verse _2"]`
+- **Expected**: Array with 4 objects with styles: normal, info, musician, normal
+- **Error**: None
+
+#### Test 3.5.7: Empty Lyrics Array (Instrumental)
+- **Input**: `[]`
+- **Expected**: `[]` (empty array remains empty)
+- **Error**: None
+
+#### Test 3.5.8: Lyric with Leading/Trailing Spaces
+- **Input**: `"  Spaced text  _4"`
+- **Expected**: `{text: "Spaced text", measures: 4, style: "normal"}` (text trimmed)
+- **Error**: None
+
+#### Test 3.5.9: Info Marker with Special Characters
+- **Input**: `"***Solo (A minor)*** _4"`
+- **Expected**: `{text: "Solo (A minor)", measures: 4, style: "info"}`
+- **Error**: None
+
+#### Test 3.5.10: Preserve Text Between Markers
+- **Input**: `"***Solo***_4"` (no space before marker)
+- **Expected**: `{text: "Solo", measures: 4, style: "info"}`
+- **Error**: None
+
+---
+
 ## Phase 4: Prompter Generation
 
 ### 4.1 PatternExpander
@@ -863,7 +1016,7 @@ Each test case specifies:
 - **Error**: None
 
 #### Test 4.4.6: % at Start of Pattern (No Previous Chord)
-- **Input**: Measures: `[["%"]]`
+- **Input**: Measures: `["%"]`
 - **Expected**: Error or special handling (no previous chord to reference)
 - **Error**: E4.1.1 - Repeat symbol with no previous chord
 
@@ -1051,7 +1204,8 @@ When the parser specification changes:
 ---
 
 **Version History**:
-- v1.0 (Feb 13, 2026): Initial test suite specification
+- v1.1 (Feb 13, 2026): Added Phase 1.5 (PatternIdAssigner) and Phase 3.5 (LyricTransformer) - Total 16 bricks
+- v1.0 (Feb 13, 2026): Initial test suite specification with 14 bricks
 
 **Related Documents**:
 - [Parser Specification](parser-generator-specification.md)

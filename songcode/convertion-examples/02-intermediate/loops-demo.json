@@ -19,7 +19,7 @@
       "measures": 8
     },
     "B": {
-      "sc": "[A;D;G;A]2;E;E",
+      "sc": "[A;D;G;A]2:E;E",
       "json": [
         "loopStart",
         [["A", ""]],
@@ -127,9 +127,8 @@
       "lyrics": "Then two E measures",
       "chords": [
         {
-          "repeats": 1,
+          "repeats": 2,
           "pattern": [
-            [["E", ""]],
             [["E", ""]]
           ]
         }

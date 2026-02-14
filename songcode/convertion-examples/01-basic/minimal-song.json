@@ -1,12 +1,22 @@
 {
   "meta": {
-    "bpm": 120,
     "time": {
       "numerator": 4,
       "denominator": 4
     }
   },
-  "patterns": {},
+  "patterns": {
+    "A": {
+      "sc": "C;G;Am;F",
+      "json": [
+        [["C", ""]],
+        [["G", ""]],
+        [["Am", ""]],
+        [["F", ""]]
+      ],
+      "measures": 4
+    }
+  },
   "sections": [
     {
       "name": "Instrumental",

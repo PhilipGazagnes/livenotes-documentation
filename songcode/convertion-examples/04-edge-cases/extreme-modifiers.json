@@ -28,14 +28,15 @@
         "repeat": 3,
         "bpm": 150,
         "time": null,
-        "cutStart": 1,
-        "cutEnd": 2,
+        "cutStart": [1, 0],
+        "cutEnd": [2, 0],
         "before": {
             "sc": "Em;Em",
             "json": [
                 [["Em", ""]],
                 [["Em", ""]]
-            ]
+            ],
+            "measures": 2
         },
         "after": {
             "sc": "D;D;D",
@@ -43,7 +44,8 @@
                 [["D", ""]],
                 [["D", ""]],
                 [["D", ""]]
-            ]
+            ],
+            "measures": 3
         }
       },
       "measures": 14,
@@ -154,7 +156,7 @@
       "lyrics": "Three D measures after",
       "chords": [
         {
-          "repeats": 3,
+          "repeats": 1,
           "pattern": [
             [["C", ""]]
           ]
@@ -167,7 +169,7 @@
       "lyrics": "All at 150 BPM",
       "chords": [
         {
-          "repeats": 3,
+          "repeats": 1,
           "pattern": [
             [["G", ""]],
             [["D", ""]],

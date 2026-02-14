@@ -1541,7 +1541,7 @@ last_chord = null
 last_measure = null
 
 for each measure in expanded_pattern:
-    if measure contains only [["%"]]:
+    if measure contains only ["%"]:
         // Repeat entire previous measure
         if last_measure == null:
             ERROR: "% symbol with no previous measure"
@@ -1569,13 +1569,13 @@ for each measure in expanded_pattern:
 
 2. **Repeating entire measure**:
    ```
-   Input:  [["E", ""]], [["%"]]
+   Input:  [["E", ""]], ["%"]
    Output: [["E", ""]], [["E", ""]]
    ```
 
 3. **Complex case**:
    ```
-   Input:  [["E", ""], ["A", ""]], [["%"]], [["D", ""], "%"]
+   Input:  [["E", ""], ["A", ""]], ["%"], [["D", ""], "%"]
    Output: [["E", ""], ["A", ""]], [["E", ""], ["A", ""]], [["D", ""], ["D", ""]]
    ```
 

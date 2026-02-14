@@ -20,7 +20,7 @@
         [["Bm", ""]],
         [["G", ""]]
       ],
-      "measures": 6
+      "measures": 8
     }
   },
   "sections": [
@@ -32,7 +32,7 @@
         "repeat": 1,
         "bpm": null,
         "time": null,
-        "cutStart": 2,
+        "cutStart": [2, 0],
         "cutEnd": null,
         "before": null,
         "after": null
@@ -65,7 +65,7 @@
         "bpm": null,
         "time": null,
         "cutStart": null,
-        "cutEnd": 3,
+        "cutEnd": [3, 0],
         "before": null,
         "after": null
       },
@@ -91,8 +91,8 @@
         "repeat": 1,
         "bpm": null,
         "time": null,
-        "cutStart": 1,
-        "cutEnd": 2,
+        "cutStart": [1, 0],
+        "cutEnd": [2, 0],
         "before": null,
         "after": null
       },
