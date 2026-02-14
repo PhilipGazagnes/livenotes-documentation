@@ -2,6 +2,22 @@
 
 **Version 1.0**
 
+---
+
+## 🚀 Reference Implementation Available
+
+A complete **TypeScript implementation** of this specification is available:
+
+- **NPM Package**: [@livenotes/songcode-converter](https://www.npmjs.com/package/@livenotes/songcode-converter)
+- **GitHub Repository**: [livenotes-sc-converter](https://github.com/PhilipGazagnes/livenotes-sc-converter)
+- **Status**: Production-ready (v1.0.0)
+- **Tests**: 205 tests passing (100%), >92% coverage
+- **Performance**: 1-3ms per song conversion
+
+This specification is fully implemented and can be used as a reference or directly as an npm package.
+
+---
+
 ## Table of Contents
 
 1. [Overview](#overview)

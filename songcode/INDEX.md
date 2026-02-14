@@ -4,7 +4,17 @@ A visual guide to navigate the SongCode documentation.
 
 ---
 
-## 📚 Documentation Map
+## � Implementation Available
+
+A complete **TypeScript/JavaScript converter** is now available:
+
+- **NPM Package**: [@livenotes/songcode-converter](https://www.npmjs.com/package/@livenotes/songcode-converter)
+- **GitHub**: [livenotes-sc-converter](https://github.com/PhilipGazagnes/livenotes-sc-converter)
+- **Install**: `npm install @livenotes/songcode-converter`
+
+---
+
+## �📚 Documentation Map
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -28,7 +38,8 @@ A visual guide to navigate the SongCode documentation.
                           │
                           ▼
         ┌─────────────────────────────────┐
-        │     Parser generates JSON       │
+        │   Parser generates JSON         │
+        │   (npm package available!)      │
         └─────────────────────────────────┘
                           │
          ┌────────────────┴────────────────┐
@@ -48,6 +59,18 @@ A visual guide to navigate the SongCode documentation.
 ---
 
 ## 🎯 Choose Your Path
+
+### Path 0: "I want to use the converter now"
+
+**NEW!** Skip implementation and use the ready-made package:
+
+```bash
+npm install @livenotes/songcode-converter
+```
+
+See the [converter README](https://github.com/PhilipGazagnes/livenotes-sc-converter#readme) for usage examples.
+
+---
 
 ### Path 1: "I want to write songs"
 

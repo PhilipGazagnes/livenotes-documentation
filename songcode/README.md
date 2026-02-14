@@ -12,6 +12,34 @@
 
 ---
 
+## 🚀 Implementation
+
+A complete **TypeScript/JavaScript converter** is now available:
+
+- **NPM Package**: [@livenotes/songcode-converter](https://www.npmjs.com/package/@livenotes/songcode-converter)
+- **GitHub Repository**: [livenotes-sc-converter](https://github.com/PhilipGazagnes/livenotes-sc-converter)
+- **Version**: 1.0.0 (Stable)
+
+### Installation
+
+```bash
+npm install @livenotes/songcode-converter
+```
+
+### Quick Usage
+
+```javascript
+import { SongCodeConverter } from '@livenotes/songcode-converter';
+
+const converter = new SongCodeConverter();
+const result = converter.convert(songCodeString);
+console.log(result); // Livenotes JSON
+```
+
+See the [converter README](https://github.com/PhilipGazagnes/livenotes-sc-converter#readme) for complete documentation.
+
+---
+
 ## Documentation Files
 
 This directory contains comprehensive documentation generated from your SongCode project specifications:

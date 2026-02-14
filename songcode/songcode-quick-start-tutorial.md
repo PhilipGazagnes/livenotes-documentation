@@ -491,6 +491,50 @@ G;C
 
 ---
 
+## Using the Converter
+
+Once you've written your SongCode file, you can convert it to Livenotes JSON format using the official npm package.
+
+### Installation
+
+```bash
+npm install @livenotes/songcode-converter
+```
+
+### Basic Usage
+
+```javascript
+const { SongCodeConverter } = require('@livenotes/songcode-converter');
+const fs = require('fs');
+
+// Create converter
+const converter = new SongCodeConverter();
+
+// Read your SongCode file
+const songCode = fs.readFileSync('my-song.sc', 'utf8');
+
+// Convert to JSON
+try {
+  const result = converter.convert(songCode);
+  console.log('Conversion successful!');
+  console.log('Sections:', result.sections.length);
+  console.log('Prompter items:', result.prompter.length);
+  
+  // Save to file
+  fs.writeFileSync('my-song.json', JSON.stringify(result, null, 2));
+} catch (error) {
+  console.error('Error:', error.message);
+}
+```
+
+### More Information
+
+- **Package Documentation**: [@livenotes/songcode-converter](https://www.npmjs.com/package/@livenotes/songcode-converter)
+- **Integration Examples**: See [`examples/integration/`](./examples/integration/README.md)
+- **GitHub Repository**: [livenotes-sc-converter](https://github.com/PhilipGazagnes/livenotes-sc-converter)
+
+---
+
 ## Next Steps
 
 ### Explore More Features
