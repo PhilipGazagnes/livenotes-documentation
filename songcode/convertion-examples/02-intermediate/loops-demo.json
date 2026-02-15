@@ -52,7 +52,7 @@
       "lyrics": [
         {
           "text": "8 measures from 2 repeated 4 times",
-          "measures": 8,
+          "measures": null,
           "style": "info"
         }
       ]
@@ -74,65 +74,16 @@
       "lyrics": [
         {
           "text": "Pattern repeats twice",
-          "measures": 8,
+          "measures": null,
           "style": "normal"
         },
         {
           "text": "Then two E measures",
-          "measures": 2,
+          "measures": null,
           "style": "normal"
         }
       ]
     }
   ],
-  "prompter": [
-    {
-      "type": "tempo",
-      "bpm": 120,
-      "time": "4/4"
-    },
-    {
-      "type": "content",
-      "style": "info",
-      "lyrics": "8 measures from 2 repeated 4 times",
-      "chords": [
-        {
-          "repeats": 4,
-          "pattern": [
-            [["A", ""]],
-            [["D", ""]]
-          ]
-        }
-      ]
-    },
-    {
-      "type": "content",
-      "style": "default",
-      "lyrics": "Pattern repeats twice",
-      "chords": [
-        {
-          "repeats": 2,
-          "pattern": [
-            [["A", ""]],
-            [["D", ""]],
-            [["G", ""]],
-            [["A", ""]]
-          ]
-        }
-      ]
-    },
-    {
-      "type": "content",
-      "style": "default",
-      "lyrics": "Then two E measures",
-      "chords": [
-        {
-          "repeats": 2,
-          "pattern": [
-            [["E", ""]]
-          ]
-        }
-      ]
-    }
-  ]
+  "prompter": []
 }

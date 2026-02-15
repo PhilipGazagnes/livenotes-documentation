@@ -1405,8 +1405,8 @@ function is_prompter_eligible(sections, patterns):
     // Check 3: All lyric lines must have measure counts
     for each section in sections:
         for each lyric in section.lyrics:
-            if lyric.measure_count is null or undefined:
-                return false  // Lyric missing measure count
+            if lyric.measures is null:
+                return false  // Lyric missing measure count (timing info not provided)
     
     // Check 4: All measure counts already validated in Phase 3
     // (sum matches section measures)
@@ -1654,7 +1654,7 @@ Result: [C, D]
 
 #### Substep 4.3.5: Pair Lyrics with Measures
 
-**Note**: At this point in Phase 4, all sections are guaranteed to have lyrics with measure counts (verified in Step 4.1). This substep pairs each lyric with its measures.
+**Note**: At this point in Phase 4, all sections are guaranteed to have lyrics with measure counts (validated in Step 4.1 - lyrics where `measures` is not `null`). This substep pairs each lyric with its measures.
 
 For each lyric line with measure count:
 

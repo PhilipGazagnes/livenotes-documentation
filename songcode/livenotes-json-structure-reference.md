@@ -415,14 +415,46 @@ Contains the structural sections of the song (verses, choruses, etc.).
 - **Structure**: Same as `before`
 
 #### `lyrics`
-- **Type**: Array of arrays
-- **Description**: Lyric lines with measure counts
-- **Structure**: `[lyric_text, measure_count]`
-- **Example**:
+- **Type**: Array of objects
+- **Description**: Lyric lines with text, timing, and style information
+- **Structure**: Each lyric is an object with three properties:
+  - `text` (string): The lyric text
+  - `measures` (number or null): Number of measures this lyric spans. `null` if song has no timing information.
+  - `style` (string): Display style - `"normal"`, `"info"`, or `"musician"`
+- **All-or-nothing rule**: Either ALL lyrics have `measures` as numbers (with timing), or ALL lyrics have `measures` as `null` (without timing). Mixed values are invalid.
+- **Example with timing**:
   ```json
   [
-      ["First line", 2],
-      ["Second line", 3]
+      {
+          "text": "First line",
+          "measures": 2,
+          "style": "normal"
+      },
+      {
+          "text": "Second line",
+          "measures": 3,
+          "style": "normal"
+      },
+      {
+          "text": "Guitar Solo",
+          "measures": 8,
+          "style": "info"
+      }
+  ]
+  ```
+- **Example without timing**:
+  ```json
+  [
+      {
+          "text": "First line",
+          "measures": null,
+          "style": "normal"
+      },
+      {
+          "text": "Second line",
+          "measures": null,
+          "style": "normal"
+      }
   ]
   ```
 
@@ -447,8 +479,16 @@ Contains the structural sections of the song (verses, choruses, etc.).
         }
     },
     "lyrics": [
-        ["I'm on the highway to hell", 2],
-        ["Highway to hell", 2]
+        {
+            "text": "I'm on the highway to hell",
+            "measures": 2,
+            "style": "normal"
+        },
+        {
+            "text": "Highway to hell",
+            "measures": 2,
+            "style": "normal"
+        }
     ]
 }
 ```
@@ -820,10 +860,26 @@ Here's a minimal but complete Livenotes JSON:
                 "after": null
             },
             "lyrics": [
-                ["First line", 2],
-                ["Second line", 2],
-                ["Third line", 2],
-                ["Fourth line", 2]
+                {
+                    "text": "First line",
+                    "measures": 2,
+                    "style": "normal"
+                },
+                {
+                    "text": "Second line",
+                    "measures": 2,
+                    "style": "normal"
+                },
+                {
+                    "text": "Third line",
+                    "measures": 2,
+                    "style": "normal"
+                },
+                {
+                    "text": "Fourth line",
+                    "measures": 2,
+                    "style": "normal"
+                }
             ]
         }
     ],

@@ -12,10 +12,10 @@ E;E
 Intro with Loop
 $1
 --
-***8 measures from 2 repeated 4 times*** _8
+***8 measures from 2 repeated 4 times***
 
 Verse with Loop and Line Break
 $2
 --
-Pattern repeats twice _8
-Then two E measures _2
+Pattern repeats twice
+Then two E measures
