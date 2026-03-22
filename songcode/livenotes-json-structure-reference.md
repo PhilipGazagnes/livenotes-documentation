@@ -89,7 +89,7 @@ Contains song-level information and settings.
 - **Max length**: 100 characters
 
 #### `bpm`
-- **Type**: Integer or null
+- **Type**: Float or null
 - **Range**: 0-400
 - **Description**: Tempo in beats per minute
 
@@ -378,7 +378,7 @@ Contains the structural sections of the song (verses, choruses, etc.).
 - **Example**: 2 means play the pattern twice
 
 ###### `bpm`
-- **Type**: Integer or null
+- **Type**: Float or null
 - **Description**: Section-specific tempo override
 - **Example**: 140 (faster than global tempo)
 
@@ -545,7 +545,7 @@ Indicates tempo or time signature change.
 
 **Properties**:
 - `type`: Always `"tempo"`
-- `bpm`: Integer (tempo)
+- `bpm`: Float (tempo)
 - `time`: String format (e.g., `"4/4"`, `"3/4"`)
 
 #### Content Item

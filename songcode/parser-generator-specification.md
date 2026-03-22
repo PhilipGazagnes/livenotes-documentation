@@ -198,7 +198,7 @@ This has ***incomplete         → style: "default" (no end marker)
 **Allowed keys**: Only `@bpm` and `@time`
 
 **Validation**:
-- `@bpm`: Same as global (integer 0-400)
+- `@bpm`: Same as global (float 0-400)
 - `@time`: Same as global (denominator must be 4)
 
 **Not allowed at section level**:
@@ -259,7 +259,7 @@ Create the base Livenotes JSON structure:
 | `artist` | string | max 100 chars | null |
 | `original` | base chord | valid base chord | null |
 | `capo` | integer | 1-20 | null |
-| `bpm` | integer | 0-400 | null |
+| `bpm` | float | 0-400 | null |
 | `time` | time sig | `n/4` (V1: denominator must be 4) | 4/4 |
 | `warning` | string | max 100 chars | null |
 | `end` | string | max 100 chars | null |

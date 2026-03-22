@@ -93,6 +93,11 @@ Each test case specifies:
 - **Expected**: `{bpm: 120}`
 - **Error**: None
 
+#### Test 1.2.3b: Valid Float BPM Metadata
+- **Input**: `@bpm 119.5`
+- **Expected**: `{bpm: 119.5}`
+- **Error**: None
+
 #### Test 1.2.4: BPM Below Range
 - **Input**: `@bpm -10`
 - **Expected**: Reject

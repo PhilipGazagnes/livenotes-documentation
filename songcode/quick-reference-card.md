@@ -39,7 +39,7 @@
 |-----|------|--------------|---------|
 | `@name` | string | max 100 chars | `@name Highway to Hell` |
 | `@artist` | string | max 100 chars | `@artist AC/DC` |
-| `@bpm` | integer | 0-400 | `@bpm 120` |
+| `@bpm` | float | 0-400 | `@bpm 120`, `@bpm 119.5` |
 | `@time` | time sig | `n/4` (V1: denom=4) | `@time 3/4` |
 | `@original` | chord | base chord | `@original A` |
 | `@capo` | integer | 1-20 | `@capo 3` |

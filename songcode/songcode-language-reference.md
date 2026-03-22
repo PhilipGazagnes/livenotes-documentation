@@ -87,9 +87,9 @@ Each metadata line starts with `@` followed by a key and value:
 - **Note**: When the guitar capo is written, it is considered that the chords writen in the patterns are relative from the capo position. For example, with @capo 3, an Am chord in the file would in reality be a Cm.
 
 #### `@bpm`
-- **Type**: Integer (0-400)
+- **Type**: Float (0-400)
 - **Description**: Tempo in beats per minute
-- **Example**: `@bpm 120`
+- **Example**: `@bpm 120`, `@bpm 119.5`
 
 #### `@time`
 - **Type**: Time signature notation
