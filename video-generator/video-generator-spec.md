@@ -219,27 +219,32 @@ For each item in the `prompter` array:
 
 - **If `type: "content"`** → create a visual block with:
   - `start_time = current_time`
-  - `duration = total_measures × seconds_per_measure`
+  - `duration = Σ actual_measure_duration(measure)` — summed over all measures after expanding repeats
   - Then advance: `current_time += duration`
 
 Where:
 
 ```
-seconds_per_beat    = 60 / current_bpm
-seconds_per_measure = seconds_per_beat × current_time_sig.numerator
-total_measures      = Σ (chord_group.repeats × chord_group.pattern.length)
-                      for each chord_group in content_item.chords
+seconds_per_beat         = 60 / current_bpm
+full_seconds_per_measure = seconds_per_beat × current_time_sig.numerator
+
+// For each measure in a chord group's pattern (repeated chord_group.repeats times):
+n_elements               = total elements in the measure (chords + removers, excluding "_")
+remover_count            = number of "=" elements in the measure
+chord_count              = n_elements - remover_count
+beats_per_slot           = current_time_sig.numerator / n_elements
+actual_beats_in_measure  = chord_count × beats_per_slot
+actual_measure_duration  = actual_beats_in_measure × seconds_per_beat
 ```
+
+**Note:** A full measure with no removers has `actual_beats_in_measure = time_numerator` as expected. Each `"="` remover removes one slot's worth of beats from the measure, shortening its duration proportionally.
+
+**Examples at BPM 120, 4/4:**
+- `["C", ""]` → 1 element, 0 removers → 4 beats → 2.0 s
+- `[["D", ""], "="]` → 2 elements, 1 remover → 2 beats → 1.0 s
+- `[["C", ""], "=", "=", "="]` → 4 elements, 3 removers → 1 beat → 0.5 s
 
 ### Timing Calculations
-
-**Measure duration** at a given BPM and time signature:
-
-```
-seconds_per_measure = (60 / bpm) × time_numerator
-```
-
-Example: BPM 120, 4/4 → `(60 / 120) × 4 = 2.0 s` per measure.
 
 **Beat duration**:
 
@@ -247,21 +252,53 @@ Example: BPM 120, 4/4 → `(60 / 120) × 4 = 2.0 s` per measure.
 seconds_per_beat = 60 / bpm
 ```
 
-**Block duration** (content item):
+**Full measure duration** (no removers):
 
 ```
-block_duration = Σ (chord_group.repeats × chord_group.pattern.length) × seconds_per_measure
+full_seconds_per_measure = (60 / bpm) × time_numerator
+```
+
+Example: BPM 120, 4/4 → `(60 / 120) × 4 = 2.0 s`.
+
+**Actual measure duration** (accounting for removers):
+
+A `"="` remover occupies one element slot in a measure but removes that slot's beats from the timeline. Given a measure with `n` total elements (chords + removers):
+
+```
+beats_per_slot          = time_numerator / n
+remover_count           = number of "=" elements in the measure
+actual_beats_in_measure = time_numerator - (remover_count × beats_per_slot)
+actual_measure_duration = actual_beats_in_measure × seconds_per_beat
+```
+
+**Block duration** (content item):
+
+Because measures within a block can have different actual durations (due to varying remover counts), the block duration is the sum of each individual measure's actual duration:
+
+```
+block_duration = Σ actual_measure_duration(measure)
+                 for every measure in every chord group (after expanding repeats)
 ```
 
 **Beat absolute timestamps** within a block (for dot animation):
 
-Each beat in the block has an absolute timestamp derived from its position in the sequence of measures. Given:
-- Block starts at `t_block`
-- Measure index `m` (0-based, after expanding repeats)
-- Beat index `b` within that measure (0-based)
+Beat timestamps are computed with a running time cursor, since measures no longer have uniform duration. For each measure, only the beats belonging to chord elements fire — remover slots produce no beat events:
 
 ```
-t_beat = t_block + (m × seconds_per_measure) + (b × seconds_per_beat)
+t_cursor = t_block
+for each measure (after expanding repeats):
+    beats_per_slot = time_numerator / n_elements_in_measure
+    t_in_measure   = 0
+    for each element in measure:
+        if element is a chord:
+            for b in range(beats_per_slot):
+                t_beat = t_cursor + t_in_measure + (b × seconds_per_beat)
+                → emit beat event
+            t_in_measure += beats_per_slot × seconds_per_beat
+        if element is "=" (remover):
+            // advance cursor by the slot duration, but emit no beat events
+            t_in_measure += beats_per_slot × seconds_per_beat
+    t_cursor += actual_measure_duration
 ```
 
 ---
@@ -323,6 +360,7 @@ The chord row contains:
 | `["G", ""]` | `G` |
 | `%` | `%` |
 | `_` | `_` |
+| `"="` (remover) | *(not rendered)* — occupies no visual space in the chord row |
 
 **Multiple chords per measure**: displayed inline with a space separator within the cell:
 
@@ -342,14 +380,17 @@ A D |G   |E   |A D       ..
 
 ### Dot Row Format
 
-Each beat in each measure has one dot. Dots are grouped by measure and separated by `|` to mirror the chord row above.
+Each **chord** element in each measure produces one dot per beat it owns. Dots are grouped by measure and separated by `|` to mirror the chord row above.
 
 - **Active beat**: highlighted dot (bright accent color)
 - **Past beats** (within the current pass): slightly brighter than inactive
 - **Future beats**: dim
 
-In 4/4, each measure produces 4 dots: `....`
-In 3/4, each measure produces 3 dots: `...`
+**Remover elements (`"="`) produce no dots** — they are completely absent from the dot row. The total dot count per measure equals its actual beat count (not `time_numerator`).
+
+In 4/4, a full measure (no removers) produces 4 dots: `....`
+In 4/4, a measure with 1 remover out of 2 elements produces 2 dots: `..`
+In 3/4, each full measure produces 3 dots: `...`
 
 For measures with multiple chords, dots are grouped under their respective chord:
 
@@ -359,6 +400,15 @@ Dot row:     .. ..|....
 ```
 
 Where `A` gets 2 dots (2 beats) and `D` gets 2 dots (2 beats) in 4/4 time.
+
+Example with a remover — 4/4, measure `[D, =]`:
+
+```
+Chord row:   D
+Dot row:     ..
+```
+
+`D` gets 2 dots (2 beats); the `"="` slot is invisible and the measure is 2 beats long.
 
 ### Repeat Dots
 
