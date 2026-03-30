@@ -1,62 +1,79 @@
 # Livenotes App Documentation
 
-Documentation for the Livenotes application - a cross-platform chord chart editor and viewer.
+Documentation for the Livenotes application - a cross-platform song catalog and chord chart editor.
 
 ## Overview
 
 The Livenotes App is a web and mobile application that allows musicians to:
-- Write songs using SongCode syntax
-- Save and organize their song library
-- Visualize chord charts in an interactive viewer
-- Access their songs on web, iOS, and Android
-- Collaborate with other musicians (future)
+- **V1**: Organize songs with metadata, tags, lists, search, and filtering
+- **V2**: Write and edit songs using SongCode syntax with syntax highlighting
+- **V2**: Visualize chord charts in an interactive viewer
+- **V3**: Collaborate with other musicians (multi-project, sharing, roles)
+- **V4+**: Advanced features (offline mode, version history, public sharing, etc.)
 
 ## Documentation Structure
 
-- **[Tech Stack](./tech-stack.md)** - Technology choices and rationale
-- **[Architecture](./architecture.md)** - Technical architecture and design decisions (TODO)
-- **[Features](./features.md)** - Feature specifications and requirements (TODO)
-- **[API Reference](./api.md)** - Backend API documentation (TODO)
+### Core Documents
 
-## Tech Stack
+- **[Roadmap](./roadmap.md)** - Product vision and development strategy (V1-V4)
+- **[Features](./features.md)** - Feature specifications organized by version
+- **[Data Model](./data-model.md)** - Database schema and entity relationships
+
+### V1 Specifications (Complete - Ready for Development)
+
+- **[V1 MVP Spec](./v1-mvp-spec.md)** - Overview and scope of Version 1
+- **[V1 UI/UX Spec](./v1-ui-spec.md)** - Complete UI/UX specifications (all screens, flows, interactions)
+- **[V1 Technical Spec](./v1-technical-spec.md)** - Complete technical implementation details (database, validation, constants, deployment)
+
+### Additional Resources
+
+- **[Tech Stack](./tech-stack.md)** - Technology choices and rationale
+
+## Tech Stack (V1)
 
 ### Frontend
 - **Framework**: Vue 3 (Composition API)
-- **UI Library**: Ionic Vue
-- **Mobile Wrapper**: Capacitor
+- **UI Library**: Ionic Vue (mobile-ready components)
+- **Styling**: Tailwind CSS (dark mode)
 - **Build Tool**: Vite
 - **Language**: TypeScript
-
-### Editor
-- **CodeMirror 6** - Lightweight code editor with syntax highlighting
+- **State Management**: Pinia
 
 ### Backend
-- **Supabase** (recommended) - PostgreSQL + Auth + Storage + Realtime
-  - Alternative: Firebase
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth (email + OAuth providers)
+- **API**: Supabase auto-generated REST API
 
 ### Deployment
-- **Web**: Netlify or Vercel
-- **iOS**: App Store (via Xcode)
-- **Android**: Play Store (via Android Studio)
+- **Web**: Netlify or Vercel (static SPA)
+- **Mobile**: Not in V1 (Capacitor-ready structure for future)
 
 ### Key Dependencies
-- `@livenotes/songcode-converter` - Core SongCode parser
+- `@livenotes/songcode-converter` - Core SongCode parser (used in V2+)
+- `@supabase/supabase-js` - Supabase client SDK
 
-## Cross-Platform Strategy
+## Version Strategy
 
-**One codebase → Three platforms**
+**V1: Song Catalog & Organization**
+- Focus on organizing songs with metadata, tags, lists, search, filtering
+- No SongCode editor or viewer yet
+- Web-only, mobile-first responsive design
+- **Goal**: Get a working catalog system in use quickly
 
-The app uses a hybrid/web-based approach:
-- Built with standard web technologies (Vue, TypeScript)
-- Wrapped with Capacitor for native iOS/Android apps
-- Deployed as-is for web version
+**V2: Content Editing**
+- Add CodeMirror 6 for SongCode editing
+- Add chord chart viewer with rendering
+- Full content management
 
-**Why hybrid for v1?**
-- Faster time to market
-- Leverages existing web skills
-- SongCode editing is primarily text-based (web's strength)
-- Chord viewer is layout-focused (CSS Grid/Flexbox excel here)
-- Can migrate to native later if needed (but probably won't need to)
+**V3: Collaboration**
+- Multi-project system
+- Member invitations and roles
+- Song transfers between projects
+
+**V4+: Advanced Features**
+- Offline mode, version history, public sharing, etc.
+
+See [roadmap.md](./roadmap.md) for detailed version strategy.
 
 ## Repository
 
@@ -66,7 +83,23 @@ This documentation defines the specifications and architecture before implementa
 
 ## Development Status
 
-📝 **Status**: Planning phase
+� **Status**: Specifications complete - Ready to start V1 development
+
+**Completed:**
+- ✅ Product roadmap defined (V1-V4 strategy)
+- ✅ Complete V1 UI/UX specifications
+- ✅ Complete V1 technical specifications
+- ✅ Database schema designed (V1-V3)
+- ✅ All validation rules and constants defined
+- ✅ User flows and wireframes documented
+
+**Next Steps:**
+1. Create `livenotes-app` repository
+2. Set up Supabase project
+3. Initialize Vue + Ionic + Vite project
+4. Implement V1 features per specifications
+
+**Last Updated:** March 30, 2026
 
 ## Related Documentation
 

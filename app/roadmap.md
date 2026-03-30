@@ -22,117 +22,162 @@ Building a fully-featured collaborative music app is a big undertaking. If we tr
 
 ### The Solution: Incremental Delivery
 
-**V1**: Build a minimal but useful app for solo use. Get it in my hands quickly and start using it daily.
+**V1**: Build a song catalog and organization system for solo use. Get it in my hands quickly to start organizing my songs.
 
-**V2**: Once V1 proves the concept and is being used regularly, add collaboration features for working with others.
+**V2**: Add SongCode editor and chord chart viewer for full content management.
 
-**V3+**: Based on real usage, add advanced features like version history, public sharing, advanced search, etc.
+**V3**: Add collaboration features for working with others (multi-project, sharing, roles).
+
+**V4+**: Based on real usage, add advanced features like version history, public sharing, offline mode, etc.
 
 ---
 
-## Version 1: Personal Song Library
+## Version 1: Song Catalog & Organization
 
 **Status**: 📝 Planning → 🚧 Development
 
-**Goal**: A working app for managing my personal chord charts
+**Goal**: Build a catalog system to track and organize songs
 
 **Timeline**: [TODO: estimate]
 
 ### What's Included
 - Authentication (login/signup)
-- Personal song library
+- Personal song library (metadata only: title, artist, key, tempo, etc.)
 - Create/edit/delete songs
-- SongCode editor with syntax highlighting
-- Chord chart viewer
+- **Tags** for categorization
+- **Lists** for setlists and collections
+- **Search** and **filtering** UI
+- Basic song list view with sorting
 
 ### What's NOT Included
+- SongCode editor (no content editing yet)
+- Chord chart viewer
+- Full SongCode content management
 - Collaboration (projects, members, roles)
-- Organization tools (tags, lists)
-- Advanced UI features (search, filters)
 
 ### Technical Approach
 - Web app only (mobile comes later)
 - Supabase for backend (PostgreSQL + Auth)
 - Vue 3 + Ionic (for future mobile readiness)
-- CodeMirror 6 for editing
+- Focus on catalog and organization features
 
 ### Why This Works
-- Gets a functional app in my hands fast
-- Validates the core value: writing and viewing chord charts
-- Tests the SongCode syntax and parser in real usage
+- Addresses immediate need: organizing existing songs
+- Gets a functional catalog in my hands fast
+- Can track songs even without full content
+- Validates organization patterns before adding editor complexity
 - Establishes architecture for future growth
 
 ### Success Metrics
-- I'm using it regularly for my songs
-- SongCode syntax feels natural
-- Editor and viewer are pleasant to use
+- I'm using it regularly to track my songs
+- Can find songs quickly using tags and search
+- Lists help me organize setlists
+- Organization system feels intuitive
 - No major technical debt blocking V2
 
 ---
 
-## Version 2: Collaborative Projects
+## Version 2: SongCode Editor & Viewer
+
+**Status**: 🔮 Planned
+
+**Goal**: Add full content management with SongCode editing and chord chart viewing
+
+**Timeline**: [TODO: after V1 ships and stabilizes]
+
+### What's Added
+- **SongCode editor** with syntax highlighting (CodeMirror 6)
+- **Chord chart viewer** with formatted display
+- Parse and validate SongCode in real-time
+- Store full song content (`songcode_content` field)
+- Edit mode / view mode switching
+
+### Why Wait Until V2?
+- V1 validates the organization system first
+- Editor and parser add significant complexity
+- Can organize songs by metadata alone initially
+- Need to ensure catalog UX is solid before adding content editing
+- SongCode parser is already built and ready to integrate
+
+### Technical Additions
+- CodeMirror 6 integration
+- `@livenotes/songcode-converter` npm package integration
+- Song content storage and parsing pipeline
+- Viewer rendering components
+- Editor/viewer UI components
+
+### Migration Path from V1 to V2
+1. Existing songs keep their metadata
+2. Add `songcode_content` field to songs
+3. Users can now add full song content to existing catalog entries
+4. Editor and viewer modes become available
+5. Organization features (tags, lists, search) continue to work
+
+**Zero disruption**: V1 song catalog remains intact, content editing is purely additive.
+
+---
+
+## Version 3: Collaborative Projects
 
 **Status**: 🔮 Planned
 
 **Goal**: Enable sharing songs with bandmates and collaborators
 
-**Timeline**: [TODO: after V1 ships and stabilizes]
+**Timeline**: [TODO: after V2 ships and stabilizes]
 
 ### What's Added
 - Multi-project system
 - Invite members to projects
 - Role management (owner/editor/reader)
 - Song transfer between projects (with approval)
-- Tags for organization
-- Lists for setlists
-- Filtering and search UI
+- Permission management and sharing
 
-### Why Wait Until V2?
-- V1 validates the core concept first
+### Why Wait Until V3?
+- V1 and V2 validate solo workflows first
 - Collaboration adds significant complexity
-- Need to test SongCode workflow solo before sharing
-- Database and architecture are already designed for V2 (no major refactor needed)
+- Need to test organization and editing patterns before sharing
+- Database is already designed for V3 (no major refactor needed)
 
 ### Technical Additions
 - ProjectMembership table and RLS policies
-- Tag, List, and junction tables
 - Transfer request workflow
 - Real-time updates (Supabase subscriptions)
-- More complex permissions system
+- Complex permissions system
+- Project switcher UI
 
-### Migration Path from V1 to V2
+### Migration Path from V2 to V3
 1. User's existing personal project stays as-is
 2. Add ability to create new shared projects
 3. Add project switcher UI
 4. Personal project remains private (no invites allowed)
 5. User can now collaborate in shared projects
 
-**Zero disruption**: V1 users keep working exactly as before, with new features available if they want them.
+**Zero disruption**: V2 users keep working exactly as before, with new features available if they want them.
 
 ---
 
-## Version 3+: Advanced Features
+## Version 4+: Advanced Features
 
 **Status**: 💭 Ideas
 
-These are features that could come after V2, based on real user needs:
+These are features that could come after V3, based on real user needs:
 
 ### Possible Features
+- **Offline Mode**: Work without internet, local caching with sync queue, conflict resolution (complex, deferred from V1)
 - **Version History**: See past revisions of songs, restore old versions
 - **Real-time Collaboration**: Multiple users editing same song simultaneously (Google Docs style)
 - **Public Sharing**: Generate read-only links to share songs publicly
-- **Advanced Search**: Search by chords, key, tempo, lyrics, etc.
+- **Advanced Search**: Search by chords, key, tempo, lyrics, metadata
 - **Export**: PDF export, plain text, ChordPro format
 - **Transposition**: Change key of entire song
 - **Audio**: Attach audio recordings or links to songs
 - **Mobile Apps**: Native iOS/Android apps (or just Capacitor-wrapped PWA)
-- **Offline Mode**: Work without internet, sync when back online
 - **Custom Templates**: Reusable song structures
 - **Comments**: Add notes/annotations to songs
 - **Activity Feed**: See what changed in a project
 
 ### Prioritization Criteria
-Wait until V2 is being used regularly, then ask:
+Wait until V3 is being used regularly, then ask:
 - What features are users requesting most?
 - What friction points exist in current workflow?
 - What features justify their complexity?
@@ -141,16 +186,17 @@ Wait until V2 is being used regularly, then ask:
 
 ## Architectural Future-Proofing
 
-Even though we're building V1 first, the architecture is designed for V2 from the start:
+Even though we're building incrementally, the architecture is designed for the full roadmap:
 
 ### Database
 - `projects` table exists in V1 (even though only personal projects are used)
 - `type` field distinguishes personal vs shared
-- Easy to add membership and collaboration tables later
+- Tag, List, and junction tables in V1
+- Easy to add membership and collaboration tables in V3
 
 ### Frontend
 - Ionic Vue = web + mobile from same codebase
-- Clean separation: editor, viewer, library as components
+- Clean separation: catalog, editor, viewer, library as components
 - State management ready for multi-project switching
 
 ### Backend
@@ -161,7 +207,7 @@ Even though we're building V1 first, the architecture is designed for V2 from th
 ### Parser
 - `@livenotes/songcode-converter` is a separate npm package
 - Can be updated independently
-- Works the same in V1, V2, and beyond
+- Ready to integrate in V2
 
 ---
 
@@ -180,12 +226,16 @@ Even though we're building V1 first, the architecture is designed for V2 from th
 - ✅ SongCode language designed and documented
 - ✅ `@livenotes/songcode-converter` npm package built and tested
 - ✅ App documentation structure created
-- ✅ V1 and V2 features specified
-- ✅ Data model designed (V1 + V2)
-- 🚧 V1 MVP detailed specification (in progress)
-- ⏳ V1 development (not started)
+- ✅ Roadmap restructured (V1-V4)
+- ✅ V1 complete specifications ready:
+  - [v1-mvp-spec.md](./v1-mvp-spec.md) - Overview and scope
+  - [v1-ui-spec.md](./v1-ui-spec.md) - Complete UI/UX specifications
+  - [v1-technical-spec.md](./v1-technical-spec.md) - Complete technical implementation details
+- ✅ Data model designed (V1-V3) in [data-model.md](./data-model.md)
+- ✅ All features specified in [features.md](./features.md)
+- 🚀 Ready to start V1 development
 - ⏳ V1 deployment (not started)
 
 ---
 
-**Last Updated**: February 20, 2026
+**Last Updated**: March 30, 2026

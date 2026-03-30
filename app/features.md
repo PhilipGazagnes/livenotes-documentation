@@ -4,8 +4,10 @@ This document outlines all features of the Livenotes app, organized by version.
 
 ## Version Strategy
 
-- **V1**: Solo/personal use - get a working app for personal song management
-- **V2**: Collaborative features - multi-project system with sharing capabilities
+- **V1**: Song catalog and organization - track songs with metadata, tags, lists, search/filters
+- **V2**: Content editing - add SongCode editor and chord chart viewer
+- **V3**: Collaboration - multi-project system with sharing capabilities
+- **V4+**: Advanced features - version history, real-time collaboration, public sharing, etc.
 
 ---
 
@@ -23,7 +25,7 @@ This document outlines all features of the Livenotes app, organized by version.
 
 ---
 
-## [V2] Project System
+## [V3] Project System
 
 ### Multi-Project Support
 - Each user can create multiple projects
@@ -51,29 +53,45 @@ This document outlines all features of the Livenotes app, organized by version.
 ## [V1] Song Management - Core CRUD
 
 ### Basic Operations
-- Create new songs using SongCode syntax
-- Edit existing songs
+- Create new songs (metadata only)
+- Edit song information
 - Delete songs
-- View songs in chord chart viewer
+- View song list
+
+### Song Metadata (V1)
+- **Title** (required, max 100 chars)
+- **Artist** (optional, max 100 chars)
+- **Notes** (optional plain text field, max 255 chars)
+- **Livenotes POC ID** (optional - for migration from existing system, exactly 4 chars or empty)
+- Creation and update timestamps
+
+**Note:** Key and tempo are part of SongCode content (V2), not separate metadata fields.
 
 ### Song Storage
 - Songs are stored in the database
 - Each song belongs to exactly one project
 - Songs are private to the user in V1
+- Full song content (`songcode_content`) added in V2
+
+---
+
+## [V2] Song Content Editing
 
 ### Editor Features
 - SongCode syntax highlighting (CodeMirror 6)
 - Real-time parsing and validation
 - Save functionality
+- Store full song content in `songcode_content` field
 - [TODO: Add specific editor features here]
 
 ### Viewer Features
 - Interactive chord chart display
+- Parse SongCode and render formatted output
 - [TODO: Add specific viewer features here]
 
 ---
 
-## [V2] Song Management - Advanced Operations
+## [V3] Song Management - Advanced Operations
 
 ### Song Transfer Between Projects
 - Owner can select one or more songs to transfer
@@ -97,7 +115,7 @@ This document outlines all features of the Livenotes app, organized by version.
 
 ---
 
-## [V2] Membership & Permissions
+## [V3] Membership & Permissions
 
 ### Role System
 Three role levels per project:
@@ -128,26 +146,26 @@ Three role levels per project:
 
 ---
 
-## [V2] Organization Tools
+## [V1] Organization Tools
 
 ### Tags
 - Songs can have multiple tags (unlimited)
 - Tag names are free-form text
 - Auto-generated tags:
-  - `from <PROJECT_NAME> <DATE>` when transferred
-- Tags can be added and removed by owner and editors
+  - `from <PROJECT_NAME> <DATE>` when transferred [V3]
+- Tags can be added and removed by the user (owner/editors in V3)
 - Used for filtering in song list view
 
 ### Lists (Setlists)
 - Lists contain songs in a specific order
 - Useful for creating setlists
-- Created and managed by owner and editors
+- Created and managed by the user (owner/editors in V3)
 - Lists can be filtered by tags
 - Songs can appear in multiple lists
 
 ---
 
-## [V2] User Interface - Song List & Filtering
+## [V1] User Interface - Song List & Filtering
 
 ### Song List Page
 - **List Selector**: Dropdown to choose which list to view
@@ -159,16 +177,17 @@ Three role levels per project:
   - Type to filter song titles
   - Highlights matching text in results
 - **Song Items**: Display filtered results
-  - Click to open in editor/viewer
+  - Show metadata (title, artist, key, etc.)
+  - Click to open details or edit
 
 ### General UI Patterns
-- Project switcher (when multiple projects exist)
-- Navigation between editor and viewer modes
+- Project switcher (when multiple projects exist) [V3]
+- Navigation between editor and viewer modes [V2]
 - Responsive design for web and mobile
 
 ---
 
-## Future Considerations (V3+)
+## Future Considerations (V4+)
 
 - Real-time collaboration (multiple users editing same song)
 - Version history for songs
@@ -179,4 +198,4 @@ Three role levels per project:
 
 ---
 
-**Last Updated**: February 20, 2026
+**Last Updated**: March 30, 2026

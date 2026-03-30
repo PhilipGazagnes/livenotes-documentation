@@ -2,26 +2,29 @@
 
 This document defines the database schema and entity relationships for the Livenotes app.
 
-**Note**: Entities and fields marked with `[V2]` are not required for the initial V1 release.
+**Note**: Entities and fields marked with version tags indicate when they are introduced:
+- No tag = V1 (initial release)
+- `[V2]` = Added in version 2
+- `[V3]` = Added in version 3
 
 ---
 
 ## Entity Relationship Overview
 
 ```
-User (1) ──< (many) ProjectMembership (many) >── (1) Project
-                                                        │
-                                                        │ (1)
-                                                        │
-                                                        ▼
-                                                     (many) Song
-                                                        │
-                                                        ├──< (many) SongTag [V2]
-                                                        │
-                                                        └──< (many) ListItem [V2]
-                                                                      │
-                                                                      ▼
-                                                                    List [V2]
+User (1) ──< (many) ProjectMembership [V3] (many) >── (1) Project
+                                                              │
+                                                              │ (1)
+                                                              │
+                                                              ▼
+                                                           (many) Song
+                                                              │
+                                                              ├──< (many) SongTag
+                                                              │
+                                                              └──< (many) ListItem
+                                                                            │
+                                                                            ▼
+                                                                          List
 ```
 
 ---
@@ -43,7 +46,7 @@ interface User {
 ```
 
 **Relationships:**
-- Has many `ProjectMembership` (through membership in multiple projects)
+- Has many `ProjectMembership` (through membership in multiple projects) [V3]
 - Has one auto-created personal `Project` (via special query)
 
 ---
@@ -66,10 +69,10 @@ interface Project {
 **Business Rules:**
 - Each `User` has exactly one `Project` with `type = 'personal'` (auto-created on signup)
 - Personal projects:
-  - Cannot have additional members [V2]
-  - Cannot receive transferred songs [V2]
+  - Cannot have additional members [V3]
+  - Cannot receive transferred songs [V3]
   - Owner cannot be transferred
-- Shared projects [V2]:
+- Shared projects [V3]:
   - Can have multiple members
   - Support all collaboration features
 - Every project must have exactly one owner at all times
@@ -77,12 +80,12 @@ interface Project {
 **Relationships:**
 - Belongs to one `User` (owner)
 - Has many `Songs`
-- Has many `ProjectMembership` [V2]
-- Has many `Lists` [V2]
+- Has many `ProjectMembership` [V3]
+- Has many `Lists`
 
 ---
 
-## [V2] ProjectMembership
+## [V3] ProjectMembership
 
 Junction table for user-project relationships with role management.
 
@@ -118,8 +121,15 @@ interface Song {
   id: string;                    // UUID, primary key
   project_id: string;            // foreign key -> Project.id, not null
   title: string;                 // not null
-  songcode_content: text;        // raw SongCode text, not null
-  parsed_json: jsonb;            // parsed Livenotes JSON structure (optional cache)
+  
+  // Metadata fields (V1)
+  artist: string;                // optional (max 100 chars)
+  notes: text;                   // optional free-form notes (max 255 chars)
+  livenotes_poc_id: string;      // optional - for migration from existing system (exactly 4 chars or empty)
+  
+  // Content fields (V2)
+  songcode_content: text;        // [V2] raw SongCode text (includes key, tempo, etc.)
+  parsed_json: jsonb;            // [V2] parsed Livenotes JSON structure (optional cache)
   
   created_at: timestamp;
   updated_at: timestamp;
@@ -130,17 +140,20 @@ interface Song {
 
 **Business Rules:**
 - A song belongs to exactly one project
-- In V1, all songs belong to the user's personal project
-- Songs cannot be shared between projects (only moved/duplicated) [V2]
+- In V1, songs contain only metadata (title, artist, notes, POC ID)
+- In V2, full SongCode content can be added and edited (includes key, tempo, chords, lyrics, etc.)
+- Songs cannot be shared between projects (only moved/duplicated) [V3]
+- Title normalization: trim whitespace, collapse multiple spaces to single space
+- POC ID is user-editable, exactly 4 characters or empty
 
 **Relationships:**
 - Belongs to one `Project`
-- Has many `SongTag` (through junction table) [V2]
-- Has many `ListItem` (appears in multiple lists) [V2]
+- Has many `SongTag` (through junction table)
+- Has many `ListItem` (appears in multiple lists)
 
 ---
 
-## [V2] Tags
+## Tags
 
 Free-form labels for organizing songs.
 
@@ -157,12 +170,12 @@ interface Tag {
 - Unique constraint on `(project_id, name)` - tag names unique per project
 
 **Special Tags:**
-- Auto-generated when song is transferred: `from <PROJECT_NAME> <DATE>`
+- Auto-generated when song is transferred [V3]: `from <PROJECT_NAME> <DATE>`
 - Format can be parsed to identify transfer origin
 
 ---
 
-## [V2] SongTag
+## SongTag
 
 Junction table for song-tag many-to-many relationship.
 
@@ -180,7 +193,7 @@ interface SongTag {
 
 ---
 
-## [V2] Lists
+## Lists
 
 Ordered collections of songs (e.g., setlists).
 
@@ -203,7 +216,7 @@ interface List {
 
 ---
 
-## [V2] ListItem
+## ListItem
 
 Junction table for list-song relationship with ordering.
 
@@ -228,7 +241,7 @@ interface ListItem {
 
 ---
 
-## [V2] TransferRequest
+## [V3] TransferRequest
 
 Tracks song transfer requests between projects.
 
@@ -265,16 +278,23 @@ interface TransferRequest {
 - Row Level Security (RLS) policies for access control
 - Real-time subscriptions available for V2+ features
 
-### V1 Simplifications
-- Only tables needed: `User`, `Project`, `Song`
+### V1 Tables
+- Tables needed: `User`, `Project`, `Song`, `Tag`, `SongTag`, `List`, `ListItem`
+- Song fields: metadata only (title, artist, key, tempo, notes)
 - RLS: Users can only access their own personal project's songs
-- No complex join queries needed
+- Focus: Catalog and organization
 
-### V2 Migrations
-- Add tables: `ProjectMembership`, `Tag`, `SongTag`, `List`, `ListItem`, `TransferRequest`
+### V2 Additions
+- Add fields to `Song`: `songcode_content`, `parsed_json`
+- Enable content editing and viewing
+- No new tables required
+
+### V3 Migrations
+- Add tables: `ProjectMembership`, `TransferRequest`
 - Add RLS policies for role-based access
 - Add indexes for common queries (project_id, user_id lookups)
+- Enable collaboration features
 
 ---
 
-**Last Updated**: February 20, 2026
+**Last Updated**: March 30, 2026

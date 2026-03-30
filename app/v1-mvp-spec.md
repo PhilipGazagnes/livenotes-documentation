@@ -1,8 +1,8 @@
 # Livenotes V1 - MVP Specification
 
-**Target**: Solo use - a personal chord chart editor and library for one user (me)
+**Target**: Solo use - a personal song catalog and organization system
 
-**Goal**: Get a working app as quickly as possible for personal song management, while keeping the architecture clean for future V2 expansion.
+**Goal**: Build a working catalog to track and organize my songs, establishing the foundation for future content editing (V2) and collaboration (V3).
 
 ---
 
@@ -17,26 +17,34 @@
 
 2. **Personal Song Library**
    - Auto-created "personal project" on signup (hidden from user perspective)
-   - List view of all songs
-   - Simple list (no filtering, no tags, no organization - just chronological or alphabetical)
+   - List view of all songs with sorting
+   - **Metadata per song**: title, artist, key, tempo, notes
 
-3. **Song Management**
-   - Create new song
-   - Edit existing song
+3. **Song Management - CRUD**
+   - Create new song (metadata only)
+   - Edit song metadata
    - Delete song
-   - [TODO: Add specific CRUD details]
+   - View song details
 
-4. **Song Editor**
-   - CodeMirror 6 integration
-   - SongCode syntax highlighting
-   - [TODO: Define editor features - auto-save, validation display, etc.]
+4. **Tags System**
+   - Create/edit/delete tags
+   - Assign multiple tags to songs
+   - Remove tags from songs
+   - Free-form tag names
 
-5. **Chord Chart Viewer**
-   - Parse SongCode using `@livenotes/songcode-converter`
-   - Display formatted chord chart
-   - [TODO: Define viewer features - layout, controls, etc.]
+5. **Lists/Setlists**
+   - Create/edit/delete lists
+   - Add songs to lists (with ordering)
+   - Remove songs from lists
+   - View songs in a specific list
 
-6. **Data Persistence**
+6. **Search & Filtering**
+   - Text search by song title and artist
+   - Filter by tags (checkbox multi-select)
+   - Filter by list (dropdown selector)
+   - Combined filtering (search + tags + list)
+
+7. **Data Persistence**
    - Songs stored in Supabase PostgreSQL
    - Real-time sync not required (simple CRUD is fine)
 
@@ -44,15 +52,20 @@
 
 ## V1 Scope - What's OUT
 
-### ❌ Deferred to V2
+### ❌ Deferred to V2 (Content Editing)
+
+- ❌ SongCode editor with syntax highlighting
+- ❌ Chord chart viewer
+- ❌ CodeMirror 6 integration
+- ❌ Full song content (`songcode_content` field)
+- ❌ SongCode parsing and rendering
+
+### ❌ Deferred to V3 (Collaboration)
 
 - ❌ Multiple projects
 - ❌ User invitations / collaboration
 - ❌ Role management (owner/editor/reader)
 - ❌ Song transfers between projects
-- ❌ Tags
-- ❌ Lists/setlists
-- ❌ Filtering and search
 - ❌ Transfer requests/acceptance flow
 
 These features are architecturally planned (see [features.md](./features.md) and [data-model.md](./data-model.md)) but not built yet.
@@ -81,17 +94,58 @@ projects (
   updated_at timestamp
 )
 
--- Songs table
+-- Songs table (metadata only in V1)
 songs (
   id uuid primary key,
   project_id uuid references projects(id) not null,
-  title text not null,
-  songcode_content text not null,
-  parsed_json jsonb,  -- optional: cache parsed result
+  title text not null,  -- max 100 chars, normalized
+  artist text,  -- max 100 chars, normalized
+  notes text,  -- max 255 chars, plain text
+  livenotes_poc_id text,  -- exactly 4 chars or NULL, user-editable
   created_at timestamp,
   updated_at timestamp,
   created_by uuid references users(id),
   updated_by uuid references users(id)
+)
+
+-- Tags table
+tags (
+  id uuid primary key,
+  project_id uuid references projects(id) not null,
+  name text not null,
+  created_at timestamp,
+  UNIQUE(project_id, name)
+)
+
+-- Song-Tag junction table
+song_tags (
+  id uuid primary key,
+  song_id uuid references songs(id) on delete cascade,
+  tag_id uuid references tags(id) on delete cascade,
+  created_at timestamp,
+  UNIQUE(song_id, tag_id)
+)
+
+-- Lists table
+lists (
+  id uuid primary key,
+  project_id uuid references projects(id) not null,
+  name text not null,
+  description text,
+  created_at timestamp,
+  updated_at timestamp,
+  created_by uuid references users(id)
+)
+
+-- List-Song junction table with ordering
+list_items (
+  id uuid primary key,
+  list_id uuid references lists(id) on delete cascade,
+  song_id uuid references songs(id) on delete cascade,
+  position integer not null,
+  added_at timestamp,
+  UNIQUE(list_id, song_id),
+  UNIQUE(list_id, position)
 )
 ```
 
@@ -110,7 +164,8 @@ CREATE POLICY "Users can view own songs"
     SELECT id FROM projects WHERE owner_id = auth.uid()
   ));
 
--- Similar policies for INSERT, UPDATE, DELETE
+-- Similar policies for INSERT, UPDATE, DELETE on all tables
+-- Tags, Lists, SongTags, ListItems all scoped to user's project
 ```
 
 ---
@@ -123,17 +178,19 @@ CREATE POLICY "Users can view own songs"
 2. User creates account (email + password)
 3. Backend auto-creates a personal project
 4. User lands on song library (initially empty)
-5. User clicks "New Song" → opens editor
-6. User writes SongCode and saves
-7. Song appears in library
+5. User clicks "New Song" → opens create form
+6. User enters song metadata (title, artist, key, tempo, notes)
+7. User saves → song appears in library
+8. User can add tags and create lists to organize songs
 
 ### Returning User
 
 1. User logs in
 2. Sees list of all their songs
-3. Click a song → opens editor
-4. Edit and save
-5. Or click "View" → opens chord chart viewer
+3. Can search, filter by tags, or view by list
+4. Click a song → opens detail view / edit form
+5. Edit metadata and save
+6. Manage tags and lists
 
 ### No Project Selection
 - User doesn't see "projects" anywhere in V1 UI
@@ -148,8 +205,7 @@ CREATE POLICY "Users can view own songs"
 - **Framework**: Vue 3 (Composition API) + TypeScript
 - **UI**: Ionic Vue (for future mobile support)
 - **Build**: Vite
-- **Editor**: CodeMirror 6
-- **Parser**: `@livenotes/songcode-converter` npm package
+- **State Management**: Pinia (for managing songs, tags, lists)
 
 ### Backend
 - **Database**: Supabase (PostgreSQL)
@@ -162,95 +218,190 @@ CREATE POLICY "Users can view own songs"
 
 ---
 
-## TODO: Editor Features to Define
+## Song Form Specifications
 
-_Add specific requirements here:_
+**Fields:**
+- **Title** (required): Text input, max 100 characters, trimmed and normalized
+- **Artist** (optional): Text input, max 100 characters, trimmed and normalized
+- **Notes** (optional): Textarea, max 255 characters, plain text, 3-4 rows
+- **POC ID** (optional): Text input, exactly 4 characters or empty, user-editable
 
-- [ ] Auto-save behavior (as you type? explicit save button?)
-- [ ] Validation error display (inline? panel?)
-- [ ] Keyboard shortcuts
-- [ ] Theme (light/dark mode?)
-- [ ] Font size controls
-- [ ] Line numbers?
-- [ ] [Add more...]
+**Validation:**
+- Client-side validation before submit
+- Inline error messages below fields
+- Required field indicator: * asterisk
+- Save button disabled while saving
 
----
+**Behavior:**
+- Explicit save button (not auto-save)
+- Unsaved changes warning on navigation
+- Cancel button with confirmation if form dirty
+- Tags and lists NOT assigned during creation (only after)
 
-## TODO: Viewer Features to Define
-
-_Add specific requirements here:_
-
-- [ ] Layout style (columns? scrollable?)
-- [ ] Font sizing controls
-- [ ] Transpose controls (change key)
-- [ ] Print/export functionality
-- [ ] Navigation between sections
-- [ ] [Add more...]
+**See:** [v1-ui-spec.md](./v1-ui-spec.md) for complete UI details
 
 ---
 
-## TODO: Song List Features to Define
+## Tag Management Specifications
 
-_Add specific requirements here:_
+**Tag Properties:**
+- Name: max 50 characters, case-sensitive
+- No character restrictions, spaces allowed
+- No maximum tags per song or per user
+- Unique per project (case-sensitive)
 
-- [ ] Default sort order (alphabetical? most recent?)
-- [ ] Display format (cards? table?)
-- [ ] Metadata shown (title only? + date? + preview?)
-- [ ] Actions on each song (edit/delete/view buttons?)
-- [ ] [Add more...]
+**Operations:**
+- Create: Via "Manage Tags" modal or Tags page
+- Assign: Checkbox interface in modal
+- Rename: Inline edit on Tags page, updates all associations
+- Delete: With confirmation, removes from all songs
+
+**Behavior:**
+- Can create new tag inline when assigning to song
+- Duplicate detection (case-sensitive): show error toast
+- Tag filter uses AND logic (song must have ALL selected tags)
+
+**See:** [v1-ui-spec.md](./v1-ui-spec.md) and [v1-technical-spec.md](./v1-technical-spec.md) for complete details
+
+---
+
+## List Management Specifications
+
+**List Properties:**
+- Name: max 50 characters
+- Description: optional, max 500 characters
+- No maximum songs per list or lists per user
+- Empty lists allowed
+
+**Song Ordering:**
+- New songs added to bottom of list (max position + 1)
+- Reorder via drag-and-drop or up/down arrows
+- Position managed only on List Detail page, not in "Manage Lists" modal
+
+**Operations:**
+- Create: Via Lists page or inline in "Manage Lists" modal
+- Add/Remove songs: Checkbox interface in modal
+- Reorder: Drag-and-drop + arrow buttons on List Detail page
+- Rename: On Lists page
+- Delete: With confirmation, songs remain in database
+
+**Behavior:**
+- Can create new list inline when assigning song to lists
+- Duplicate song detection: show toast if trying to add song already in list
+- Lists sorted alphabetically by name
+
+**See:** [v1-ui-spec.md](./v1-ui-spec.md) and [v1-technical-spec.md](./v1-technical-spec.md) for complete details
+
+---
+
+## Song List Specifications
+
+**Display:**
+- Format: Full-width cards (one per row)
+- Shown: Title (bold), Artist, Tags (chips with 🏷️), Lists (chips with 📋)
+- Sort: Alphabetical by title (A-Z)
+- No click action on card in V1 (reserved for V2 chart viewer)
+
+**Search & Filter:**
+- Search: Sticky bottom bar with search input + filter button
+- Filter button: Opens modal with tag checkboxes
+- Search: Real-time, 200ms debounce, case-insensitive, partial match, title only
+- Tag filter: AND logic (must have ALL selected tags)
+- Combined: Search + tags work together
+- "Uncheck all" button in filter modal
+
+**Actions:**
+- Per song dropdown: Edit, Duplicate, Manage Tags, Manage Lists, Delete
+- Bulk selection mode: Checkboxes appear, bulk delete/add to list/assign tags
+- Select all / Deselect all buttons
+
+**Performance:**
+- Client-side filtering and sorting
+- All songs loaded on page load
+- No pagination (user may have 1000+ songs)
+
+**See:** [v1-ui-spec.md](./v1-ui-spec.md) for complete UI details
 
 ---
 
 ## Development Priorities
 
-### Phase 1: Basic CRUD
+### Phase 1: Basic Infrastructure
 1. Supabase project setup
-2. Database schema + RLS
+2. Database schema + RLS (all V1 tables)
 3. Vue app scaffold (Ionic + Vite)
 4. Auth flow (login/signup pages)
 5. Auto-create personal project on signup
+
+### Phase 2: Song CRUD
 6. Basic song list page (read)
-7. Create song form (write SongCode as plain text)
+7. Create song form (metadata fields)
 8. Edit song page
 9. Delete song confirmation
+10. Song detail view
 
-### Phase 2: Editor Integration
-10. Integrate CodeMirror 6
-11. SongCode syntax highlighting
-12. Parse SongCode on save
-13. Show parse errors to user
+### Phase 3: Tags
+11. Tag creation/management
+12. Assign tags to songs
+13. Display tags on song list items
+14. Tag filter UI (checkboxes)
 
-### Phase 3: Viewer
-14. Chord chart viewer page
-15. Parse & display formatted output
-16. Basic styling for readability
+### Phase 4: Lists
+15. List creation/management
+16. Add/remove songs from lists
+17. List selector dropdown
+18. View songs in a list
+19. Song ordering within lists
 
-### Phase 4: Polish
-17. Responsive design
-18. Loading states
-19. Error handling
-20. Basic testing
+### Phase 5: Search & Filtering
+20. Text search implementation
+21. Combined filtering (search + tags + list)
+22. Filter UI polish
+23. Empty states and no-results handling
+
+### Phase 6: Polish
+24. Responsive design
+25. Loading states
+26. Error handling
+27. Basic testing
+28. Performance optimization
 
 ---
 
 ## Success Criteria
 
 V1 is complete when:
-- ✅ I can sign up and log in
-- ✅ I can create a new song with SongCode
+- ✅ I can sign up and log in (email + Google/Facebook)
+- ✅ I can create songs with metadata (title, artist, notes, POC ID)
 - ✅ I can see a list of all my songs
-- ✅ I can edit an existing song
-- ✅ I can delete a song
-- ✅ I can view a song as a formatted chord chart
-- ✅ My songs are persisted and accessible from any device
-- ✅ The app works in a web browser
+- ✅ I can edit song metadata
+- ✅ I can delete songs (with confirmation)
+- ✅ I can duplicate songs (appends "(copy)" to title)
+- ✅ I can create and manage tags (create, rename, delete)
+- ✅ I can assign multiple tags to songs
+- ✅ I can create and manage lists/setlists
+- ✅ I can add songs to lists with custom ordering (drag-drop + arrows)
+- ✅ I can search songs by title (real-time, debounced)
+- ✅ I can filter songs by tags (AND logic, multi-select)
+- ✅ Search and tag filtering work together
+- ✅ I can bulk delete songs, bulk add to lists, bulk assign/remove tags
+- ✅ My data is persisted and accessible from any device
+- ✅ The app works in a web browser (mobile-first, responsive)
+- ✅ Dark mode UI with Tailwind CSS
+- ✅ All confirmations, toasts, and empty states work correctly
 
-Mobile apps (iOS/Android) can wait until V2 or later.
+V2 will add: SongCode editor and chord chart viewer
+V3 will add: Collaboration features (multi-project, sharing, roles)
+
+Mobile apps (iOS/Android) can wait until later versions.
 
 ---
 
-**Next Steps**: Fill in the TODO sections above with specific requirements and implementation details.
+**Complete Specifications:**
+- See [v1-ui-spec.md](./v1-ui-spec.md) for all UI/UX details
+- See [v1-technical-spec.md](./v1-technical-spec.md) for all technical implementation details
+- All TODO sections have been resolved and documented
 
 ---
 
-**Last Updated**: February 20, 2026
+**Last Updated**: March 30, 2026
