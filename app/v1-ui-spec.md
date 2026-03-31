@@ -30,6 +30,7 @@ This document provides complete UI/UX specifications for Livenotes V1, defining 
 /lists              - Lists management page
 /lists/:id          - Single list detail page
 /tags               - Tags management page
+/artists            - Artists management page
 ```
 
 ### Global Navigation
@@ -47,6 +48,7 @@ This document provides complete UI/UX specifications for Livenotes V1, defining 
 - Logout
 - Tags
 - Lists
+- Artists
 
 **No bottom navigation bar** - Search/filter is at bottom of All Songs page only
 
@@ -96,11 +98,15 @@ The primary view showing all user's songs with search and filtering.
 **Structure:**
 - Full width card with subtle border/shadow
 - Top row: Title (bold, larger) + Dropdown menu [⋮] (right-aligned)
-- Second row: Artist (smaller, muted color)
+- Second row: Artists (smaller, muted color) - comma-separated if multiple: "Artist1, Artist2"
 - Third row: Tags (if any) - displayed as small chips/badges with 🏷️ icon
 - Fourth row: Lists (if any) - displayed as small chips/badges with 📋 icon
 - No hover effects
 - No click action on card in V1 (reserved for V2 chart viewer)
+
+**Artists Display:**
+- Show all artists comma-separated: "The Beatles" or "Artist1, Artist2, Artist3"
+- If no artists: Hide the artists row entirely
 
 **Tags Display:**
 - Show all tags as inline chips: `🏷️ Rock, Covers, Easy`
@@ -250,8 +256,13 @@ Form to create a new song with metadata only.
 │ Title *                         │
 │ [_____________________]         │
 │                                 │
-│ Artist                          │
+│ Artists                         │
 │ [_____________________]         │
+│   ↓ The Beatles                 │
+│   ↓ Beatles                     │
+│                                 │
+│ Selected Artists:               │
+│ [Artist 1 ✕] [Artist 2 ✕]      │
 │                                 │
 │ Notes                           │
 │ [_____________________]         │
@@ -274,11 +285,31 @@ Form to create a new song with metadata only.
 - Error message: "Title is required" / "Title is too long (max 100 characters)"
 - Required indicator: * asterisk
 
-**Artist** (optional)
-- Input type: text
-- Max length: 100 characters
-- Validation: Trimmed
-- Placeholder: "Artist name"
+**Artists** (optional, multiple)
+- Input type: text with autocomplete suggestions
+- Free text input with suggestions appearing below as user types
+- Suggestions filtered from existing artists in project (fuzzy match)
+- User can select from suggestions OR create new artist
+- Selected artists displayed as removable chips below input: [Artist 1 ✕] [Artist 2 ✕]
+- Artists ordered by selection sequence (can be reordered with drag-and-drop on chips)
+- Display format in song list: "Artist1, Artist2, Artist3" (comma-separated)
+- Placeholder: "Type to search or create artist..."
+
+**Artist Autocomplete Behavior:**
+- As user types, show filtered suggestions below input (max 5-10 suggestions)
+- Suggestions show artist name and song count: "The Beatles (12 songs)"
+- Click suggestion to select → adds to selected artists list
+- Press Enter while typing → shows confirmation dialog if artist doesn't exist
+- Confirmation dialog: "Create new artist: [name]?" with [Cancel] [Create] buttons
+- If similar artists exist (fuzzy match), show in confirmation: "Did you mean: The Beatles?"
+- User can click suggested match or proceed with creating new artist
+- Clear input after selection/creation
+
+**Selected Artists Management:**
+- Each selected artist shown as chip with ✕ button
+- Click ✕ to remove artist from song
+- Drag chips to reorder (changes display order: position 1, 2, 3...)
+- Order preserved in database via SongArtist.position field
 
 **Notes** (optional)
 - Input type: textarea
@@ -743,6 +774,99 @@ Page showing all tags with management options.
 
 ---
 
+### 9. Artists Page (`/artists`)
+
+Page showing all artists with management options.
+
+#### Layout
+
+```
+┌─────────────────────────────────┐
+│ ← Artists                  [☰]  │
+├─────────────────────────────────┤
+│                   [+ New Artist] │
+│                                 │
+│ ┌─────────────────────────────┐ │
+│ │ The Beatles            [⋮]  │ │ ← Artist card
+│ │ 12 songs                    │ │
+│ └─────────────────────────────┘ │
+│                                 │
+│ ┌─────────────────────────────┐ │
+│ │ Casting Crowns         [⋮]  │ │
+│ │ 8 songs                     │ │
+│ └─────────────────────────────┘ │
+│                                 │
+│ ┌─────────────────────────────┐ │
+│ │ U2                     [⋮]  │ │
+│ │ 0 songs                     │ │
+│ └─────────────────────────────┘ │
+│                                 │
+└─────────────────────────────────┘
+```
+
+#### Artist Card Design
+
+**Structure:**
+- Full width card
+- Top row: Artist name (bold) + Dropdown menu [⋮] (right-aligned)
+- Second row: Song count (smaller, muted)
+- Optional: Click anywhere on card → Filter songs list to show only this artist's songs
+
+**Dropdown Menu (per artist):**
+- Rename
+- Delete
+
+#### Sorting
+
+- **Alphabetical by artist name** (A-Z)
+- Case-sensitive sort
+
+#### Actions
+
+**+ New Artist Button:**
+- Opens "Create Artist" modal/form
+- Input: Artist name (max 100 chars)
+- Creates artist (not assigned to any songs yet)
+- Validation:
+  - No duplicates (case-sensitive)
+  - If duplicate: Show error toast "Artist already exists"
+  - Name normalization: trim whitespace, collapse multiple spaces to single space
+
+**Rename Artist:**
+- Opens inline edit or modal
+- Change artist name
+- Validation:
+  - Max 100 chars
+  - No duplicates (case-sensitive)
+  - Name normalization applied
+  - If duplicate: Show error toast "Artist already exists"
+- On save: Updates artist name for all songs (by artist ID)
+- Shows toast: "Artist renamed"
+
+**Delete Artist:**
+- If artist is used by songs: Show error toast "Cannot delete artist used by [X] songs"
+- If artist has 0 songs:
+  - Confirmation: "Delete artist '[Artist Name]'?"
+  - On confirm:
+    - Deletes artist record
+    - Shows toast: "Artist deleted"
+
+#### Empty State
+
+**No artists exist:**
+```
+┌─────────────────────────────────┐
+│         🎤                      │
+│  No artists yet                 │
+│  Create artists to organize     │
+│  your songs                     │
+│                                 │
+│      [+ New Artist]             │
+└─────────────────────────────────┘
+```
+
+---
+
 ## Confirmation Dialogs
 
 All destructive actions require confirmation.
@@ -761,6 +885,19 @@ All destructive actions require confirmation.
 
 **Message:** "Delete list '[List Name]'? Songs will not be deleted."  
 **Buttons:** Cancel | Delete
+
+### Delete Artist
+
+**Message:** "Delete artist '[Artist Name]'?"  
+**Buttons:** Cancel | Delete
+
+**Note:** Only shown when artist has 0 songs. If artist is used by songs, show error toast instead.
+
+### Create New Artist
+
+**Message:** "Create new artist: [name]?"  
+**Additional info (if similar artists exist):** "Did you mean: [Similar Artist Name]?"  
+**Buttons:** Cancel | Create | [Use Similar Artist]
 
 ### Bulk Delete Songs
 
@@ -797,6 +934,9 @@ All toast notifications are:
 - "List renamed"
 - "List deleted"
 - "Removed from [List Name]"
+- "Artist created"
+- "Artist renamed"
+- "Artist deleted"
 - "[X] songs deleted"
 - "[X] songs added to [List Name]"
 - "Tags assigned to [X] songs"
@@ -808,6 +948,8 @@ All toast notifications are:
 - "Title is too long (max 100 characters)"
 - "Tag already exists"
 - "List already exists"
+- "Artist already exists"
+- "Cannot delete artist used by [X] songs"
 - "Song already in list"
 - "Network error. Please try again."
 - "Failed to save. Please try again."

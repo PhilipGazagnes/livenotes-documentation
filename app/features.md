@@ -60,7 +60,7 @@ This document outlines all features of the Livenotes app, organized by version.
 
 ### Song Metadata (V1)
 - **Title** (required, max 100 chars)
-- **Artist** (optional, max 100 chars)
+- **Artists** (optional, multiple artists per song via many-to-many relationship)
 - **Notes** (optional plain text field, max 255 chars)
 - **Livenotes POC ID** (optional - for migration from existing system, exactly 4 chars or empty)
 - Creation and update timestamps
@@ -143,6 +143,59 @@ Three role levels per project:
 - Owner can change member roles
 - Owner can remove members
 - Each project requires an owner at all times
+
+---
+
+## [V1] Artist Management
+
+### Artist Entity
+- Artists are stored as separate entities in the database
+- Songs have many-to-many relationships with artists (via `SongArtist` junction table)
+- Artists are scoped to projects (like tags and lists)
+- In V1, only artist name is stored; additional metadata deferred to future versions
+
+### Multiple Artists Per Song
+- Songs can have multiple artists in ordered sequence
+- Display format: "Artist1, Artist2, Artist3" (comma-separated)
+- Order is preserved and can be modified
+- Example use cases: collaborations, featuring artists, bands with guest musicians
+
+### Artist Input & Autocomplete
+- When creating/editing a song, artist field shows autocomplete suggestions
+- Suggestions appear below the input as user types (free text input with suggestions)
+- Suggestions filtered from existing artists in the project
+- User can select from suggestions or create new artist by typing and confirming
+
+### Creating New Artists
+- User can type a new artist name not in the suggestion list
+- Confirmation dialog appears before creating: "Create new artist: [name]?"
+- If similar artists exist (fuzzy match), they're shown in confirmation dialog
+- Example: Typing "Beatles" shows suggestion "Did you mean: The Beatles?"
+- User can confirm to create new artist or select from similar matches
+
+### Artists Management Page
+- Dedicated page accessible from hamburger menu
+- Lists all artists in the project
+- Shows song count for each artist
+- Allows editing artist names (affects all songs using that artist)
+- Allows deleting artists (only if no songs reference them)
+- Artists sorted alphabetically
+
+### Artist Edit Behavior
+- Editing an artist name updates it for all songs in the project
+- Name normalization: trim whitespace, collapse multiple spaces to single space
+- Prevents duplicate artist names (case-sensitive uniqueness per project)
+
+### Artist Deletion
+- Artists can only be deleted if no songs reference them
+- If songs exist with that artist, show error: "Cannot delete artist used by X songs"
+- Successfully deleted artists are permanently removed
+
+### Data Migration
+- Existing songs with artist string field will be migrated
+- Extract all artist strings from songs → populate artists table
+- Deduplicate exact matches automatically
+- Maintain song-artist associations via junction table
 
 ---
 

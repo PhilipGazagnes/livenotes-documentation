@@ -21,6 +21,8 @@ User (1) ──< (many) ProjectMembership [V3] (many) >── (1) Project
                                                               │
                                                               ├──< (many) SongTag
                                                               │
+                                                              ├──< (many) SongArtist >──(many)── Artist
+                                                              │
                                                               └──< (many) ListItem
                                                                             │
                                                                             ▼
@@ -123,7 +125,6 @@ interface Song {
   title: string;                 // not null
   
   // Metadata fields (V1)
-  artist: string;                // optional (max 100 chars)
   notes: text;                   // optional free-form notes (max 255 chars)
   livenotes_poc_id: string;      // optional - for migration from existing system (exactly 4 chars or empty)
   
@@ -140,7 +141,8 @@ interface Song {
 
 **Business Rules:**
 - A song belongs to exactly one project
-- In V1, songs contain only metadata (title, artist, notes, POC ID)
+- In V1, songs contain only metadata (title, notes, POC ID) and artist relationships
+- Artists are managed through the `SongArtist` junction table (many-to-many)
 - In V2, full SongCode content can be added and edited (includes key, tempo, chords, lyrics, etc.)
 - Songs cannot be shared between projects (only moved/duplicated) [V3]
 - Title normalization: trim whitespace, collapse multiple spaces to single space
@@ -148,8 +150,66 @@ interface Song {
 
 **Relationships:**
 - Belongs to one `Project`
+- Has many `Artist` (through `SongArtist` junction table)
 - Has many `SongTag` (through junction table)
 - Has many `ListItem` (appears in multiple lists)
+
+---
+
+## Artists
+
+Artist information for songs. Songs can have multiple artists in ordered sequence.
+
+```typescript
+interface Artist {
+  id: string;                    // UUID, primary key
+  project_id: string;            // foreign key -> Project.id
+  name: string;                  // artist name, not null
+  created_at: timestamp;
+  updated_at: timestamp;
+}
+```
+
+**Constraints:**
+- Unique constraint on `(project_id, name)` - artist names unique per project
+
+**Business Rules:**
+- Artists are scoped to projects (like tags and lists)
+- In V1, only name is stored; additional metadata (bio, photo, links) deferred to future versions
+- Artist names are normalized: trim whitespace, collapse multiple spaces to single space
+- Artists can be reused across multiple songs within the same project
+- When an artist name is edited, it updates for all songs using that artist
+- Artists can only be deleted if no songs reference them
+
+**Relationships:**
+- Belongs to one `Project`
+- Has many `Song` (through `SongArtist` junction table)
+
+---
+
+## SongArtist
+
+Junction table for song-artist many-to-many relationship with ordering.
+
+```typescript
+interface SongArtist {
+  id: string;                    // UUID, primary key
+  song_id: string;               // foreign key -> Song.id
+  artist_id: string;             // foreign key -> Artist.id
+  position: integer;             // order of artist (1, 2, 3, ...) for display
+  created_at: timestamp;
+}
+```
+
+**Constraints:**
+- Unique constraint on `(song_id, artist_id)` - artist appears once per song
+- Unique constraint on `(song_id, position)` - positions are unique within song
+
+**Business Rules:**
+- Position determines display order when multiple artists ("Artist1, Artist2, Artist3")
+- Display format: comma-separated list in position order
+- When an artist is removed, positions are preserved for remaining artists
+- Same artist can be associated with multiple songs
 
 ---
 

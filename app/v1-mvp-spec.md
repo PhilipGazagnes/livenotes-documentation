@@ -18,7 +18,7 @@
 2. **Personal Song Library**
    - Auto-created "personal project" on signup (hidden from user perspective)
    - List view of all songs with sorting
-   - **Metadata per song**: title, artist, key, tempo, notes
+   - **Metadata per song**: title, artists (multiple, ordered), notes
 
 3. **Song Management - CRUD**
    - Create new song (metadata only)
@@ -38,13 +38,25 @@
    - Remove songs from lists
    - View songs in a specific list
 
-6. **Search & Filtering**
+6. **Artists**
+   - Create/edit/delete artists
+   - Assign multiple artists to songs (with ordering)
+   - Autocomplete suggestions when typing artist names
+   - Artists management page
+
+6. **Artists**
+   - Create/edit/delete artists
+   - Assign multiple artists to songs (with ordering)
+   - Autocomplete suggestions when typing artist names
+   - Artists management page
+
+7. **Search & Filtering**
    - Text search by song title and artist
    - Filter by tags (checkbox multi-select)
    - Filter by list (dropdown selector)
    - Combined filtering (search + tags + list)
 
-7. **Data Persistence**
+8. **Data Persistence**
    - Songs stored in Supabase PostgreSQL
    - Real-time sync not required (simple CRUD is fine)
 
@@ -99,13 +111,33 @@ songs (
   id uuid primary key,
   project_id uuid references projects(id) not null,
   title text not null,  -- max 100 chars, normalized
-  artist text,  -- max 100 chars, normalized
   notes text,  -- max 255 chars, plain text
   livenotes_poc_id text,  -- exactly 4 chars or NULL, user-editable
   created_at timestamp,
   updated_at timestamp,
   created_by uuid references users(id),
   updated_by uuid references users(id)
+)
+
+-- Artists table
+artists (
+  id uuid primary key,
+  project_id uuid references projects(id) not null,
+  name text not null,  -- artist name, normalized
+  created_at timestamp,
+  updated_at timestamp,
+  UNIQUE(project_id, name)
+)
+
+-- Song-Artist junction table with ordering
+song_artists (
+  id uuid primary key,
+  song_id uuid references songs(id) on delete cascade,
+  artist_id uuid references artists(id) on delete cascade,
+  position integer not null,  -- order of artist for display (1, 2, 3, ...)
+  created_at timestamp,
+  UNIQUE(song_id, artist_id),
+  UNIQUE(song_id, position)
 )
 
 -- Tags table
@@ -165,7 +197,7 @@ CREATE POLICY "Users can view own songs"
   ));
 
 -- Similar policies for INSERT, UPDATE, DELETE on all tables
--- Tags, Lists, SongTags, ListItems all scoped to user's project
+-- Tags, Lists, Artists, SongTags, SongArtists, ListItems all scoped to user's project
 ```
 
 ---
@@ -222,7 +254,7 @@ CREATE POLICY "Users can view own songs"
 
 **Fields:**
 - **Title** (required): Text input, max 100 characters, trimmed and normalized
-- **Artist** (optional): Text input, max 100 characters, trimmed and normalized
+- **Artists** (optional): Free text input with autocomplete suggestions, can add multiple artists in order
 - **Notes** (optional): Textarea, max 255 characters, plain text, 3-4 rows
 - **POC ID** (optional): Text input, exactly 4 characters or empty, user-editable
 
@@ -239,6 +271,52 @@ CREATE POLICY "Users can view own songs"
 - Tags and lists NOT assigned during creation (only after)
 
 **See:** [v1-ui-spec.md](./v1-ui-spec.md) for complete UI details
+
+---
+
+## Artist Management Specifications
+
+**Artist Properties:**
+- Name: max 100 characters, case-sensitive, normalized (trimmed, single spaces)
+- No maximum artists per song or per project
+- Unique per project (case-sensitive)
+- Artists are scoped to projects (like tags and lists)
+
+**Operations:**
+- Create: Via Artists page or inline when adding to song (with autocomplete)
+- Assign to song: Free text input with suggestions, can add multiple in order
+- Edit name: On Artists page, updates name for all songs
+- Delete: Only if no songs reference the artist
+- Reorder: When song has multiple artists, order can be changed
+
+**Autocomplete Behavior:**
+- As user types in artist field, suggestions appear below input
+- Suggestions filtered from existing artists in project
+- User can select from suggestions or create new artist
+- When creating new artist, show confirmation: "Create new artist: [name]?"
+- If similar artists exist (fuzzy match), show in confirmation dialog
+- Example: "Did you mean: The Beatles?" with option to select or proceed with new name
+
+**Artist Display:**
+- Multiple artists shown comma-separated: "Artist1, Artist2, Artist3"
+- Order preserved from `SongArtist.position` field
+- Displayed on song cards in song list
+
+**Artists Page:**
+- Accessible from hamburger menu
+- Lists all artists alphabetically
+- Shows song count for each artist
+- Inline edit for artist names
+- Delete button (disabled if songs exist)
+- Error message if trying to delete artist with songs: "Cannot delete artist used by X songs"
+
+**Data Migration:**
+- Extract all existing `song.artist` string values
+- Create artist records, deduplicate exact matches
+- Create `song_artists` records linking songs to artists
+- Maintain original song-artist associations
+
+**See:** [v1-ui-spec.md](./v1-ui-spec.md) and [v1-technical-spec.md](./v1-technical-spec.md) for complete details
 
 ---
 
@@ -346,25 +424,33 @@ CREATE POLICY "Users can view own songs"
 13. Display tags on song list items
 14. Tag filter UI (checkboxes)
 
-### Phase 4: Lists
-15. List creation/management
-16. Add/remove songs from lists
-17. List selector dropdown
-18. View songs in a list
-19. Song ordering within lists
+### Phase 4: Artists
+15. Artist creation/management
+16. Artist autocomplete in song form
+17. Assign multiple artists to songs (with ordering)
+18. Display artists on song list items
+19. Artists management page
+20. Migrate existing artist strings to artist table
 
-### Phase 5: Search & Filtering
-20. Text search implementation
-21. Combined filtering (search + tags + list)
-22. Filter UI polish
-23. Empty states and no-results handling
+### Phase 5: Lists
+21. List creation/management
+22. Add/remove songs from lists
+23. List selector dropdown
+24. View songs in a list
+25. Song ordering within lists
 
-### Phase 6: Polish
-24. Responsive design
-25. Loading states
-26. Error handling
-27. Basic testing
-28. Performance optimization
+### Phase 6: Search & Filtering
+26. Text search implementation
+27. Combined filtering (search + tags + list)
+28. Filter UI polish
+29. Empty states and no-results handling
+
+### Phase 7: Polish
+30. Responsive design
+31. Loading states
+32. Error handling
+33. Basic testing
+34. Performance optimization
 
 ---
 
@@ -372,11 +458,17 @@ CREATE POLICY "Users can view own songs"
 
 V1 is complete when:
 - ✅ I can sign up and log in (email + Google/Facebook)
-- ✅ I can create songs with metadata (title, artist, notes, POC ID)
-- ✅ I can see a list of all my songs
-- ✅ I can edit song metadata
+- ✅ I can create songs with metadata (title, artists, notes, POC ID)
+- ✅ I can assign multiple artists to a song in ordered sequence
+- ✅ Artist autocomplete suggests existing artists as I type
+- ✅ I can create new artists with confirmation dialog
+- ✅ I can see a list of all my songs with artists displayed
+- ✅ I can edit song metadata including artists
 - ✅ I can delete songs (with confirmation)
 - ✅ I can duplicate songs (appends "(copy)" to title)
+- ✅ I can create and manage artists (create, rename, delete)
+- ✅ Artist edits update all songs using that artist
+- ✅ I cannot delete artists that are used by songs
 - ✅ I can create and manage tags (create, rename, delete)
 - ✅ I can assign multiple tags to songs
 - ✅ I can create and manage lists/setlists
@@ -389,6 +481,7 @@ V1 is complete when:
 - ✅ The app works in a web browser (mobile-first, responsive)
 - ✅ Dark mode UI with Tailwind CSS
 - ✅ All confirmations, toasts, and empty states work correctly
+- ✅ Existing artist data migrated to new artist table structure
 
 V2 will add: SongCode editor and chord chart viewer
 V3 will add: Collaboration features (multi-project, sharing, roles)
