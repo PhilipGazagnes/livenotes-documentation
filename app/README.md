@@ -15,15 +15,25 @@ The Livenotes App is a web and mobile application that allows musicians to:
 
 ### Core Documents
 
-- **[Roadmap](./roadmap.md)** - Product vision and development strategy (V1-V4)
-- **[Features](./features.md)** - Feature specifications organized by version
-- **[Data Model](./data-model.md)** - Database schema and entity relationships
+- **[Roadmap](./roadmap.md)** - Product vision and development strategy (V1-V4) ⚠️ **Superseded by V2 Roadmap**
+- **[Features](./features.md)** - Feature specifications organized by version ⚠️ **Superseded by V2 docs**
+- **[Data Model](./data-model.md)** - Database schema and entity relationships ⚠️ **Superseded by V2 Data Model**
 
-### V1 Specifications (Complete - Ready for Development)
+### V1 Specifications (✅ Complete - In Production)
 
 - **[V1 MVP Spec](./v1-mvp-spec.md)** - Overview and scope of Version 1
 - **[V1 UI/UX Spec](./v1-ui-spec.md)** - Complete UI/UX specifications (all screens, flows, interactions)
 - **[V1 Technical Spec](./v1-technical-spec.md)** - Complete technical implementation details (database, validation, constants, deployment)
+
+### V2 Specifications (📝 Planning Complete - Ready for Implementation)
+
+**V2 represents a fundamental architectural shift to a notes-based system with global song catalog.**
+
+- **[V2 Architecture Summary](./v2-architecture-summary.md)** - **START HERE** - Executive overview and key decisions
+- **[V2 Data Model](./v2-data-model.md)** - Complete V2 schema (global songs, library, multi-notes)
+- **[V2 Roadmap](./v2-roadmap.md)** - Phased development strategy (MVP → Verification → Collaboration)
+- **[V2 Migration Plan](./v2-migration-plan.md)** - Step-by-step SQL migrations from V1 → V2
+- **[V2 Implementation Plan](./v2-implementation-plan.md)** - Week-by-week development tasks
 
 ### Additional Resources
 
