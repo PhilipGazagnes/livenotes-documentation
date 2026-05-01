@@ -234,12 +234,21 @@ Sections are the main building blocks of a song (verses, choruses, etc.).
 
 ### Format
 
+With lyrics:
+
 ```songcode
 SectionName
 pattern description or $n
 --
 lyric line 1
 lyric line 2
+```
+
+Without lyrics (instrumental):
+
+```songcode
+SectionName
+pattern description or $n
 ```
 
 Or with a comment:
@@ -258,40 +267,48 @@ lyric line
 - The `!` separates the name from an optional comment
 - **Example**: `Break!Rythmic pattern`
 
-#### 2. Pattern Description
+#### 2. Pattern Description _(optional)_
 - Can be a pattern variable (`$1`, `$2`, etc.)
 - Or a full pattern description
 - Optional modifiers can appear here (see [Modifiers](#modifiers))
+- **Omit entirely** for label-only sections (structural markers with no chords)
 
-#### 3. Lyrics Separator
+#### 3. Lyrics Separator _(optional)_
 - A line containing only `--`
 - Marks the start of lyrics
+- **Omit entirely** for instrumental sections with no lyrics
 
-#### 4. Lyrics
+#### 4. Lyrics _(optional)_
 - One or more lines of lyrics
 - Each line can have a measure count (see [Lyrics](#lyrics))
+- Only present when a `--` separator is used
 
 ### Example
 
 ```songcode
-Intro
-$1
-_repeat 2
---
-***Intro*** _8
+Intro!Label only
 
 Verse
 $2
 --
 Living easy, living free _2
 Season ticket on a one-way ride _2
+
+Solo
+$3
+
+Chorus
+$4
+--
+Highway to hell _4
 ```
 
 ### Rules:
-- Sections are separated by **empty lines**
+- Sections are separated by **empty lines** — this is the universal boundary marker
 - Each section must have a **name** (first line)
 - Pattern can be **inline** or **reference** a definition
-- Lyrics are **optional** but the `--` separator is **required** if you want lyrics
+- The `--` separator and lyrics are **optional**: omit both for instrumental sections
+- The pattern itself is also **optional**: a section with only a name (no pattern, no `--`) is a valid structural label/placeholder
 
 ---
 
@@ -760,15 +777,18 @@ The number indicates how many measures that lyric line lasts.
 
 **Format**: `lyric text _n` where n is a positive integer
 
-### All or Nothing Rule
+### Measure Counts are Optional
 
-**Important**: If ANY lyric line in the song has a measure count, then ALL lyric lines must have measure counts. Otherwise, the parser will generate an error.
+Measure counts are optional on each lyric line. Lines without a count will have `measures: null` in the output.
 
-**Why?** The Prompter (display format) requires complete timing information. If you don't need timing, omit it from all lyrics.
+- Lines **with** `_n` → `measures` is set to that number
+- Lines **without** `_n` → `measures` is `null`
+
+The Prompter is only generated when **every** lyric line in **every** section has a measure count. If any count is missing, the song is still valid — the Prompter is simply left empty.
 
 ### Validation
 
-The sum of all lyric measure counts in a section must equal the total measures of the section's pattern (considering repeats and modifiers).
+When **all** lyric lines in a section have measure counts, their sum must equal the total measures of the section's pattern (considering repeats and modifiers). If any line is missing a count, sum validation is skipped for that section.
 
 **Example**:
 ```songcode
@@ -1197,30 +1217,32 @@ $5
 ...
 ```
 
-### 8. Incomplete Timing Information
+### 8. Mismatched Measure Count Total
 
-**Error**:
+Measure counts on individual lines are optional. However, when **all** lines in a section have counts, they must sum to the section's total measures.
+
+**Error** (all counts present, but sum is wrong):
+```songcode
+Verse
+A;G;D;E    ← 4 measures
+--
+Line one _2
+Line two _1    ← Total: 3 ≠ 4 → ERROR
+```
+
+**Fix**:
 ```songcode
 --
 Line one _2
-Line two      ← ERROR: missing measure count
-Line three _1
+Line two _2    ← Total: 4 ✓
 ```
 
-**Fix** (all or nothing):
+Lines without counts are always accepted:
 ```songcode
 --
 Line one _2
-Line two _3
+Line two      ← OK: no count → measures: null
 Line three _1
-```
-
-Or remove all timing:
-```songcode
---
-Line one
-Line two
-Line three
 ```
 
 ---

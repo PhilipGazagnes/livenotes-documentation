@@ -459,6 +459,7 @@ See [Error Catalog](#comprehensive-error-catalog) for complete error messages.
 
 #### Section Structure
 
+With lyrics:
 ```
 SectionName[!Comment]
 [Section Metadata (optional)]
@@ -470,24 +471,42 @@ Lyric Line 2
 ...
 ```
 
+Without lyrics (instrumental — no `--` at all):
+```
+SectionName[!Comment]
+[Section Metadata (optional)]
+[Pattern Description or $n (optional)]
+[Pattern Modifiers (optional)]
+```
+
+Label-only (no pattern, no `--`, no lyrics — structural placeholder):
+```
+SectionName[!Comment]
+```
+
+**Empty lines are the universal section boundary** — they separate every section, whether or not it has a `--` separator.
+
 #### Algorithm
 
-1. Split remaining file content by empty lines (each block is a section)
+1. Collect lines for the current section until a boundary is reached:
+   - **Boundary with `--`**: after `--` is seen, a new section starts at the next non-empty line preceded by an empty line.
+   - **Boundary without `--`**: the section ends at the first empty line (instrumental sections have no lyrics).
 2. For each section block:
    - **Line 1**: Parse name and optional comment
      - Split by `!` if present
      - `section.name = name`
      - `section.comment = comment` (or null)
    
-   - **After Line 1, before `--`**: Pattern area
+   - **After Line 1, before `--` (or end of block)**: Pattern area
      - Collect lines starting with `@` → section-level metadata
      - Collect lines starting with `_` → pattern modifiers
      - Remaining lines → pattern description
    
-   - **After `--`**: Lyrics area
+   - **After `--`** _(optional)_: Lyrics area
      - Each line is a lyric
      - Parse measure count if present (`_n` at end)
      - Store as `[lyric_text, measure_count]`
+     - If no `--` is present, `lyrics` is an empty array
 
 #### Section Object Structure
 
@@ -1231,20 +1250,19 @@ The result : Em;A;G;A;G;A;G.
 
 ### Step 3.3: Validate Lyric Timing
 
-#### All-or-Nothing Rule
-
-1. Count lyrics with measure counts
-2. Count lyrics without measure counts
-3. If both counts > 0 → **E3.3.1** (VALIDATION ERROR)
-
-See [Error Catalog](#comprehensive-error-catalog) for complete error message.
+Measure counts (`_n`) are **optional** on each lyric line. The parser is permissive:
+- Lines **with** `_n` → `measures` set to that integer
+- Lines **without** `_n` → `measures` set to `null`
+- Mixed lines within the same section are accepted
 
 #### Measure Count Validation
 
-For each section:
+For each section, **only if ALL lyric lines have measure counts**:
 1. Sum all lyric measure counts
 2. Compare with section's total measures
 3. If not equal → **E3.3.2** (VALIDATION ERROR)
+
+If any lyric line is missing a count, sum validation is skipped for that section.
 
 See [Error Catalog](#comprehensive-error-catalog) for complete error message.
 
@@ -1274,8 +1292,8 @@ Third line
 
 1. **ALL sections must have lyrics**: Every section must have at least one lyric line
 2. **ALL sections must have patterns**: Every section must have a non-empty pattern (`json != null`, `measures > 0`)
-3. **ALL lyrics must have measure counts**: Every lyric line in every section must have `_n` suffix
-4. **ALL measure counts must be valid**: Already validated above (sum matches section measures)
+3. **ALL lyrics must have measure counts**: Every lyric line in every section must have a `_n` suffix (i.e. `measures != null`)
+4. **ALL measure counts must be valid**: Sum matches section measures (already validated above)
 
 **If any condition fails**:
 - The song is still **valid** (no error)
@@ -2048,20 +2066,13 @@ Fix: Adjust _after pattern to use valid chord count for time signature
 
 #### 3.3 Lyrics Timing Validation (VALIDATION ERROR)
 
-**E3.3.1 - Mixed lyric measure counts**
-```
-VALIDATION ERROR: All lyrics must have measure counts, or none
-Line [N]: Section has mix of lyrics with and without measure counts
-Expected: Either all lyrics have _n counts, or none do
-Fix: Add measure counts to all lyrics, or remove all measure counts
-```
-
 **E3.3.2 - Lyric measures don't match**
 ```
 VALIDATION ERROR: Lyric measures don't match section measures
 Line [N]: Lyrics total [sum] measures but section has [total] measures
 Expected: Sum of lyric measures must equal section total
 Fix: Adjust lyric measure counts or pattern to match (difference: [diff])
+Note: Only triggered when ALL lyric lines in the section have measure counts
 ```
 
 ---
