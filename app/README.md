@@ -35,6 +35,12 @@ The Livenotes App is a web and mobile application that allows musicians to:
 - **[V2 Migration Plan](./v2-migration-plan.md)** - Step-by-step SQL migrations from V1 → V2
 - **[V2 Implementation Plan](./v2-implementation-plan.md)** - Week-by-week development tasks
 
+### V3 Specifications (📝 Planning Complete)
+
+**V3 introduces multi-user projects, roles, note sharing, and the community project.**
+
+- **[Projects & Users](./projects-and-users.md)** - **START HERE for V3** - User model, project types, roles, membership, invitation flow, note push flow, drawer UX, and personal project deprecation
+
 ### Additional Resources
 
 - **[Tech Stack](./tech-stack.md)** - Technology choices and rationale
