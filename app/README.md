@@ -13,6 +13,8 @@ The Livenotes App is a web and mobile application that allows musicians to:
 
 ## Documentation Structure
 
+> **Current direction (2026-10-02):** see **[Strategy 2026](./strategy-2026.md)** and the **[Decision records](./decisions/README.md)**. They supersede the "single Ionic/Capacitor codebase" plan below: web stays Vue, mobile becomes a separate React Native (Expo) app.
+
 ### Core Documents
 
 - **[Roadmap](./roadmap.md)** - Product vision and development strategy (V1-V4) ⚠️ **Superseded by V2 Roadmap**
