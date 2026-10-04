@@ -1,6 +1,6 @@
 # ADR-002: Monorepo
 
-- **Status:** Accepted
+- **Status:** Partly superseded: the tooling (yarn) is replaced by npm workspaces, see [ADR-018](./018-npm-workspaces.md). The layout stands.
 - **Date:** 2026-10-02
 
 ## Decision

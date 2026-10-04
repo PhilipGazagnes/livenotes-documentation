@@ -1,6 +1,6 @@
 # Offline Data Layer: Spec (Phase 1)
 
-- **Status:** Implemented on branch `feat/monorepo-offline` (livenotes-app)
+- **Status:** Implemented on branch `feat/monorepo-offline` (livenotes-app). **Being revised:** read strategy, sync triggers, writes and logout behaviour change with [ADR-009 to ADR-015](./decisions/README.md); this spec will be updated with that work.
 - **Date:** 2026-10-02
 - **Decisions:** [ADR-004](./decisions/004-offline-local-snapshot-dexie.md), [ADR-005](./decisions/005-data-access-layer.md)
 - **Issues:** livenotes-app #21 (epic), #22–#33, #13

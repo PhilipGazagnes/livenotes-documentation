@@ -22,6 +22,15 @@ See [ADR-004](./decisions/004-offline-local-snapshot-dexie.md) and [ADR-005](./d
 - Service worker cut down to app-shell caching only.
 - Remove `useOfflineSync.warmUp()` and the Supabase route in `sw.ts`.
 
+### Phase 1b: Local-first and project edit mode
+Revision of Phase 1 after review (2026-10-04), see ADR-009 to ADR-015:
+- always read local; manual sync only; project version + "sync" toast
+- one editor at a time per project (editing flag, "Keep editing?" dialog, Stop editing, admin release, server-enforced)
+- writes server first, then patch the local copy
+- edit controls disabled with a reason, not hidden
+- keep local data on logout, "Delete local data" action
+- closeable update banner (hidden for a day)
+
 ### Phase 2: Targeted cleanup
 - Remove Ionic ([ADR-003](./decisions/003-remove-ionic-from-web.md)).
 - One error-handling convention (see `livenotes-app/docs/TECHNICAL_DEBT.md`).

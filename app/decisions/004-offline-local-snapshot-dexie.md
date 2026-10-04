@@ -1,6 +1,10 @@
 # ADR-004: Offline = read-only local snapshot in IndexedDB (Dexie)
 
-- **Status:** Accepted
+- **Status:** Partly superseded. Still valid: local snapshot in IndexedDB (Dexie), offline is read-only, service worker for the app shell only, PowerSync deferred. Replaced:
+  - network-first reads → local-first, [ADR-009](./009-local-first-reads.md)
+  - automatic syncs → manual sync + version check, [ADR-010](./010-manual-sync-staleness-check.md)
+  - re-sync after writes → server first then local patch, [ADR-012](./012-server-first-writes-local-patch.md)
+  - deleting local data on logout → kept, [ADR-014](./014-keep-local-data-on-logout.md)
 - **Date:** 2026-10-02
 
 ## Context
