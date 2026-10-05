@@ -37,7 +37,7 @@ Each project has a single **editing flag**. Only the member holding it can make 
 - Same system as any project: every app user is a viewer by default, a few members are editors.
 
 ## Boundary: the shared song catalog
-Song titles and artists are stored once in global tables (`songs_v2`, `artists_v2`) with no project attached. A project's library only links to them (`library_songs.song_id`), and its notes and tags hang off that link. Example: "Wonderwall / Oasis" is one row in `songs_v2`, linked from three projects, each with its own private notes.
+Song titles and artists are stored once in global tables (`songs`, `artists`; called `songs_v2` and `artists_v2` until migration 045) with no project attached. A project's library only links to them (`library_songs.song_id`), and its notes and tags hang off that link. Example: "Wonderwall / Oasis" is one row in `songs`, linked from three projects, each with its own private notes.
 
 Adding a new song to a project creates (or reuses) the shared card, then creates the project's link. The flag guards the project's own rows (library links, notes, tags, setlists, custom titles). The shared card is outside the flag; it is harmless because adding it to a library still requires the flag. A private project never changes another project's data.
 
