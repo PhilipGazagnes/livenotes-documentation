@@ -6,6 +6,7 @@
 
 ## Decision
 - **The only sync is the Sync button**, pressed by the user. No automatic download of project data.
+- **Sync covers the active project only** (decided 2026-10-05). Other projects keep their own local copy, synced when they are active and the user presses Sync.
 - Each project has a **version**: a number increased by database triggers on *any* change to the project's data (library songs, notes, tags, setlists and their items, project settings), deletions included. Stored with who made the last change and when.
 - The local copy remembers the version it was synced at.
 - **Staleness check:** while reading locally with a network available, the app fetches only the project's current version (one tiny request), at app open, on reconnect, and when navigating (throttled). If the server version is newer, a toast invites the user to sync, showing who changed what and when ("Updated by Alex, 5 min ago — Sync").
@@ -20,5 +21,3 @@
 - **A timestamp per note only:** misses setlist, tag and library changes, and deletions.
 - **Automatic background sync** (previous behaviour): rejected, see above.
 
-## Open
-- Scope of the Sync button: active project only (current behaviour) or all of the user's projects.
