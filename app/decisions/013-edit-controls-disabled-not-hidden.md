@@ -1,6 +1,6 @@
 # ADR-013: Edit controls are disabled, not hidden, when editing isn't possible
 
-- **Status:** Accepted (not implemented yet)
+- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11)
 - **Date:** 2026-10-04
 - **Supersedes:** the Phase 1 implementation detail "offline, `isEditor` is false, which hides all edit controls"
 

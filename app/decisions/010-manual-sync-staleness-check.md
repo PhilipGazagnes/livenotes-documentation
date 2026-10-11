@@ -1,6 +1,6 @@
 # ADR-010: Manual sync only, with a project version check
 
-- **Status:** Accepted (not implemented yet)
+- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11)
 - **Date:** 2026-10-04
 - **Supersedes:** the automatic syncs of [ADR-004](./004-offline-local-snapshot-dexie.md) (on login/open when older than 10 minutes, on reconnect, after every write)
 
@@ -21,3 +21,5 @@
 - **A timestamp per note only:** misses setlist, tag and library changes, and deletions.
 - **Automatic background sync** (previous behaviour): rejected, see above.
 
+## Note (2026-10-11)
+As implemented, the status is checked at app open and project switch, on reconnect, when the app comes back to the foreground, on navigation (at most every 30 s), and after the user's own writes, syncs and editing actions. There is no polling: a user who only watches a screen sees remote changes and editing changes at their next action. Live updates are tracked in livenotes-app #45 (backlog).

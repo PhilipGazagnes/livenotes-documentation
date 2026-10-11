@@ -1,6 +1,6 @@
 # ADR-015: PWA updates: a closeable banner, never an automatic reload
 
-- **Status:** Accepted (partly implemented: banner and "Reload app" exist; closing for a day is not done yet)
+- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11)
 - **Date:** 2026-10-04
 - **Issue:** livenotes-app #13
 

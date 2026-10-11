@@ -23,6 +23,8 @@ See [ADR-004](./decisions/004-offline-local-snapshot-dexie.md) and [ADR-005](./d
 - Remove `useOfflineSync.warmUp()` and the Supabase route in `sw.ts`.
 
 ### Phase 1b: Local-first and project edit mode
+**Built (2026-10-11):** on `develop`, database changes on dev only (prod with the merge to `main`). Epic livenotes-app #34; follow-ups ADR-020, ADR-021, #45 (live status).
+
 Revision of Phase 1 after review (2026-10-04), see ADR-009 to ADR-015:
 - always read local; manual sync only; project version + "sync" toast
 - one editor at a time per project (editing flag, "Keep editing?" dialog, Stop editing, admin release, server-enforced)
