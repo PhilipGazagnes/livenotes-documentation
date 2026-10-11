@@ -1,112 +1,119 @@
-# Offline Data Layer: Spec (Phase 1)
+# Offline Data Layer: Spec (Phase 1 + 1b)
 
-- **Status:** Implemented on branch `feat/monorepo-offline` (livenotes-app). **Being revised:** read strategy, sync triggers, writes and logout behaviour change with [ADR-009 to ADR-015](./decisions/README.md); this spec will be updated with that work.
-- **Date:** 2026-10-02
-- **Decisions:** [ADR-004](./decisions/004-offline-local-snapshot-dexie.md), [ADR-005](./decisions/005-data-access-layer.md)
-- **Issues:** livenotes-app #21 (epic), #22–#33, #13
+- **Status:** Implemented in livenotes-app, on `develop` since 2026-10-11. Database migration `046_project_version_and_edit_mode.sql` is applied on dev; prod gets it with the merge to `main`.
+- **Dates:** 2026-10-02 (Phase 1), revised 2026-10-11 (Phase 1b)
+- **Decisions:** [ADR-004](./decisions/004-offline-local-snapshot-dexie.md), [ADR-005](./decisions/005-data-access-layer.md), [ADR-009 to ADR-015](./decisions/README.md), [ADR-020](./decisions/020-local-data-per-project.md), [ADR-021](./decisions/021-writes-check-editing-flag-first.md)
+- **Issues:** livenotes-app #21 (Phase 1 epic), #34 (Phase 1b epic), #45 (live status, backlog)
 
 ## Goal
 
-After one sync, every **read** screen works with no network, with any filter, sort or search. Editing requires a connection. A failed sync never damages the previous local copy. Logging out removes local data.
+Screens show a project's **local copy**, instantly, online or offline. The user decides when it changes (Sync). One member at a time edits a project; their edits go to the server first and show at once. What the user sees is exactly what is stored on the device.
 
 ## Concepts
 
 | Term | Meaning |
 |---|---|
-| **Snapshot** | One complete copy of a project's raw data (rows of the Supabase tables), plus `syncedAt` and `schemaVersion`. Stored as one IndexedDB record per project. |
-| **Sync** | Download all of a project's tables, then replace the snapshot in a single write (all or nothing). |
-| **Read-through** | How every read service function works: use the network when it's available, fall back to the snapshot when it isn't. |
+| **Local copy** (snapshot) | One complete copy of a project's raw data (rows of the Supabase tables), with `syncedAt`, `schemaVersion` and the project `version` it matches. One IndexedDB record per project. |
+| **Project version** | A number on `projects`, increased by database triggers on any change to the project's data, deletions included. |
+| **Sync** | Download all of a project's tables and replace its local copy in one write (all or nothing). Only by the user. |
+| **Editing flag** | Held by at most one member per project. Only its holder can write to the project's data (enforced by the database). |
+| **Status** | The project's current version and who holds the flag: one small request (`get_project_status`). |
 
-## What's in a snapshot
+## What's in a local copy
 
-Scoped to one project, fetched with the user's session (so RLS applies):
+Scoped to one project, fetched with the user's session (RLS applies):
 
-| Snapshot field | Source |
+| Field | Source |
 |---|---|
+| `version` | `get_project_status`, read **before** the data |
 | `project` | `projects` row |
 | `role` | `project_memberships.role` for the current user |
 | `librarySongs` | `library_songs` where `project_id` |
-| `songs`, `songArtists`, `artists` | `songs_v2`, `song_artists_v2`, `artists_v2` reached from the library songs |
+| `songs`, `songArtists`, `artists` | `songs`, `song_artists`, `artists` (shared catalog) reached from the library songs |
 | `librarySongTags` | `library_song_tags` of those library songs |
 | `notes` | `notes` of those library songs |
 | `tags` | `tags` where `project_id` |
 | `lists`, `listItems` | `lists` where `project_id`, plus their `list_items` |
 
-Requests: about 5, using PostgREST embedding (`library_songs` → song → artists, tags, notes; `lists` → items). Pages of 500 rows avoid PostgREST's 1,000-row cap. **Every request must succeed**, otherwise the sync fails and the previous snapshot is kept.
+About 5 requests (PostgREST embedding), pages of 500 rows. Every request must succeed, otherwise the previous copy is kept.
 
-Not included: the global song catalog search, public libraries, members and invitations. Those are online-only features.
+Online only (not in the copy): members, invitations, public libraries, global song search, uploaded images.
 
-## Where the code lives (ADR-005, first step)
+## Where the code lives
 
 ```
-packages/shared/src/offline/      framework-agnostic, reusable by mobile
+packages/shared/src/offline/
   snapshot.ts        ProjectSnapshot type, schema version
-  store.ts           SnapshotStore interface (storage adapter)
-  dexieStore.ts      Dexie/IndexedDB adapter (web)
-  fetchSnapshot.ts   download a project snapshot with a Supabase client
-  queries.ts         rebuild the app's read shapes from a snapshot (local joins, sorting, counts)
-  network.ts         isNetworkError(), timeouts
+  store.ts           SnapshotStore interface; dexieStore.ts: IndexedDB adapter (one DB per user)
+  fetchSnapshot.ts   download a copy; re-read aggregates after a write
+  status.ts          project status and editing-flag results
+  patch.ts           apply a write's changed rows to a copy (pure)
+  queries.ts         rebuild the app's read shapes from a copy
 
 apps/web/src/lib/offline/
-  offlineData.ts     singleton: current user DB, in-memory cache, sync, readThrough(), auto-sync, dirty tracking
-  supabaseFetch.ts   fetch wrapper given to supabase-js: blocks writes when offline, marks data dirty after writes
+  offlineData.ts     current user's DB, readLocal(), syncProject(), patches, delete per project
+  projectStatus.ts   status checks, "copy outdated"
+  projectWrites.ts   commitWrite(): flag check, server write, local patch
+  supabaseFetch.ts   blocks data requests when offline
+apps/web/src/stores/editMode.ts   editing flag UI state, write guard, inactivity countdown
 ```
 
-The web services (`src/services/*`) keep their signatures. Each read function becomes `readThrough(remote, local)`. Stores, components and pages are unchanged. Moving all services into `packages/shared` is a later step, done when mobile needs them.
-
-## Read strategy
+## Reads (ADR-009, ADR-020)
 
 ```
-readThrough(remote, local):
-  if offline mode (navigator offline OR "force offline" setting):
-      snapshot? -> local(snapshot)
-      none      -> throw OfflineDataUnavailableError ("Sync this project while online first")
-  else:
-      try remote()  (if a snapshot exists, give up after 8 s, which handles venue "lie-fi")
-      on network error / timeout:
-          snapshot? -> local(snapshot)
-          none      -> rethrow
-      other errors (RLS, validation) -> rethrow (never hidden)
+readLocal(select, projectId = active):
+  copy on the device        -> select(copy)
+  no copy, deleted by user  -> select(empty copy)     (until the user syncs, ADR-020)
+  no copy, offline          -> OfflineDataUnavailableError
+  no copy, online           -> download it (first time only), then select(copy)
 ```
 
-Online behaviour stays exactly as before: when the network works, reads are the same Supabase queries as today.
+- The project's identity (row, user's role) is fetched online when there is no copy, so the header and project menu stay usable (ADR-020).
+- When a copy is replaced as a whole (Sync, delete), stores, open panels and the current page are dropped and read again.
 
-## Writes
+## Sync and staleness (ADR-010)
 
-- **Offline:** the fetch wrapper rejects every non-GET REST/RPC request immediately with "You are offline. This action requires an internet connection." The main create and edit entry points are disabled from `useOnlineStatus`.
-- **Online:** after any successful write (POST/PATCH/PUT/DELETE on `/rest/v1`), the active project is marked dirty, and a debounced background re-sync (4 s) refreshes the snapshot.
-  - **Why re-sync instead of patching rows locally:** one code path, so the snapshot can't drift from the server, and there are ~40 write functions that would each need a local patch. A re-sync is ~5 requests.
+- The Sync button (Local data panel, or the banner) is the only sync. It covers the active project only.
+- The status is checked at app open and project switch, on reconnect, when the app comes back to the foreground, on navigation (at most every 30 s), and after the user's own writes, syncs and editing actions. No polling yet (#45).
+- Server version ≠ copy's version → banner "Updated by Alex, 5m ago — Sync". The check never changes the copy.
 
-## When sync happens
+## Edit mode (ADR-011, ADR-013)
 
-1. Manual **Sync now** button (Offline sync drawer).
-2. **Auto-sync** after login or app start when online, if there's no snapshot or it's older than 10 minutes.
-3. When the connection comes back, under the same staleness rule.
-4. Debounced, after writes.
+- Viewing is the default. **Start editing** (project menu) calls `start_project_editing(project, copy's version)`: refused if someone else holds the flag ("Being edited by …") or the copy is outdated ("Sync first").
+- The flag expires 15 min after the last write or renewal. "Keep editing?" shows 30 s before; no answer releases it. **Stop editing** in the project menu; administrators can **Release** another member's flag. Switching project releases it.
+- Header: amber ring and pen badge when you edit; grey pen badge when another member does.
+- Edit controls stay visible: disabled with a reason (offline, not editing, being edited by …, sync first). Viewers don't see them.
+- Database: restrictive RLS on `library_songs`, `notes`, `library_song_tags`, `tags`, `lists`, `list_items` and project settings (`projects` UPDATE) requires a valid flag. Outside the flag: the shared catalog, members, invitations, public libraries, creating and deleting projects. `update_list_item_positions` checks the flag; `push_note_to_project` refuses a project someone else is editing.
 
-Concurrent syncs for the same project are coalesced into one.
+## Writes (ADR-012, ADR-021)
 
-## Storage and security
+```
+commitWrite(write, refresh):
+  guard: role + edit mode (else EditNotAllowedError with the reason)
+  check the flag on the server (else: nothing sent, "Not saved: you are no longer editing")
+  write to Supabase
+  re-read the changed aggregates + status
+  still holding the flag -> patch the copy, set its version to the server's
+  otherwise / re-read failed -> mark the copy outdated (version -1): the banner asks for a sync
+```
 
-- One IndexedDB database **per user**: `livenotes-offline-<userId>`, table `snapshots` (key `projectId`).
-- **Logout** deletes the current user's database.
-- **Login** deletes any other user's `livenotes-offline-*` databases on the device.
-- Bumping `SNAPSHOT_SCHEMA_VERSION` invalidates older snapshots (they're ignored and re-synced).
+Aggregates: a library song with its song card, artists, tags and notes; a setlist with its items; the project's tags; the project row; catalog artists. Removals follow the database cascades.
 
-## Service worker
+## Storage (ADR-014, ADR-020)
 
-- Keeps precaching the app shell and the SPA navigation fallback, so the PWA stays installable and opens offline.
-- The Supabase `/rest/v1` runtime route and the `supabase-data` cache are removed (the old cache is deleted on activate).
-- "Force offline" is now an app-level setting read by the data layer. No more SW messages.
-- **#13 (refresh in an installed PWA):** the app checks for a new version when it becomes visible and every hour, and reloads automatically when one is activated. The project menu gets a "Reload app" action, because standalone PWAs have no browser reload button.
+- One IndexedDB database per user: `livenotes-offline-<userId>`, table `snapshots` (key `projectId`).
+- Logout keeps local data; another user's data is never readable through the app.
+- **Local data** panel (project menu): space used by the project's copy, last sync, Sync now, **Delete local data** (this project only).
+- Bumping `SNAPSHOT_SCHEMA_VERSION`, or a copy without a version, makes old copies ignored (downloaded again).
 
-## Error handling
+## Service worker and updates (ADR-015)
 
-- The sync never swallows errors. A failed sync reports which step failed, and the previous snapshot stays intact.
-- `OfflineDataUnavailableError` has a user-facing message.
+- Precaches the app shell; no data caching.
+- Checks for a new version at start and when the app comes back to the foreground; never reloads by itself. The banner offers "Reload" and can be closed for a day; "Reload app" stays in the project menu.
 
 ## Tests
 
-- Unit (`packages/shared`): query builders vs fixtures (shapes, ordering, counts, tag and list joins), fetcher paging and failure atomicity (mocked client), Dexie adapter (`fake-indexeddb`), network-error detection.
-- Unit (`apps/web`): `readThrough` decisions (offline, network error, timeout, real error), write blocking.
-- e2e (Playwright `context.setOffline`): sync → offline → browse the library, setlist and song notes → filters and search → editing blocked → logout clears data.
+- Unit (`packages/shared`): queries, snapshot download (paging, version, failure atomicity), patches, Dexie adapter, network errors.
+- Unit (`apps/web`): local reads, sync, patches, delete per project, `commitWrite` (guard, flag check, patch, outdated), edit-mode store (reasons, start/stop, countdown).
+- e2e (Playwright, mocked Supabase): offline reading with disabled controls, offline start with an expired token, no copy offline, logout keeps data, delete per project and Sync, edit mode, another member editing, "sync available".
+- Database rules: tested on dev by impersonating users in rolled-back transactions. The real-database e2e suite needs ADR-019 first.
