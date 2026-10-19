@@ -1,6 +1,6 @@
 # ADR-011: Project edit mode: one editor at a time per project
 
-- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11)
 - **Date:** 2026-10-04
 
 ## Context

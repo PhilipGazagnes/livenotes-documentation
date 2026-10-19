@@ -1,6 +1,6 @@
 # ADR-021: Writes check the editing flag on the server first
 
-- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11)
 - **Date:** 2026-10-11
 - **Completes:** [ADR-012](./012-server-first-writes-local-patch.md), [ADR-011](./011-project-edit-mode.md)
 

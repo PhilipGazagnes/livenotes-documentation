@@ -1,6 +1,6 @@
 # ADR-020: Local data per project: what you see is what is stored
 
-- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11)
 - **Date:** 2026-10-11
 - **Partly supersedes:** [ADR-009](./009-local-first-reads.md) (automatic first download, project identity), [ADR-014](./014-keep-local-data-on-logout.md) (scope and place of "Delete local data")
 

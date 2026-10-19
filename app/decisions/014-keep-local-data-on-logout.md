@@ -1,6 +1,6 @@
 # ADR-014: Local data is kept on logout; deleting it is a user action
 
-- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11) · **Partly superseded by [ADR-020](./020-local-data-per-project.md)** (delete is per project, in the "Local data" panel)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11) · **Partly superseded by [ADR-020](./020-local-data-per-project.md)** (delete is per project, in the "Local data" panel)
 - **Date:** 2026-10-04
 - **Supersedes:** the logout and login cleanup of the Phase 1 implementation ([ADR-004](./004-offline-local-snapshot-dexie.md), offline spec)
 

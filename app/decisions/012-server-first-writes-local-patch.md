@@ -1,6 +1,6 @@
 # ADR-012: Writes go to the server first, then patch the local copy
 
-- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11) · **Completed by [ADR-021](./021-writes-check-editing-flag-first.md)** (the flag is checked before each write)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11) · **Completed by [ADR-021](./021-writes-check-editing-flag-first.md)** (the flag is checked before each write)
 - **Date:** 2026-10-04
 - **Supersedes:** "re-sync the whole project a few seconds after every write" from the Phase 1 implementation ([ADR-004](./004-offline-local-snapshot-dexie.md), offline spec)
 

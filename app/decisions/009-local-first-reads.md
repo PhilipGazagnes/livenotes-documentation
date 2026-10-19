@@ -1,6 +1,6 @@
 # ADR-009: Local-first reads
 
-- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11) · **Partly superseded by [ADR-020](./020-local-data-per-project.md)** (no automatic download after "Delete local data"; project identity fetched online without a copy)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11) · **Partly superseded by [ADR-020](./020-local-data-per-project.md)** (no automatic download after "Delete local data"; project identity fetched online without a copy)
 - **Date:** 2026-10-04
 - **Supersedes:** the network-first read strategy of [ADR-004](./004-offline-local-snapshot-dexie.md) (`readThrough`: network first, snapshot as fallback after 8 s)
 

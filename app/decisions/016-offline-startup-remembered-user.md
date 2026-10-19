@@ -1,6 +1,6 @@
 # ADR-016: Offline startup uses the last signed-in user
 
-- **Status:** Accepted (implemented on `feat/monorepo-offline`)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11)
 - **Date:** 2026-10-04
 
 ## Context

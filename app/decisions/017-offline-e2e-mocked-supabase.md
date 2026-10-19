@@ -1,6 +1,6 @@
 # ADR-017: Offline end-to-end tests run against a mocked Supabase
 
-- **Status:** Accepted (implemented on `feat/monorepo-offline`)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11)
 - **Date:** 2026-10-04
 
 ## Decision

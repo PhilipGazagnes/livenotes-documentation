@@ -1,6 +1,6 @@
 # ADR-010: Manual sync only, with a project version check
 
-- **Status:** Accepted (implemented in livenotes-app, on `develop` since 2026-10-11)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11)
 - **Date:** 2026-10-04
 - **Supersedes:** the automatic syncs of [ADR-004](./004-offline-local-snapshot-dexie.md) (on login/open when older than 10 minutes, on reconnect, after every write)
 

@@ -1,6 +1,6 @@
 # ADR-018: npm workspaces (not yarn)
 
-- **Status:** Accepted (implemented on `feat/monorepo-offline`)
+- **Status:** Accepted (implemented in livenotes-app, in production since 2026-10-11)
 - **Date:** 2026-10-04
 - **Supersedes:** the "yarn workspaces" tooling choice in [ADR-002](./002-monorepo.md) (the monorepo layout itself stands)
 

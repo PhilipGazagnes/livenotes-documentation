@@ -13,7 +13,7 @@ Rules:
 |---|---|---|---|
 | [001](./001-separate-native-mobile-app.md) | Web stays Vue; mobile is a separate React Native (Expo) app | Accepted | 2026-10-02 |
 | [002](./002-monorepo.md) | Monorepo: `apps/web`, `apps/mobile`, `packages/shared`, `packages/editor` | Partly superseded (tooling: 018) | 2026-10-02 |
-| [003](./003-remove-ionic-from-web.md) | Remove Ionic and Capacitor from the web app | Accepted | 2026-10-02 |
+| [003](./003-remove-ionic-from-web.md) | Remove Ionic and Capacitor from the web app | Accepted, implemented | 2026-10-02 |
 | [004](./004-offline-local-snapshot-dexie.md) | Offline = read-only local snapshot in IndexedDB (Dexie); no sync engine for now | Partly superseded (009, 010, 012, 014) | 2026-10-02 |
 | [005](./005-data-access-layer.md) | All data access goes through one layer in `packages/shared`, with swappable storage | Accepted | 2026-10-02 |
 | [006](./006-shared-songcode-editor.md) | One CodeMirror SongCode editor, embedded in a WebView on mobile | Accepted | 2026-10-02 |
@@ -26,9 +26,10 @@ Rules:
 | [013](./013-edit-controls-disabled-not-hidden.md) | Edit controls disabled (with a reason), not hidden | Accepted, implemented | 2026-10-04 |
 | [014](./014-keep-local-data-on-logout.md) | Keep local data on logout; "Delete local data" in the user menu | Partly superseded (020), implemented | 2026-10-04 |
 | [015](./015-pwa-update-banner.md) | PWA updates: closeable banner (hidden for a day), never auto-reload | Accepted, implemented | 2026-10-04 |
-| [016](./016-offline-startup-remembered-user.md) | Offline startup uses the last signed-in user | Accepted | 2026-10-04 |
-| [017](./017-offline-e2e-mocked-supabase.md) | Offline e2e tests against a mocked Supabase | Accepted | 2026-10-04 |
-| [018](./018-npm-workspaces.md) | npm workspaces (not yarn) | Accepted | 2026-10-04 |
-| [019](./019-e2e-credentials-outside-repo.md) | E2E credentials out of the repository; rotate leaked ones | Proposed | 2026-10-04 |
+| [016](./016-offline-startup-remembered-user.md) | Offline startup uses the last signed-in user | Accepted, implemented | 2026-10-04 |
+| [017](./017-offline-e2e-mocked-supabase.md) | Offline e2e tests against a mocked Supabase | Accepted, implemented | 2026-10-04 |
+| [018](./018-npm-workspaces.md) | npm workspaces (not yarn) | Accepted, implemented | 2026-10-04 |
+| [019](./019-e2e-credentials-outside-repo.md) | E2E credentials out of the repository; rotate leaked ones | Accepted, implemented | 2026-10-04 |
 | [020](./020-local-data-per-project.md) | What you see = what is stored; "Delete local data" per project, no auto-download until Sync | Accepted, implemented | 2026-10-11 |
 | [021](./021-writes-check-editing-flag-first.md) | Writes check the editing flag on the server first | Accepted, implemented | 2026-10-11 |
+| [022](./022-error-handling-convention.md) | One error-handling convention: services throw, stores return results, one toast helper | Accepted, implemented | 2026-10-19 |

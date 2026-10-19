@@ -23,7 +23,7 @@ See [ADR-004](./decisions/004-offline-local-snapshot-dexie.md) and [ADR-005](./d
 - Remove `useOfflineSync.warmUp()` and the Supabase route in `sw.ts`.
 
 ### Phase 1b: Local-first and project edit mode
-**Built (2026-10-11):** on `develop`, database changes on dev only (prod with the merge to `main`). Epic livenotes-app #34; follow-ups ADR-020, ADR-021, #45 (live status).
+**Done:** in production since 2026-10-11. Epic livenotes-app #34; follow-ups ADR-020, ADR-021, #45 (live status, in the Backlog).
 
 Revision of Phase 1 after review (2026-10-04), see ADR-009 to ADR-015:
 - always read local; manual sync only; project version + "sync" toast
@@ -34,9 +34,12 @@ Revision of Phase 1 after review (2026-10-04), see ADR-009 to ADR-015:
 - closeable update banner (hidden for a day)
 
 ### Phase 2: Targeted cleanup
-- Remove Ionic ([ADR-003](./decisions/003-remove-ionic-from-web.md)).
-- One error-handling convention (see `livenotes-app/docs/TECHNICAL_DEBT.md`).
-- **No standalone "refactor phase".** Other debt is fixed when the code is touched for a feature.
+**Done:** in production since 2026-10-19 (milestone closed). Also dropped the V1 song tables (#42, #43, 2026-10-11).
+- Remove Ionic ([ADR-003](./decisions/003-remove-ionic-from-web.md), #46).
+- One error-handling convention ([ADR-022](./decisions/022-error-handling-convention.md), #47).
+- npm audit at 0 (#44): Vite 5 → 8, Tailwind CSS 3 → 4 (the v3 color palette is kept, so the UI looks the same).
+- E2E credentials out of the repository, leaked ones rotated ([ADR-019](./decisions/019-e2e-credentials-outside-repo.md), #48).
+- **No standalone "refactor phase".** Other debt is fixed when the code is touched for a feature (`livenotes-app/docs/TECHNICAL_DEBT.md`).
 
 ### Phase 3: Musician features on web (timeboxed)
 - SongCode editing ([ADR-006](./decisions/006-shared-songcode-editor.md): build it as `packages/editor` so mobile reuses it), song views, song features.

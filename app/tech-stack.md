@@ -1,6 +1,6 @@
 # Livenotes App - Tech Stack
 
-> ⚠️ **Partly superseded (2026-10-02):** the mobile app will be a separate React Native (Expo) app, and Ionic/Capacitor will be removed from the web app. See [ADR-001](./decisions/001-separate-native-mobile-app.md) and [ADR-003](./decisions/003-remove-ionic-from-web.md). The Vue, Supabase, Vite and CodeMirror choices still stand.
+> ⚠️ **Partly superseded (2026-10-02):** the mobile app will be a separate React Native (Expo) app, and Ionic was removed from the web app on 2026-10-19 (Capacitor was never added). See [ADR-001](./decisions/001-separate-native-mobile-app.md) and [ADR-003](./decisions/003-remove-ionic-from-web.md). The Vue, Supabase, Vite and CodeMirror choices still stand; the web app is on Vite 8 and Tailwind CSS 4.
 
 ## Technology Decisions
 

@@ -116,4 +116,4 @@ Aggregates: a library song with its song card, artists, tags and notes; a setlis
 - Unit (`packages/shared`): queries, snapshot download (paging, version, failure atomicity), patches, Dexie adapter, network errors.
 - Unit (`apps/web`): local reads, sync, patches, delete per project, `commitWrite` (guard, flag check, patch, outdated), edit-mode store (reasons, start/stop, countdown).
 - e2e (Playwright, mocked Supabase): offline reading with disabled controls, offline start with an expired token, no copy offline, logout keeps data, delete per project and Sync, edit mode, another member editing, "sync available".
-- Database rules: tested on dev by impersonating users in rolled-back transactions. The real-database e2e suite needs ADR-019 first.
+- Database rules: tested on dev by impersonating users in rolled-back transactions. The real-database e2e suite (`npm run test:e2e`) runs against dev with the account from `.env.test` (ADR-019).
